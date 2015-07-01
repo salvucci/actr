@@ -1,0 +1,40 @@
+<project>
+ 
+    <target name="compile">
+        <mkdir dir="bin"/>
+        <javac srcdir="src" destdir="bin"/>
+    	<copy todir="bin"> <fileset dir="src" includes="**/*.txt"/> </copy>
+    	<copy todir="bin"> <fileset dir="src" includes="**/*.gif"/> </copy>
+    	<copy todir="bin"> <fileset dir="src" includes="**/*.png"/> </copy>
+    </target>
+
+	<target name="javadoc">
+    	<javadoc access="public" destdir="doc" author="true" version="true" use="true" windowtitle="ACT-R">
+        <fileset dir="src" defaultexcludes="yes"> <include name="**/*.java"/> </fileset>
+    	</javadoc>
+	</target>
+
+    <target name="jar" depends="compile,javadoc">
+    	<exec executable="svn" output="bin/svn.properties"> <arg value="info" /> </exec>
+    	<property prefix="svn" file="bin/svn.properties"/>
+    	<property name="revision" value="${svn.Revision}"/>
+    	<delete file="bin/svn.properties"/>
+    	<delete file="src/actr/env/Version.txt"/>
+        <delete file="bin/actr/env/Version.txt"/>
+    	<echo file="src/actr/env/Version.txt">${revision}</echo>
+    	<echo file="bin/actr/env/Version.txt">${revision}</echo>
+
+        <mkdir dir="jar"/>
+        <jar destfile="jar/ACT-R.jar" basedir="bin">
+            <fileset dir="." includes="doc/**/*"/>
+        	<manifest> <attribute name="Main-Class" value="actr.env.Main"/> </manifest>
+        </jar>
+    	
+    	<echo>Created JAR file, revision ${revision}</echo>
+    </target>
+	
+    <target name="run" depends="compile">
+        <java classname="actr.env.Main" classpath="bin" fork="true"/>
+    </target>
+
+</project>
