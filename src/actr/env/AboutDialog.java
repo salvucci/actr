@@ -19,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import resources.Resources;
+import actr.resources.Resources;
 
 class AboutDialog extends JDialog {
 	private AboutDialog dialog;

@@ -9,7 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.text.StyledEditorKit;
 
-import resources.Resources;
+import actr.resources.Resources;
 
 class Actions {
 	private Core core;

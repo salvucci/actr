@@ -11,8 +11,8 @@ import java.util.Vector;
 
 import javax.swing.JPanel;
 
-import resources.Resources;
 import actr.model.Symbol;
+import actr.resources.Resources;
 
 class Brain extends JPanel {
 	private Frame frame;

@@ -18,7 +18,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
 
-import resources.Resources;
+import actr.resources.Resources;
 
 class Toolbar extends JToolBar {
 	private String speedup, iterations;
