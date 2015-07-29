@@ -50,64 +50,56 @@ class Editor extends JEditorPane {
 
 		InputMap inputMap = getInputMap();
 		int accelerator = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, accelerator),
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, accelerator), new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				moveCaretPreviousBlock(false);
+			}
+		});
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, accelerator + ActionEvent.SHIFT_MASK),
 				new AbstractAction() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						moveCaretPreviousBlock(false);
-					}
-				});
-		inputMap.put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_UP, accelerator
-						+ ActionEvent.SHIFT_MASK), new AbstractAction() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						moveCaretPreviousBlock(true);
 					}
 				});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, accelerator),
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, accelerator), new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				moveCaretNextBlock(false);
+			}
+		});
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, accelerator + ActionEvent.SHIFT_MASK),
 				new AbstractAction() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						moveCaretNextBlock(false);
-					}
-				});
-		inputMap.put(
-				KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, accelerator
-						+ ActionEvent.SHIFT_MASK), new AbstractAction() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						moveCaretNextBlock(true);
 					}
 				});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
-				new AbstractAction() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						if (editor.getSelectionStart() != editor
-								.getSelectionEnd())
-							editor.setCaretPosition(editor.getSelectionStart());
-						else {
-							int pos = editor.getCaretPosition();
-							if (pos > 0)
-								editor.setCaretPosition(pos - 1);
-						}
-					}
-				});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
-				new AbstractAction() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						if (editor.getSelectionStart() != editor
-								.getSelectionEnd())
-							editor.setCaretPosition(editor.getSelectionEnd());
-						else {
-							int pos = editor.getCaretPosition();
-							if (pos < editor.getModelDocument().getLength())
-								editor.setCaretPosition(pos + 1);
-						}
-					}
-				});
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (editor.getSelectionStart() != editor.getSelectionEnd())
+					editor.setCaretPosition(editor.getSelectionStart());
+				else {
+					int pos = editor.getCaretPosition();
+					if (pos > 0)
+						editor.setCaretPosition(pos - 1);
+				}
+			}
+		});
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (editor.getSelectionStart() != editor.getSelectionEnd())
+					editor.setCaretPosition(editor.getSelectionEnd());
+				else {
+					int pos = editor.getCaretPosition();
+					if (pos < editor.getModelDocument().getLength())
+						editor.setCaretPosition(pos + 1);
+				}
+			}
+		});
 
 		setOpaque(false);
 		setLayout(null);
@@ -167,16 +159,14 @@ class Editor extends JEditorPane {
 			if (r1 == null)
 				return;
 			int h = getVisibleRect().height;
-			Rectangle r = new Rectangle(r1.x, r1.y - ((int) (top * h)),
-					r1.width, ((int) ((top + bottom) * h)));
+			Rectangle r = new Rectangle(r1.x, r1.y - ((int) (top * h)), r1.width, ((int) ((top + bottom) * h)));
 			scrollRectToVisible(r);
 		} catch (Exception e) {
 		}
 	}
 
 	void moveCaretNextBlock(boolean select) {
-		int start = document.findNextMarker(getSelectionEnd(),
-				document.getCommandMarkers());
+		int start = document.findNextMarker(getSelectionEnd(), document.getCommandMarkers());
 		if (select)
 			moveCaretPosition(start);
 		else
@@ -185,8 +175,7 @@ class Editor extends JEditorPane {
 	}
 
 	void moveCaretPreviousBlock(boolean select) {
-		int start = document.findPreviousMarker(getSelectionStart(),
-				document.getCommandMarkers());
+		int start = document.findPreviousMarker(getSelectionStart(), document.getCommandMarkers());
 		if (select)
 			moveCaretPosition(start);
 		else
@@ -203,8 +192,7 @@ class Editor extends JEditorPane {
 		while (pes.hasNext()) {
 			ParseError pe = pes.next();
 			try {
-				Marker marker = new Marker(pe.getText(),
-						document.createPosition(pe.getOffset()), pe.isFatal());
+				Marker marker = new Marker(pe.getText(), document.createPosition(pe.getOffset()), pe.isFatal());
 				if (pe.getLine() == lastLine)
 					remove(getComponentCount() - 1);
 				add(marker);

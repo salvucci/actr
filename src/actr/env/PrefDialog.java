@@ -32,9 +32,8 @@ class PrefDialog extends JDialog {
 	private ColorDialog colorDialog;
 	private JComboBox<String> fontCB, fontSizeCB;
 	private JCheckBox autoHiliteCB, autoIndentCB;
-	private ColorButton commandColorButton, parameterColorButton,
-			productionColorButton, chunkColorButton, bufferColorButton,
-			commentColorButton;
+	private ColorButton commandColorButton, parameterColorButton, productionColorButton, chunkColorButton,
+			bufferColorButton, commentColorButton;
 	private JComboBox<String> indentSpacesCB;
 
 	class ColorDialog extends JDialog {
@@ -74,8 +73,7 @@ class PrefDialog extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
 				}
-			}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-					JComponent.WHEN_IN_FOCUSED_WINDOW);
+			}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 			pack();
 			setLocation(200, 200);
 			setVisible(false);
@@ -128,8 +126,7 @@ class PrefDialog extends JDialog {
 
 		colorDialog = new ColorDialog(this);
 
-		String[] fonts = { "Courier", "Lucida Grande", "Menlo", "Monaco",
-				"Myriad Pro", "Verdana" };
+		String[] fonts = { "Courier", "Lucida Grande", "Menlo", "Monaco", "Myriad Pro", "Verdana" };
 		fontCB = new JComboBox<String>(fonts);
 		fontCB.addItemListener(new ItemListener() {
 			@Override
@@ -144,8 +141,7 @@ class PrefDialog extends JDialog {
 		fontSizeCB.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				prefs.fontSize = Integer.valueOf(
-						(String) fontSizeCB.getSelectedItem()).intValue();
+				prefs.fontSize = Integer.valueOf((String) fontSizeCB.getSelectedItem()).intValue();
 				core.refreshEditors();
 			}
 		});
@@ -240,8 +236,7 @@ class PrefDialog extends JDialog {
 		indentSpacesCB.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				prefs.indentSpaces = Integer.valueOf(
-						(String) indentSpacesCB.getSelectedItem()).intValue();
+				prefs.indentSpaces = Integer.valueOf((String) indentSpacesCB.getSelectedItem()).intValue();
 				core.refreshEditors();
 			}
 		});
@@ -355,8 +350,7 @@ class PrefDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().setDefaultButton(closeButton);
 

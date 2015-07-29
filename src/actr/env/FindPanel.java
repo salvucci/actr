@@ -34,8 +34,7 @@ class FindPanel extends JPanel {
 	private boolean forEditor;
 	private JTextField findTF, replaceTF;
 	private JCheckBox ignoreCaseCB, wrapAroundCB;
-	private JButton nextButton, previousButton, replaceButton,
-			replaceAllButton;
+	private JButton nextButton, previousButton, replaceButton, replaceAllButton;
 	private int searchStart;
 	private boolean inPanel;
 
@@ -72,8 +71,7 @@ class FindPanel extends JPanel {
 		findTF.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				JTextComponent textComponent = (forEditor) ? frame.getEditor()
-						: frame.getOutputArea();
+				JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 				searchStart = textComponent.getSelectionStart();
 			}
 
@@ -202,8 +200,7 @@ class FindPanel extends JPanel {
 
 		setBorder(new AbstractBorder() {
 			@Override
-			public void paintBorder(Component c, Graphics g, int x, int y,
-					int width, int height) {
+			public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 				g.setColor(Color.gray);
 				g.drawRect(x, y, width - 1, height - 1);
 				if (inPanel)
@@ -232,16 +229,14 @@ class FindPanel extends JPanel {
 			if (r1 == null)
 				return;
 			int h = tc.getVisibleRect().height;
-			Rectangle r = new Rectangle(r1.x, r1.y - ((int) (top * h)),
-					r1.width, ((int) ((top + bottom) * h)));
+			Rectangle r = new Rectangle(r1.x, r1.y - ((int) (top * h)), r1.width, ((int) ((top + bottom) * h)));
 			tc.scrollRectToVisible(r);
 		} catch (Exception e) {
 		}
 	}
 
 	void find(boolean forward) {
-		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame
-				.getOutputArea();
+		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		String findText = findTF.getText();
 		if (findText.equals(""))
 			return;
@@ -261,14 +256,12 @@ class FindPanel extends JPanel {
 				pos = text.lastIndexOf(findText);
 		}
 		textComponent.setCaretPosition((pos == -1) ? 0 : pos);
-		textComponent.moveCaretPosition((pos == -1) ? 0 : pos
-				+ findText.length());
+		textComponent.moveCaretPosition((pos == -1) ? 0 : pos + findText.length());
 		scrollTo(textComponent, (pos == -1) ? 0 : pos, 0.25);
 	}
 
 	void findNext() {
-		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame
-				.getOutputArea();
+		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		searchStart = textComponent.getSelectionStart() + 1;
 		if (searchStart >= textComponent.getText().length())
 			searchStart = 0;
@@ -276,8 +269,7 @@ class FindPanel extends JPanel {
 	}
 
 	void findPrevious() {
-		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame
-				.getOutputArea();
+		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		searchStart = textComponent.getSelectionStart() - 1;
 		if (searchStart < 0)
 			searchStart = textComponent.getText().length() - 1;
@@ -289,8 +281,7 @@ class FindPanel extends JPanel {
 			return;
 
 		int lastPos = frame.getEditor().getSelectionStart();
-		int selectionLength = frame.getEditor().getSelectionEnd()
-				- frame.getEditor().getSelectionStart();
+		int selectionLength = frame.getEditor().getSelectionEnd() - frame.getEditor().getSelectionStart();
 		if (lastPos == -1 || selectionLength == 0)
 			return;
 		String replaceText = replaceTF.getText();
@@ -298,8 +289,7 @@ class FindPanel extends JPanel {
 		frame.getDocument().disableExtras();
 		try {
 			frame.getDocument().remove(lastPos, selectionLength);
-			frame.getDocument().insertString(lastPos, replaceText,
-					Document.styleNormal);
+			frame.getDocument().insertString(lastPos, replaceText, Document.styleNormal);
 		} catch (Exception ex) {
 		}
 		frame.getDocument().enableExtras();
@@ -325,8 +315,7 @@ class FindPanel extends JPanel {
 			frame.getDocument().disableExtras();
 			while (pos >= 0 && pos < text.length()) {
 				try {
-					frame.getDocument().replace(pos, findText.length(),
-							replaceText, Document.styleNormal);
+					frame.getDocument().replace(pos, findText.length(), replaceText, Document.styleNormal);
 				} catch (Exception ex) {
 				}
 				text = text.substring(0, pos);
@@ -356,14 +345,11 @@ class FindPanel extends JPanel {
 	}
 
 	void update() {
-		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame
-				.getOutputArea();
+		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		if (textComponent == null)
 			return;
 		boolean findEnabled = (!findTF.getText().equals(""));
-		boolean replaceEnabled = findEnabled
-				&& (textComponent.getSelectionEnd() > textComponent
-						.getSelectionStart());
+		boolean replaceEnabled = findEnabled && (textComponent.getSelectionEnd() > textComponent.getSelectionStart());
 		nextButton.setEnabled(findEnabled);
 		previousButton.setEnabled(findEnabled);
 		replaceAllButton.setEnabled(forEditor && findEnabled);

@@ -16,9 +16,8 @@ class Parser {
 	private Tokenizer t;
 	private Symbol lastProduction = null;
 
-	public static final String[] defaultBuffers = { "goal", "retrieval",
-			"visual-location", "visual", "aural-location", "aural", "manual",
-			"vocal", "imaginal", "temporal" };
+	public static final String[] defaultBuffers = { "goal", "retrieval", "visual-location", "visual", "aural-location",
+			"aural", "manual", "vocal", "imaginal", "temporal" };
 
 	Parser(String s) {
 		t = new Tokenizer(s);
@@ -70,8 +69,7 @@ class Parser {
 							model.setTask(task);
 							task.setModel(model);
 						} else
-							model.recordError("task '" + taskName
-									+ "' is not defined", t);
+							model.recordError("task '" + taskName + "' is not defined", t);
 					}
 					t.advance();
 					if (!t.getToken().equals(")"))
@@ -88,18 +86,14 @@ class Parser {
 						}
 						String value = t.getToken();
 						t.advance();
-						if (!parameter.startsWith("*")
-								|| !parameter.endsWith("*"))
-							model.recordWarning(
-									"parameter should start and end with '*'",
-									t);
+						if (!parameter.startsWith("*") || !parameter.endsWith("*"))
+							model.recordWarning("parameter should start and end with '*'", t);
 						t.addVariable(parameter, value);
 					}
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-				} else if (t.getToken().equals("p")
-						|| t.getToken().equals("p*")) {
+				} else if (t.getToken().equals("p") || t.getToken().equals("p*")) {
 					Production p = parseProduction(model);
 					model.getProcedural().add(p);
 				} else if (t.getToken().equals("add-dm")) {
@@ -109,9 +103,7 @@ class Parser {
 						Symbol cname = c.getName();
 						c = model.getDeclarative().add(c, true);
 						if (cname != c.getName())
-							model.recordWarning("chunk '" + cname
-									+ "' has been merged into '" + c.getName()
-									+ "'", t);
+							model.recordWarning("chunk '" + cname + "' has been merged into '" + c.getName() + "'", t);
 					}
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
@@ -130,24 +122,19 @@ class Parser {
 					for (int i = 1; i <= 12; i++)
 						for (int j = 1; j <= 12; j++) {
 							String name = "plus-" + i + "-" + j;
-							String slots = "isa " + plusFact + " arg1 \"" + i
-									+ "\" arg2 \"" + j + "\" sum \"" + (i + j)
+							String slots = "isa " + plusFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" sum \"" + (i + j)
 									+ "\"";
-							Chunk c = parseNewChunk(model,
-									Symbol.getUnique(name), slots);
+							Chunk c = parseNewChunk(model, Symbol.getUnique(name), slots);
 							model.getDeclarative().add(c, true);
 							name = "times-" + i + "-" + j;
-							slots = "isa " + timesFact + " arg1 \"" + i
-									+ "\" arg2 \"" + j + "\" product \""
-									+ (i * j) + "\"";
-							c = parseNewChunk(model, Symbol.getUnique(name),
-									slots);
+							slots = "isa " + timesFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" product \"" + (i * j)
+									+ "\"";
+							c = parseNewChunk(model, Symbol.getUnique(name), slots);
 							model.getDeclarative().add(c, true);
 						}
 					for (int i = 0; i <= 99; i++) {
 						String s = "\"" + i + "\"";
-						model.getVision().setVisualFrequency(s,
-								(i < 10) ? .1 : .01);
+						model.getVision().setVisualFrequency(s, (i < 10) ? .1 : .01);
 					}
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
@@ -160,23 +147,20 @@ class Parser {
 					if (c != null)
 						model.getBuffers().set(Symbol.goal, c);
 					else
-						model.recordWarning("chunk '" + goalName
-								+ "' has not been defined", t);
+						model.recordWarning("chunk '" + goalName + "' has not been defined", t);
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
 				} else if (t.getToken().equals("spp")) {
 					t.advance();
 					Symbol pname = lastProduction;
-					if (!t.getToken().startsWith(":")
-							&& !t.getToken().startsWith(")")) {
+					if (!t.getToken().startsWith(":") && !t.getToken().startsWith(")")) {
 						pname = Symbol.get(t.getToken());
 						t.advance();
 					}
 					Production p = model.getProcedural().get(pname);
 					if (p == null) {
-						model.recordError("production '" + pname
-								+ "' has not been defined", t);
+						model.recordError("production '" + pname + "' has not been defined", t);
 						while (t.hasMoreTokens() && !t.getToken().equals(")"))
 							t.advance();
 						t.advance();
@@ -212,16 +196,14 @@ class Parser {
 						if (!t.getToken().equals("("))
 							model.recordError(t);
 						t.advance();
-						Chunk c = model.getDeclarative().get(
-								Symbol.get(t.getToken()));
+						Chunk c = model.getDeclarative().get(Symbol.get(t.getToken()));
 						t.advance();
 						double baseLevel = Double.valueOf(t.getToken());
 						t.advance();
 						if (c != null)
 							c.setBaseLevel(baseLevel);
 						else
-							model.recordWarning("chunk '" + c
-									+ "' has not been defined", t);
+							model.recordWarning("chunk '" + c + "' has not been defined", t);
 						if (!t.getToken().equals(")"))
 							model.recordError(t);
 						t.advance();
@@ -247,8 +229,7 @@ class Parser {
 						t.advance();
 						Symbol s2 = Symbol.get(t.getToken());
 						t.advance();
-						model.getDeclarative().setSimilarity(s1, s2,
-								Double.valueOf(t.getToken()));
+						model.getDeclarative().setSimilarity(s1, s2, Double.valueOf(t.getToken()));
 						t.advance();
 						if (!t.getToken().equals(")"))
 							model.recordError(t);
@@ -294,9 +275,7 @@ class Parser {
 		if (model.getProcedural().get(name) != null) {
 			String oldname = name.getString();
 			name = Symbol.getUnique(oldname);
-			model.recordWarning("production '" + oldname
-					+ "' exists; renaming second production as '" + name + "'",
-					t);
+			model.recordWarning("production '" + oldname + "' exists; renaming second production as '" + name + "'", t);
 		}
 
 		Production p = new Production(name, model);
@@ -324,14 +303,11 @@ class Parser {
 		return p;
 	}
 
-	BufferCondition parseBufferCondition(Model model, Set<String> variables)
-			throws Exception {
+	BufferCondition parseBufferCondition(Model model, Set<String> variables) throws Exception {
 		char prefix = t.getToken().charAt(0);
-		String bufferName = t.getToken()
-				.substring(1, t.getToken().length() - 1);
+		String bufferName = t.getToken().substring(1, t.getToken().length() - 1);
 		if (prefix != '!' && !contains(bufferName, defaultBuffers))
-			model.recordWarning("buffer '" + bufferName
-					+ "' is not a default buffer", t);
+			model.recordWarning("buffer '" + bufferName + "' is not a default buffer", t);
 		if (prefix == '=')
 			variables.add("=" + bufferName);
 		Symbol buffer = Symbol.get((prefix == '?' ? "?" : "") + bufferName);
@@ -345,8 +321,7 @@ class Parser {
 			bc.addSpecial(t.getToken());
 			t.advance();
 			int nparens = 0;
-			while (t.hasMoreTokens() && nparens > 0
-					|| !t.getToken().equals(")")) {
+			while (t.hasMoreTokens() && nparens > 0 || !t.getToken().equals(")")) {
 				if (t.getToken().equals("("))
 					nparens++;
 				else if (t.getToken().equals(")"))
@@ -359,25 +334,19 @@ class Parser {
 			bc.addSpecial(t.getToken());
 			t.advance();
 		} else {
-			while (t.hasMoreTokens()
-					&& !t.getToken().startsWith("?")
-					&& !t.getToken().startsWith("!")
-					&& !(t.getToken().startsWith("=") && t.getToken().endsWith(
-							">"))) {
-				SlotCondition slotCondition = parseSlotCondition(model,
-						variables);
+			while (t.hasMoreTokens() && !t.getToken().startsWith("?") && !t.getToken().startsWith("!")
+					&& !(t.getToken().startsWith("=") && t.getToken().endsWith(">"))) {
+				SlotCondition slotCondition = parseSlotCondition(model, variables);
 				bc.addCondition(slotCondition);
 			}
 		}
 		return bc;
 	}
 
-	SlotCondition parseSlotCondition(Model model, Set<String> variables)
-			throws Exception {
+	SlotCondition parseSlotCondition(Model model, Set<String> variables) throws Exception {
 		String operator = null;
-		if (t.getToken().equals("-") || t.getToken().equals("<")
-				|| t.getToken().equals(">") || t.getToken().equals("<=")
-				|| t.getToken().equals(">=")) {
+		if (t.getToken().equals("-") || t.getToken().equals("<") || t.getToken().equals(">")
+				|| t.getToken().equals("<=") || t.getToken().equals(">=")) {
 			operator = t.getToken();
 			t.advance();
 		}
@@ -392,14 +361,11 @@ class Parser {
 		return new SlotCondition(operator, slot, value, model);
 	}
 
-	BufferAction parseBufferAction(Model model, Set<String> variables)
-			throws Exception {
+	BufferAction parseBufferAction(Model model, Set<String> variables) throws Exception {
 		char prefix = t.getToken().charAt(0);
-		String bufferName = t.getToken()
-				.substring(1, t.getToken().length() - 1);
+		String bufferName = t.getToken().substring(1, t.getToken().length() - 1);
 		if (prefix != '!' && !contains(bufferName, defaultBuffers))
-			model.recordWarning("buffer '" + bufferName
-					+ "' is not a default buffer", t);
+			model.recordWarning("buffer '" + bufferName + "' is not a default buffer", t);
 		Symbol buffer = Symbol.get((prefix == '?' ? "?" : "") + bufferName);
 		t.advance();
 
@@ -415,8 +381,7 @@ class Parser {
 			ba.addSpecial(t.getToken());
 			t.advance();
 			int nparens = 0;
-			while (t.hasMoreTokens()
-					&& (nparens > 0 || !t.getToken().equals(")"))) {
+			while (t.hasMoreTokens() && (nparens > 0 || !t.getToken().equals(")"))) {
 				if (t.getToken().equals("("))
 					nparens++;
 				else if (t.getToken().equals(")"))
@@ -439,23 +404,19 @@ class Parser {
 			String direct = t.getToken();
 			t.advance();
 			String next = t.getToken();
-			if (next.equals(")") || next.startsWith("-")
-					|| next.startsWith("+") || next.startsWith("!")
+			if (next.equals(")") || next.startsWith("-") || next.startsWith("+") || next.startsWith("!")
 					|| (next.startsWith("=") && next.endsWith(">"))) {
 				ba.setDirect(Symbol.get(direct));
 				if (!variables.contains(direct))
-					model.recordWarning("variable '" + direct + "' is not set",
-							t);
+					model.recordWarning("variable '" + direct + "' is not set", t);
 				return ba;
 			} else
 				t.pushBack(direct);
 		}
 
-		while (t.hasMoreTokens()
-				&& !t.getToken().equals(")")
+		while (t.hasMoreTokens() && !t.getToken().equals(")")
 				&& !(t.getToken().startsWith("=") && t.getToken().endsWith(">"))
-				&& !(t.getToken().startsWith("-") && t.getToken().length() > 1)
-				&& !t.getToken().startsWith("+")
+				&& !(t.getToken().startsWith("-") && t.getToken().length() > 1) && !t.getToken().startsWith("+")
 				&& !t.getToken().startsWith("!")) {
 			SlotAction slotAction = parseSlotAction(model, variables);
 			ba.addAction(slotAction);
@@ -463,24 +424,20 @@ class Parser {
 		return ba;
 	}
 
-	SlotAction parseSlotAction(Model model, Set<String> variables)
-			throws Exception {
+	SlotAction parseSlotAction(Model model, Set<String> variables) throws Exception {
 		String operator = null;
-		if (t.getToken().equals("-") || t.getToken().equals("<")
-				|| t.getToken().equals(">") || t.getToken().equals("<=")
-				|| t.getToken().equals(">=")) {
+		if (t.getToken().equals("-") || t.getToken().equals("<") || t.getToken().equals(">")
+				|| t.getToken().equals("<=") || t.getToken().equals(">=")) {
 			operator = t.getToken();
 			t.advance();
 		}
 		Symbol slot = Symbol.get(t.getToken());
 		if (slot.isVariable() && !variables.contains(slot.getString()))
-			model.recordWarning("variable '" + slot.getString()
-					+ "' is not set", t);
+			model.recordWarning("variable '" + slot.getString() + "' is not set", t);
 		t.advance();
 		Symbol value = Symbol.get(t.getToken());
 		if (value.isVariable() && !variables.contains(value.getString()))
-			model.recordWarning("variable '" + value.getString()
-					+ "' is not set", t);
+			model.recordWarning("variable '" + value.getString() + "' is not set", t);
 		t.advance();
 		return new SlotAction(operator, slot, value, model);
 	}
@@ -542,8 +499,7 @@ class Parser {
 			t.advance();
 			while (t.hasMoreTokens() && !t.getToken().equals(")")) {
 				Symbol parentName = Symbol.get(t.getToken());
-				ChunkType parent = model.getDeclarative().getChunkType(
-						parentName);
+				ChunkType parent = model.getDeclarative().getChunkType(parentName);
 				if (parent != null)
 					chunkType.addParent(parent);
 				else

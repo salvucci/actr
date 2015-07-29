@@ -77,8 +77,7 @@ public class U3Subitize extends Task {
 
 	// --- Analysis Code ---//
 
-	final double humanRT[] = { .60, .65, .70, .86, 1.12, 1.50, 1.79, 2.13,
-			2.15, 2.58 };
+	final double humanRT[] = { .60, .65, .70, .86, 1.12, 1.50, 1.79, 2.13, 2.15, 2.58 };
 
 	@Override
 	public int analysisIterations() {

@@ -170,9 +170,7 @@ public class Declarative extends Module {
 					}
 				} else {
 					Symbol potval = potential.get(slot);
-					if (!partialMatching
-							|| (slot == Symbol.isa || slot.getString()
-									.charAt(0) == ':'))
+					if (!partialMatching || (slot == Symbol.isa || slot.getString().charAt(0) == ':'))
 						if (potval == null || (potval != request.get(slot)))
 							if (!model.getDeclarative().isa(potval, value)) {
 								match = false;
@@ -188,13 +186,11 @@ public class Declarative extends Module {
 			Chunk chunk = null;
 			if (extendedMemory != null) {
 				if (model.isVerbose())
-					model.output("declarative", "extended memory: request "
-							+ request);
+					model.output("declarative", "extended memory: request " + request);
 				chunk = extendedMemory.findRetrieval(request, model);
 				if (model.isVerbose()) {
 					if (chunk != null)
-						model.output("declarative", "extended memory: found "
-								+ chunk);
+						model.output("declarative", "extended memory: found " + chunk);
 					else
 						model.output("declarative", "extended memory: failure");
 				}
@@ -209,8 +205,7 @@ public class Declarative extends Module {
 				model.output("*** testing " + chunk.getName() + " " + chunk);
 			double highestActivation = chunk.computeActivation(request);
 			if (activationTrace)
-				model.output("*** activation " + chunk.getName() + " = "
-						+ String.format("%.3f", highestActivation));
+				model.output("*** activation " + chunk.getName() + " = " + String.format("%.3f", highestActivation));
 			Chunk highestChunk = chunk;
 			while (it.hasNext()) {
 				chunk = it.next();
@@ -218,8 +213,7 @@ public class Declarative extends Module {
 					model.output("*** testing " + chunk.getName() + " " + chunk);
 				double act = chunk.computeActivation(request);
 				if (activationTrace)
-					model.output("*** activation " + chunk.getName() + " = "
-							+ String.format("%.3f", act));
+					model.output("*** activation " + chunk.getName() + " = " + String.format("%.3f", act));
 				if (act > highestActivation) {
 					highestActivation = act;
 					highestChunk = chunk;
@@ -227,8 +221,7 @@ public class Declarative extends Module {
 			}
 			if (highestActivation >= retrievalThreshold) {
 				if (activationTrace)
-					model.output("*** retrieving " + highestChunk.getName()
-							+ " " + highestChunk);
+					model.output("*** retrieving " + highestChunk.getName() + " " + highestChunk);
 				return highestChunk;
 			} else {
 				if (activationTrace)
@@ -257,15 +250,11 @@ public class Declarative extends Module {
 				model.output("declarative", "start-retrieval");
 			final Chunk retrieval = findRetrieval(request);
 			if (retrieval != null) {
-				double retrievalTime = latencyFactor
-						* Math.exp(-retrieval.getActivation());
-				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state,
-						Symbol.busy);
-				model.getBuffers().setSlot(Symbol.retrievalState,
-						Symbol.buffer, Symbol.requested);
-				model.addEvent(new Event(model.getTime() + retrievalTime,
-						"declarative", "retrieved-chunk ["
-								+ retrieval.getName() + "]") {
+				double retrievalTime = latencyFactor * Math.exp(-retrieval.getActivation());
+				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
+				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.requested);
+				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative",
+						"retrieved-chunk [" + retrieval.getName() + "]") {
 					@Override
 					public void action() {
 						retrieval.setRetrieved(true);
@@ -275,25 +264,18 @@ public class Declarative extends Module {
 							finsts.removeElementAt(0);
 						retrieval.addUse();
 						model.getBuffers().set(Symbol.retrieval, retrieval);
-						model.getBuffers().setSlot(Symbol.retrievalState,
-								Symbol.state, Symbol.free);
-						model.getBuffers().setSlot(Symbol.retrievalState,
-								Symbol.buffer, Symbol.full);
+						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.free);
+						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.full);
 					}
 				});
 			} else {
-				double retrievalTime = latencyFactor
-						* Math.exp(-retrievalThreshold);
-				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state,
-						Symbol.busy);
-				model.addEvent(new Event(model.getTime() + retrievalTime,
-						"declarative", "retrieval-failure") {
+				double retrievalTime = latencyFactor * Math.exp(-retrievalThreshold);
+				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
+				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative", "retrieval-failure") {
 					@Override
 					public void action() {
-						model.getBuffers().setSlot(Symbol.retrievalState,
-								Symbol.state, Symbol.error);
-						model.getBuffers().setSlot(Symbol.retrievalState,
-								Symbol.buffer, Symbol.empty);
+						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.error);
+						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.empty);
 					}
 				});
 			}
@@ -342,8 +324,7 @@ public class Declarative extends Module {
 	public double getSimilarity(Symbol chunk1, Symbol chunk2) {
 		if (chunk1 == chunk2)
 			return 0;
-		Double d = similarities.get(chunk1.getString() + "$"
-				+ chunk2.getString());
+		Double d = similarities.get(chunk1.getString() + "$" + chunk2.getString());
 		if (d == null)
 			d = similarities.get(chunk2.getString() + "$" + chunk1.getString());
 		if (d == null)
@@ -353,8 +334,7 @@ public class Declarative extends Module {
 	}
 
 	void setSimilarity(Symbol chunk1, Symbol chunk2, double value) {
-		similarities.put(chunk1.getString() + "$" + chunk2.getString(),
-				new Double(value));
+		similarities.put(chunk1.getString() + "$" + chunk2.getString(), new Double(value));
 	}
 
 	void setAllBaseLevels(double baseLevel) {
@@ -370,8 +350,7 @@ public class Declarative extends Module {
 	 * @param emClass
 	 *            the name of the extended memory class
 	 */
-	public static void registerExtendedMemoryClass(
-			Class<? extends ExtendedMemory> emClass) {
+	public static void registerExtendedMemoryClass(Class<? extends ExtendedMemory> emClass) {
 		extendedMemoryClass = emClass;
 	}
 

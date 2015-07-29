@@ -76,10 +76,8 @@ public class Frame extends JFrame {
 		editor.grabFocus();
 
 		JScrollPane editorScroll = new JScrollPane(editor);
-		editorScroll
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		editorScroll
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		editorScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		editorScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		navigator = new Navigator(this);
 
@@ -113,10 +111,8 @@ public class Frame extends JFrame {
 		});
 
 		JScrollPane outputScroll = new JScrollPane(outputArea);
-		outputScroll
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		outputScroll
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		outputScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		outputScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		outputFind = new FindPanel(this, false);
 		outputFind.setVisible(false);
@@ -126,14 +122,12 @@ public class Frame extends JFrame {
 		outputPanel.add(outputScroll, BorderLayout.CENTER);
 		outputPanel.add(outputFind, BorderLayout.SOUTH);
 
-		taskSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new Task(),
-				outputPanel);
+		taskSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new Task(), outputPanel);
 		taskSplitPane.setBorder(BorderFactory.createEmptyBorder());
 		taskSplitPane.setOneTouchExpandable(true);
 		// taskSplitPane.setOpaque (true);
 
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, modelPanel,
-				taskSplitPane);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, modelPanel, taskSplitPane);
 		splitPane.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6)); // 12,12,12,12));
 		splitPane.setOneTouchExpandable(true);
 		// splitPane.setOpaque(true);
@@ -148,8 +142,7 @@ public class Frame extends JFrame {
 		toolbar = new Toolbar(this, actions);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
-		getRootPane().registerKeyboardAction(actions.findHideAction,
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+		getRootPane().registerKeyboardAction(actions.findHideAction, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		menus = new Menus(actions, core.getPreferences());
@@ -187,8 +180,7 @@ public class Frame extends JFrame {
 			open(file);
 
 		pack();
-		setSize(core.getPreferences().frameWidth,
-				core.getPreferences().frameHeight);
+		setSize(core.getPreferences().frameWidth, core.getPreferences().frameHeight);
 
 		splitPane.setDividerLocation(core.getPreferences().editorPaneSplit);
 		taskSplitPane.setDividerLocation(core.getPreferences().taskPaneSplit);
@@ -408,8 +400,7 @@ public class Frame extends JFrame {
 		if (model == null)
 			return;
 		Task task = model.getTask();
-		final int n = (iterations.equals("")) ? task.analysisIterations()
-				: Integer.valueOf(iterations);
+		final int n = (iterations.equals("")) ? task.analysisIterations() : Integer.valueOf(iterations);
 		(new SwingWorker<Object, Object>() {
 			@Override
 			public Object doInBackground() {
@@ -459,9 +450,7 @@ public class Frame extends JFrame {
 				output("> (run-batch)\n");
 				output(Result.headerString());
 				String basePath = file.getPath();
-				basePath = basePath.substring(0,
-						basePath.lastIndexOf(File.separator))
-						+ File.separator;
+				basePath = basePath.substring(0, basePath.lastIndexOf(File.separator)) + File.separator;
 				String[] filenames = editor.getText().split("\\s");
 				if (filenames != null) {
 					for (int k = 0; !stop && k < filenames.length; k++) {
@@ -470,26 +459,22 @@ public class Frame extends JFrame {
 						String taskOverrides[] = { null };
 						if (line.contains(":")) {
 							modelName = line.substring(0, line.indexOf(":"));
-							taskOverrides = line.substring(
-									line.indexOf(":") + 1).split(",");
+							taskOverrides = line.substring(line.indexOf(":") + 1).split(",");
 						}
 						open(new File(basePath + modelName), true);
 						final String modelText = editor.getText();
 
 						for (int ti = 0; ti < taskOverrides.length; ti++) {
 							String taskOverride = taskOverrides[ti];
-							model = Model.compile(modelText, frame,
-									taskOverride);
+							model = Model.compile(modelText, frame, taskOverride);
 							if (model == null) {
-								output("Error: Model " + basePath + modelName
-										+ " does not exist");
+								output("Error: Model " + basePath + modelName + " does not exist");
 								break;
 							}
 							int n = model.getTask().analysisIterations();
 							Task[] tasks = new Task[n];
 							for (int i = 0; !stop && i < n; i++) {
-								model = Model.compile(modelText, frame,
-										taskOverride);
+								model = Model.compile(modelText, frame, taskOverride);
 								if (model == null)
 									System.exit(1);
 								brainPanel.setVisible(false);
@@ -546,18 +531,15 @@ public class Frame extends JFrame {
 			if (forceSaveAs || file == null) {
 				File newFile = null;
 				while (newFile == null) {
-					FileDialog fileDialog = new FileDialog(frame, "Save As...",
-							FileDialog.SAVE);
+					FileDialog fileDialog = new FileDialog(frame, "Save As...", FileDialog.SAVE);
 					if (file != null)
 						fileDialog.setDirectory(file.getPath());
 					else
-						fileDialog.setDirectory(core.getPreferences()
-								.getMostRecentPath());
+						fileDialog.setDirectory(core.getPreferences().getMostRecentPath());
 					fileDialog.setVisible(true);
 					if (fileDialog.getFile() == null)
 						return;
-					String filename = fileDialog.getDirectory()
-							+ fileDialog.getFile();
+					String filename = fileDialog.getDirectory() + fileDialog.getFile();
 					if (filename.indexOf('.') != -1)
 						filename = filename.substring(0, filename.indexOf('.'));
 					filename += ".actr";
@@ -565,10 +547,8 @@ public class Frame extends JFrame {
 					if (newFile.exists()) {
 						String options[] = { "Yes", "No", "Cancel" };
 						int choice = JOptionPane.showOptionDialog(frame,
-								"Overwrite existing \"" + newFile.getName()
-										+ "\"?", "File Exists",
-								JOptionPane.YES_NO_CANCEL_OPTION,
-								JOptionPane.QUESTION_MESSAGE, null, options,
+								"Overwrite existing \"" + newFile.getName() + "\"?", "File Exists",
+								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
 								options[0]);
 						if (choice == 1)
 							newFile = null;
@@ -680,8 +660,7 @@ public class Frame extends JFrame {
 		core.getPreferences().frameWidth = getWidth();
 		core.getPreferences().frameHeight = getHeight();
 		core.getPreferences().editorPaneSplit = splitPane.getDividerLocation();
-		core.getPreferences().taskPaneSplit = taskSplitPane
-				.getDividerLocation();
+		core.getPreferences().taskPaneSplit = taskSplitPane.getDividerLocation();
 		core.getPreferences().save();
 		return true;
 	}

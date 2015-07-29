@@ -47,76 +47,61 @@ public class Symbol {
 	public static final Symbol goal = Symbol.createPervasiveSymbol("goal");
 
 	/** Pervasive symbol for the string <tt>"?goal"</tt>. */
-	public static final Symbol goalState = Symbol
-			.createPervasiveSymbol("?goal");
+	public static final Symbol goalState = Symbol.createPervasiveSymbol("?goal");
 
 	/** Pervasive symbol for the string <tt>"retrieval"</tt>. */
-	public static final Symbol retrieval = Symbol
-			.createPervasiveSymbol("retrieval");
+	public static final Symbol retrieval = Symbol.createPervasiveSymbol("retrieval");
 
 	/** Pervasive symbol for the string <tt>"?retrieval"</tt>. */
-	public static final Symbol retrievalState = Symbol
-			.createPervasiveSymbol("?retrieval");
+	public static final Symbol retrievalState = Symbol.createPervasiveSymbol("?retrieval");
 
 	/** Pervasive symbol for the string <tt>"visual-location"</tt>. */
-	public static final Symbol visloc = Symbol
-			.createPervasiveSymbol("visual-location");
+	public static final Symbol visloc = Symbol.createPervasiveSymbol("visual-location");
 
 	/** Pervasive symbol for the string <tt>"?visual-location"</tt>. */
-	public static final Symbol vislocState = Symbol
-			.createPervasiveSymbol("?visual-location");
+	public static final Symbol vislocState = Symbol.createPervasiveSymbol("?visual-location");
 
 	/** Pervasive symbol for the string <tt>"visual"</tt>. */
 	public static final Symbol visual = Symbol.createPervasiveSymbol("visual");
 
 	/** Pervasive symbol for the string <tt>"?visual"</tt>. */
-	public static final Symbol visualState = Symbol
-			.createPervasiveSymbol("?visual");
+	public static final Symbol visualState = Symbol.createPervasiveSymbol("?visual");
 
 	/** Pervasive symbol for the string <tt>"aural-location"</tt>. */
-	public static final Symbol aurloc = Symbol
-			.createPervasiveSymbol("aural-location");
+	public static final Symbol aurloc = Symbol.createPervasiveSymbol("aural-location");
 
 	/** Pervasive symbol for the string <tt>"?aural-location"</tt>. */
-	public static final Symbol aurlocState = Symbol
-			.createPervasiveSymbol("?aural-location");
+	public static final Symbol aurlocState = Symbol.createPervasiveSymbol("?aural-location");
 
 	/** Pervasive symbol for the string <tt>"aural"</tt>. */
 	public static final Symbol aural = Symbol.createPervasiveSymbol("aural");
 
 	/** Pervasive symbol for the string <tt>"?aural"</tt>. */
-	public static final Symbol auralState = Symbol
-			.createPervasiveSymbol("?aural");
+	public static final Symbol auralState = Symbol.createPervasiveSymbol("?aural");
 
 	/** Pervasive symbol for the string <tt>"manual"</tt>. */
 	public static final Symbol manual = Symbol.createPervasiveSymbol("manual");
 
 	/** Pervasive symbol for the string <tt>"?manual"</tt>. */
-	public static final Symbol manualState = Symbol
-			.createPervasiveSymbol("?manual");
+	public static final Symbol manualState = Symbol.createPervasiveSymbol("?manual");
 
 	/** Pervasive symbol for the string <tt>"vocal"</tt>. */
 	public static final Symbol vocal = Symbol.createPervasiveSymbol("vocal");
 
 	/** Pervasive symbol for the string <tt>"?vocal"</tt>. */
-	public static final Symbol vocalState = Symbol
-			.createPervasiveSymbol("?vocal");
+	public static final Symbol vocalState = Symbol.createPervasiveSymbol("?vocal");
 
 	/** Pervasive symbol for the string <tt>"imaginal"</tt>. */
-	public static final Symbol imaginal = Symbol
-			.createPervasiveSymbol("imaginal");
+	public static final Symbol imaginal = Symbol.createPervasiveSymbol("imaginal");
 
 	/** Pervasive symbol for the string <tt>"?imaginal"</tt>. */
-	public static final Symbol imaginalState = Symbol
-			.createPervasiveSymbol("?imaginal");
+	public static final Symbol imaginalState = Symbol.createPervasiveSymbol("?imaginal");
 
 	/** Pervasive symbol for the string <tt>"temporal"</tt>. */
-	public static final Symbol temporal = Symbol
-			.createPervasiveSymbol("temporal");
+	public static final Symbol temporal = Symbol.createPervasiveSymbol("temporal");
 
 	/** Pervasive symbol for the string <tt>"?temporal"</tt>. */
-	public static final Symbol temporalState = Symbol
-			.createPervasiveSymbol("?temporal");
+	public static final Symbol temporalState = Symbol.createPervasiveSymbol("?temporal");
 
 	/** Pervasive symbol for the string <tt>"buffer"</tt>. */
 	public static final Symbol buffer = Symbol.createPervasiveSymbol("buffer");
@@ -125,16 +110,13 @@ public class Symbol {
 	public static final Symbol state = Symbol.createPervasiveSymbol("state");
 
 	/** Pervasive symbol for the string <tt>"preparation"</tt>. */
-	public static final Symbol preparation = Symbol
-			.createPervasiveSymbol("preparation");
+	public static final Symbol preparation = Symbol.createPervasiveSymbol("preparation");
 
 	/** Pervasive symbol for the string <tt>"processor"</tt>. */
-	public static final Symbol processor = Symbol
-			.createPervasiveSymbol("processor");
+	public static final Symbol processor = Symbol.createPervasiveSymbol("processor");
 
 	/** Pervasive symbol for the string <tt>"execution"</tt>. */
-	public static final Symbol execution = Symbol
-			.createPervasiveSymbol("execution");
+	public static final Symbol execution = Symbol.createPervasiveSymbol("execution");
 
 	/** Pervasive symbol for the string <tt>"free"</tt>. */
 	public static final Symbol free = Symbol.createPervasiveSymbol("free");
@@ -149,34 +131,28 @@ public class Symbol {
 	public static final Symbol full = Symbol.createPervasiveSymbol("full");
 
 	/** Pervasive symbol for the string <tt>"requested"</tt>. */
-	public static final Symbol requested = Symbol
-			.createPervasiveSymbol("requested");
+	public static final Symbol requested = Symbol.createPervasiveSymbol("requested");
 
 	/** Pervasive symbol for the string <tt>"unrequested"</tt>. */
-	public static final Symbol unrequested = Symbol
-			.createPervasiveSymbol("unrequested");
+	public static final Symbol unrequested = Symbol.createPervasiveSymbol("unrequested");
 
 	/** Pervasive symbol for the string <tt>"error"</tt>. */
 	public static final Symbol error = Symbol.createPervasiveSymbol("error");
 
 	/** Pervasive symbol for the string <tt>":recently-retrieved"</tt>. */
-	public static final Symbol recentlyRetrieved = Symbol
-			.createPervasiveSymbol(":recently-retrieved");
+	public static final Symbol recentlyRetrieved = Symbol.createPervasiveSymbol(":recently-retrieved");
 
 	/** Pervasive symbol for the string <tt>"kind"</tt>. */
 	public static final Symbol kind = Symbol.createPervasiveSymbol("kind");
 
 	/** Pervasive symbol for the string <tt>"screen-x"</tt>. */
-	public static final Symbol screenx = Symbol
-			.createPervasiveSymbol("screen-x");
+	public static final Symbol screenx = Symbol.createPervasiveSymbol("screen-x");
 
 	/** Pervasive symbol for the string <tt>"screen-y"</tt>. */
-	public static final Symbol screeny = Symbol
-			.createPervasiveSymbol("screen-y");
+	public static final Symbol screeny = Symbol.createPervasiveSymbol("screen-y");
 
 	/** Pervasive symbol for the string <tt>"screen-pos"</tt>. */
-	public static final Symbol screenpos = Symbol
-			.createPervasiveSymbol("screen-pos");
+	public static final Symbol screenpos = Symbol.createPervasiveSymbol("screen-pos");
 
 	/** Pervasive symbol for the string <tt>"value"</tt>. */
 	public static final Symbol value = Symbol.createPervasiveSymbol("value");
@@ -188,19 +164,16 @@ public class Symbol {
 	public static final Symbol height = Symbol.createPervasiveSymbol("height");
 
 	/** Pervasive symbol for the string <tt>"distance"</tt>. */
-	public static final Symbol distance = Symbol
-			.createPervasiveSymbol("distance");
+	public static final Symbol distance = Symbol.createPervasiveSymbol("distance");
 
 	/** Pervasive symbol for the string <tt>"lowest"</tt>. */
 	public static final Symbol lowest = Symbol.createPervasiveSymbol("lowest");
 
 	/** Pervasive symbol for the string <tt>"highest"</tt>. */
-	public static final Symbol highest = Symbol
-			.createPervasiveSymbol("highest");
+	public static final Symbol highest = Symbol.createPervasiveSymbol("highest");
 
 	/** Pervasive symbol for the string <tt>"current"</tt>. */
-	public static final Symbol current = Symbol
-			.createPervasiveSymbol("current");
+	public static final Symbol current = Symbol.createPervasiveSymbol("current");
 
 	/** Pervasive symbol for the string <tt>"tone"</tt>. */
 	public static final Symbol tone = Symbol.createPervasiveSymbol("tone");
@@ -212,15 +185,13 @@ public class Symbol {
 	public static final Symbol digit = Symbol.createPervasiveSymbol("digit");
 
 	/** Pervasive symbol for the string <tt>"location"</tt>. */
-	public static final Symbol location = Symbol
-			.createPervasiveSymbol("location");
+	public static final Symbol location = Symbol.createPervasiveSymbol("location");
 
 	/** Pervasive symbol for the string <tt>"event"</tt>. */
 	public static final Symbol event = Symbol.createPervasiveSymbol("event");
 
 	/** Pervasive symbol for the string <tt>"content"</tt>. */
-	public static final Symbol content = Symbol
-			.createPervasiveSymbol("content");
+	public static final Symbol content = Symbol.createPervasiveSymbol("content");
 
 	/** Pervasive symbol for the string <tt>"hand"</tt>. */
 	public static final Symbol hand = Symbol.createPervasiveSymbol("hand");
@@ -238,8 +209,7 @@ public class Symbol {
 	public static final Symbol where = Symbol.createPervasiveSymbol("where");
 
 	/** Pervasive symbol for the string <tt>"keyboard"</tt>. */
-	public static final Symbol keyboard = Symbol
-			.createPervasiveSymbol("keyboard");
+	public static final Symbol keyboard = Symbol.createPervasiveSymbol("keyboard");
 
 	/** Pervasive symbol for the string <tt>"mouse"</tt>. */
 	public static final Symbol mouse = Symbol.createPervasiveSymbol("mouse");

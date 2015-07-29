@@ -49,8 +49,7 @@ class BufferCondition {
 		if (slotConditions.size() != bc2.slotConditions.size())
 			return false;
 		for (int i = 0; i < slotConditions.size(); i++)
-			if (!slotConditions.elementAt(i).equals(
-					bc2.slotConditions.elementAt(i)))
+			if (!slotConditions.elementAt(i).equals(bc2.slotConditions.elementAt(i)))
 				return false;
 		if (specials.size() != bc2.specials.size())
 			return false;

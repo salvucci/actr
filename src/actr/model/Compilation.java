@@ -24,8 +24,7 @@ class Compilation {
 		p2 = inst2.getProduction().copy();
 		p1.expandDirectActions(inst1);
 		p2.expandDirectActions(inst2);
-		String name = inst1.getProduction().getName() + "++"
-				+ inst2.getProduction().getName();
+		String name = inst1.getProduction().getName() + "++" + inst2.getProduction().getName();
 		newp = new Production(Symbol.getUnique(name), model);
 	}
 
@@ -54,8 +53,7 @@ class Compilation {
 		return bcnew;
 	}
 
-	BufferCondition blendConditionsMinusActions(BufferCondition bc1,
-			BufferCondition bc2, BufferAction ba1) {
+	BufferCondition blendConditionsMinusActions(BufferCondition bc1, BufferCondition bc2, BufferAction ba1) {
 		if (bc1 == null && bc2 == null)
 			return null;
 		if (bc2 == null)
@@ -90,10 +88,8 @@ class Compilation {
 
 	BufferCondition createStandardStateCondition(Symbol stateBuffer) {
 		BufferCondition bc = new BufferCondition('?', stateBuffer, model);
-		bc.addCondition(new SlotCondition(null, Symbol.buffer, Symbol.empty,
-				model));
-		bc.addCondition(new SlotCondition(null, Symbol.state, Symbol.free,
-				model));
+		bc.addCondition(new SlotCondition(null, Symbol.buffer, Symbol.empty, model));
+		bc.addCondition(new SlotCondition(null, Symbol.state, Symbol.free, model));
 		return bc;
 	}
 
@@ -110,17 +106,12 @@ class Compilation {
 		// return false;
 
 		if (!p1.hasBufferAction('+', buffer)) {
-			addCondition(blendConditionsMinusActions(
-					p1.getBufferCondition(buffer),
-					p2.getBufferCondition(buffer),
+			addCondition(blendConditionsMinusActions(p1.getBufferCondition(buffer), p2.getBufferCondition(buffer),
 					p1.getBufferAction('=', buffer)));
-			addCondition(blendConditions(p1.getBufferCondition(stateBuffer),
-					p2.getBufferCondition(stateBuffer)));
+			addCondition(blendConditions(p1.getBufferCondition(stateBuffer), p2.getBufferCondition(stateBuffer)));
 
-			addAction(blendActions(p1.getBufferAction('=', buffer),
-					p2.getBufferAction('=', buffer)));
-			addAction(blendActions(p1.getBufferAction('-', buffer),
-					p2.getBufferAction('-', buffer)));
+			addAction(blendActions(p1.getBufferAction('=', buffer), p2.getBufferAction('=', buffer)));
+			addAction(blendActions(p1.getBufferAction('-', buffer), p2.getBufferAction('-', buffer)));
 			addAction(p2.getBufferAction('+', buffer));
 		} else // if (p1.hasBufferAction('+',buffer) &&
 				// !p2.hasBufferAction('+',buffer))
@@ -139,11 +130,9 @@ class Compilation {
 			}
 
 			addAction(p1.getBufferAction('=', buffer));
-			addAction(blendActions(p1.getBufferAction('-', buffer),
-					p2.getBufferAction('-', buffer)));
+			addAction(blendActions(p1.getBufferAction('-', buffer), p2.getBufferAction('-', buffer)));
 
-			BufferAction ba = blendActions(p1.getBufferAction('+', buffer),
-					p2.getBufferAction('=', buffer));
+			BufferAction ba = blendActions(p1.getBufferAction('+', buffer), p2.getBufferAction('=', buffer));
 			if (ba != null)
 				ba.setPrefix('+');
 			addAction(ba);
@@ -154,31 +143,21 @@ class Compilation {
 	boolean compilePercMotorStyle(Symbol buffer) {
 		Symbol stateBuffer = Symbol.get("?" + buffer);
 
-		if ((p1.hasBufferAction('+', buffer) || p1.hasBufferAction('-', buffer))
-				&& (p2.hasBufferAction('+', buffer)
-						|| p2.hasBufferCondition(buffer) || p2
-							.queriesOtherThanBusy(stateBuffer)))
+		if ((p1.hasBufferAction('+', buffer) || p1.hasBufferAction('-', buffer)) && (p2.hasBufferAction('+', buffer)
+				|| p2.hasBufferCondition(buffer) || p2.queriesOtherThanBusy(stateBuffer)))
 			return false;
 
 		if (p1.hasBufferAction('+', buffer))
-			addCondition(blendConditionsMinusActions(
-					p1.getBufferCondition(buffer),
-					p2.getBufferCondition(buffer),
+			addCondition(blendConditionsMinusActions(p1.getBufferCondition(buffer), p2.getBufferCondition(buffer),
 					p1.getBufferAction('+', buffer)));
 		else
-			addCondition(blendConditionsMinusActions(
-					p1.getBufferCondition(buffer),
-					p2.getBufferCondition(buffer),
+			addCondition(blendConditionsMinusActions(p1.getBufferCondition(buffer), p2.getBufferCondition(buffer),
 					p1.getBufferAction('=', buffer)));
-		addCondition(blendConditions(p1.getBufferCondition(stateBuffer),
-				p2.getBufferCondition(stateBuffer)));
+		addCondition(blendConditions(p1.getBufferCondition(stateBuffer), p2.getBufferCondition(stateBuffer)));
 
-		addAction(blendActions(p1.getBufferAction('=', buffer),
-				p2.getBufferAction('=', buffer)));
-		addAction(blendActions(p1.getBufferAction('-', buffer),
-				p2.getBufferAction('-', buffer)));
-		addAction(blendActions(p1.getBufferAction('+', buffer),
-				p2.getBufferAction('+', buffer)));
+		addAction(blendActions(p1.getBufferAction('=', buffer), p2.getBufferAction('=', buffer)));
+		addAction(blendActions(p1.getBufferAction('-', buffer), p2.getBufferAction('-', buffer)));
+		addAction(blendActions(p1.getBufferAction('+', buffer), p2.getBufferAction('+', buffer)));
 
 		return true;
 	}
@@ -189,8 +168,7 @@ class Compilation {
 		if (p1.hasBufferAction(buffer) && p2.queriesForError(stateBuffer))
 			return false;
 
-		if (p1.hasBufferAction(buffer) && p2.hasBufferAction(buffer)
-				&& !p2.hasBufferCondition(buffer))
+		if (p1.hasBufferAction(buffer) && p2.hasBufferAction(buffer) && !p2.hasBufferCondition(buffer))
 			return false;
 
 		// NEW: specialize ALL variables when compiling a retrieval
@@ -234,8 +212,7 @@ class Compilation {
 				}
 			}
 
-			p2.specialize(Symbol.get("=" + buffer),
-					inst2.get(Symbol.get("=" + buffer)));
+			p2.specialize(Symbol.get("=" + buffer), inst2.get(Symbol.get("=" + buffer)));
 			BufferCondition c2 = p2.getBufferCondition(buffer);
 			Iterator<SlotCondition> itSC = c2.getSlotConditions();
 			while (itSC.hasNext()) {
@@ -279,28 +256,22 @@ class Compilation {
 				)
 					addCondition(p1.getBufferCondition(stateBuffer));
 			} else {
-				addCondition(blendConditions(p1.getBufferCondition(buffer),
-						p2.getBufferCondition(buffer)));
+				addCondition(blendConditions(p1.getBufferCondition(buffer), p2.getBufferCondition(buffer)));
 				if (!newp.hasBufferCondition(buffer) // XXX bug? this fix added
 														// 5/20/11
 				)
-					addCondition(blendConditions(
-							p1.getBufferCondition(stateBuffer),
-							p2.getBufferCondition(stateBuffer)));
+					addCondition(
+							blendConditions(p1.getBufferCondition(stateBuffer), p2.getBufferCondition(stateBuffer)));
 			}
 
-			addAction(blendActions(p1.getBufferAction('=', buffer),
-					p2.getBufferAction('=', buffer)));
-			addAction(blendActions(p1.getBufferAction('-', buffer),
-					p2.getBufferAction('-', buffer)));
-			addAction(blendActions(p1.getBufferAction('+', buffer),
-					p2.getBufferAction('+', buffer)));
+			addAction(blendActions(p1.getBufferAction('=', buffer), p2.getBufferAction('=', buffer)));
+			addAction(blendActions(p1.getBufferAction('-', buffer), p2.getBufferAction('-', buffer)));
+			addAction(blendActions(p1.getBufferAction('+', buffer), p2.getBufferAction('+', buffer)));
 		}
 		return true;
 	}
 
-	void replaceValue(Production p, Instantiation inst, Symbol oldval,
-			Symbol newval) {
+	void replaceValue(Production p, Instantiation inst, Symbol oldval, Symbol newval) {
 		p.specialize(oldval, newval);
 		inst.replaceVariable(oldval, newval);
 	}
@@ -314,8 +285,7 @@ class Compilation {
 				if (model.getBuffers().isLegalBuffer(var))
 					p2.specialize(var, inst2.get(var));
 				else
-					replaceValue(p2, inst2, var,
-							Symbol.get(var.getString() + "2"));
+					replaceValue(p2, inst2, var, Symbol.get(var.getString() + "2"));
 			}
 		}
 	}
@@ -351,17 +321,13 @@ class Compilation {
 			synchronizeVariables();
 			if (checkSpecials()
 
-			&& compileGoalStyle(Symbol.goal)
-					&& compileGoalStyle(Symbol.imaginal)
+			&& compileGoalStyle(Symbol.goal) && compileGoalStyle(Symbol.imaginal)
 
-					&& compilePercMotorStyle(Symbol.visloc)
-					&& compilePercMotorStyle(Symbol.visual)
-					&& compilePercMotorStyle(Symbol.aurloc)
-					&& compilePercMotorStyle(Symbol.aural)
-					&& compilePercMotorStyle(Symbol.manual)
-					&& compilePercMotorStyle(Symbol.vocal)
+			&& compilePercMotorStyle(Symbol.visloc) && compilePercMotorStyle(Symbol.visual)
+					&& compilePercMotorStyle(Symbol.aurloc) && compilePercMotorStyle(Symbol.aural)
+					&& compilePercMotorStyle(Symbol.manual) && compilePercMotorStyle(Symbol.vocal)
 
-					&& compileRetrievalStyle(Symbol.retrieval)) {
+			&& compileRetrievalStyle(Symbol.retrieval)) {
 				newp.setUtility(model.getProcedural().productionCompilationNewUtility);
 				return newp;
 			}

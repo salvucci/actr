@@ -16,8 +16,7 @@ import actr.model.Model;
 class Document extends DefaultStyledDocument {
 	private Frame frame;
 	private Preferences prefs;
-	private MutableAttributeSet styleCommand, styleParameter, styleProduction,
-			styleChunk, styleBuffer, styleComment;
+	private MutableAttributeSet styleCommand, styleParameter, styleProduction, styleChunk, styleBuffer, styleComment;
 	private UndoQueue undos, redos;
 	private boolean extrasEnabled = true;
 	private int undoKeystrokes = 0;
@@ -203,15 +202,12 @@ class Document extends DefaultStyledDocument {
 	}
 
 	@Override
-	public void insertString(int offset, String text, AttributeSet attr)
-			throws BadLocationException {
+	public void insertString(int offset, String text, AttributeSet attr) throws BadLocationException {
 		if (extrasEnabled) {
 			changed = true;
 			if (text.length() == 1)
 				undoKeystrokes++;
-			if (undos.size() == 0
-					|| Math.abs(offset - undos.lastOffset()) > maxUndoKeystrokes
-					|| text.length() != 1
+			if (undos.size() == 0 || Math.abs(offset - undos.lastOffset()) > maxUndoKeystrokes || text.length() != 1
 					|| undoKeystrokes >= maxUndoKeystrokes)
 				saveState();
 		}
@@ -234,8 +230,8 @@ class Document extends DefaultStyledDocument {
 			}
 			if (length == 1)
 				undoKeystrokes++;
-			if (undos.size() == 0 || Math.abs(offset - undos.lastOffset()) > 1
-					|| length != 1 || undoKeystrokes >= maxUndoKeystrokes)
+			if (undos.size() == 0 || Math.abs(offset - undos.lastOffset()) > 1 || length != 1
+					|| undoKeystrokes >= maxUndoKeystrokes)
 				saveState();
 		}
 		super.remove(offset, length);
@@ -335,15 +331,12 @@ class Document extends DefaultStyledDocument {
 				String keyword = getText(start, pos - start);
 				if (parenLevel == 1) {
 					if (prefs.autoHilite)
-						setCharacterAttributes(start, pos - start,
-								styleCommand, false);
-					commands.add(new Marker("(" + keyword + " ...)",
-							createPosition(parenPos)));
+						setCharacterAttributes(start, pos - start, styleCommand, false);
+					commands.add(new Marker("(" + keyword + " ...)", createPosition(parenPos)));
 					lastCommand = keyword;
 				} else if (lastCommand.equals("add-dm")) {
 					if (prefs.autoHilite)
-						setCharacterAttributes(start, pos - start, styleChunk,
-								false);
+						setCharacterAttributes(start, pos - start, styleChunk, false);
 					chunks.add(new Marker(keyword, createPosition(parenPos)));
 				}
 
@@ -355,10 +348,8 @@ class Document extends DefaultStyledDocument {
 					while (pos < length && notWhiteOrSpecial(charAt(pos)))
 						pos++;
 					if (prefs.autoHilite)
-						setCharacterAttributes(start, pos - start,
-								styleProduction, false);
-					productions.add(new Marker(getText(start, pos - start),
-							createPosition(parenPos)));
+						setCharacterAttributes(start, pos - start, styleProduction, false);
+					productions.add(new Marker(getText(start, pos - start), createPosition(parenPos)));
 				}
 			} else if (c == ')') {
 				pos++;
@@ -372,35 +363,29 @@ class Document extends DefaultStyledDocument {
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
 				if (prefs.autoHilite)
-					setCharacterAttributes(start, pos - start, styleParameter,
-							false);
+					setCharacterAttributes(start, pos - start, styleParameter, false);
 			} else if (c == '*') {
 				int start = pos;
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
 				if (prefs.autoHilite && pos > start + 1)
-					setCharacterAttributes(start, pos - start, styleParameter,
-							false);
-			} else if (c == '#' && pos + 1 < length
-					&& text.charAt(pos + 1) == '|') {
+					setCharacterAttributes(start, pos - start, styleParameter, false);
+			} else if (c == '#' && pos + 1 < length && text.charAt(pos + 1) == '|') {
 				int start = pos;
-				while (pos + 1 < length
-						&& (charAt(pos) != '|' || text.charAt(pos + 1) != '#'))
+				while (pos + 1 < length && (charAt(pos) != '|' || text.charAt(pos + 1) != '#'))
 					pos++;
 				if (pos < length)
 					pos++;
 				if (pos < length)
 					pos++;
 				if (prefs.autoHilite)
-					setCharacterAttributes(start, pos - start, styleComment,
-							false);
+					setCharacterAttributes(start, pos - start, styleComment, false);
 			} else if (c == ';' || c == '#') {
 				int start = pos;
 				while (pos < length && charAt(pos) != '\n')
 					pos++;
 				if (prefs.autoHilite)
-					setCharacterAttributes(start, pos - start, styleComment,
-							false);
+					setCharacterAttributes(start, pos - start, styleComment, false);
 			} else if (c == '=' || c == '+' || c == '-' || c == '?') {
 				int start = pos;
 				String buffer = "";
@@ -410,16 +395,14 @@ class Document extends DefaultStyledDocument {
 				}
 				if (buffer.endsWith(">") && buffer.length() > 3)
 					if (prefs.autoHilite)
-						setCharacterAttributes(start, pos - start, styleBuffer,
-								false);
+						setCharacterAttributes(start, pos - start, styleBuffer, false);
 			} else if (c == '!') {
 				int start = pos;
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
 				if (text.charAt(pos - 1) == '!')
 					if (prefs.autoHilite)
-						setCharacterAttributes(start, pos - start, styleBuffer,
-								false);
+						setCharacterAttributes(start, pos - start, styleBuffer, false);
 			} else if (pos < length) {
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
@@ -437,8 +420,7 @@ class Document extends DefaultStyledDocument {
 		boolean inProduction = false;
 		while (pos < getLength()) {
 			int start = pos;
-			while (pos < getLength() && isWhite(charAt(pos))
-					&& charAt(pos) != '\n')
+			while (pos < getLength() && isWhite(charAt(pos)) && charAt(pos) != '\n')
 				pos++;
 			if (pos >= getLength())
 				pos = getLength() - 1;
@@ -464,8 +446,7 @@ class Document extends DefaultStyledDocument {
 			int realParenLevel = parenLevel;
 			if (firstToken.startsWith("("))
 				realParenLevel = startParenLevel;
-			else if (parenLevel < startParenLevel
-					&& !firstToken.startsWith(")"))
+			else if (parenLevel < startParenLevel && !firstToken.startsWith(")"))
 				realParenLevel = startParenLevel;
 
 			if (firstToken.toLowerCase().equals("(p")) {
@@ -476,11 +457,8 @@ class Document extends DefaultStyledDocument {
 					realParenLevel = 0;
 				else if (firstToken.equals("==>"))
 					realParenLevel = 0;
-				else if (firstToken.endsWith(">")
-						&& (firstToken.startsWith("=")
-								|| firstToken.startsWith("+")
-								|| firstToken.startsWith("-") || firstToken
-									.startsWith("?")))
+				else if (firstToken.endsWith(">") && (firstToken.startsWith("=") || firstToken.startsWith("+")
+						|| firstToken.startsWith("-") || firstToken.startsWith("?")))
 					realParenLevel = 1;
 				else if (firstToken.startsWith("!") && firstToken.endsWith("!"))
 					realParenLevel = 1;

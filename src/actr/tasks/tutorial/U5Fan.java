@@ -19,16 +19,12 @@ public class U5Fan extends Task {
 	int tupleIndex = 0;
 	String response = null;
 	double responseTime = 0;
-	String[][] tuples = { { "lawyer", "store", "t" },
-			{ "captain", "cave", "t" }, { "hippie", "church", "t" },
-			{ "debutante", "bank", "t" }, { "earl", "castle", "t" },
-			{ "hippie", "bank", "t" }, { "fireman", "park", "t" },
-			{ "captain", "park", "t" }, { "hippie", "park", "t" },
-			{ "fireman", "store", "nil" }, { "captain", "store", "nil" },
-			{ "giant", "store", "nil" }, { "fireman", "bank", "nil" },
-			{ "captain", "bank", "nil" }, { "giant", "bank", "nil" },
-			{ "lawyer", "park", "nil" }, { "earl", "park", "nil" },
-			{ "giant", "park", "nil" } };
+	String[][] tuples = { { "lawyer", "store", "t" }, { "captain", "cave", "t" }, { "hippie", "church", "t" },
+			{ "debutante", "bank", "t" }, { "earl", "castle", "t" }, { "hippie", "bank", "t" },
+			{ "fireman", "park", "t" }, { "captain", "park", "t" }, { "hippie", "park", "t" },
+			{ "fireman", "store", "nil" }, { "captain", "store", "nil" }, { "giant", "store", "nil" },
+			{ "fireman", "bank", "nil" }, { "captain", "bank", "nil" }, { "giant", "bank", "nil" },
+			{ "lawyer", "park", "nil" }, { "earl", "park", "nil" }, { "giant", "park", "nil" } };
 	boolean correct[] = new boolean[tuples.length];
 	double rts[] = new double[tuples.length];
 
@@ -72,8 +68,7 @@ public class U5Fan extends Task {
 			if (response == null)
 				correct[tupleIndex] = false;
 			else {
-				correct[tupleIndex] = (tuples[tupleIndex][2].equals("t")) ? response
-						.equals("k") : response.equals("d");
+				correct[tupleIndex] = (tuples[tupleIndex][2].equals("t")) ? response.equals("k") : response.equals("d");
 				rts[tupleIndex] = responseTime;
 			}
 			response = null;
@@ -98,8 +93,8 @@ public class U5Fan extends Task {
 
 	// --- Analysis Code ---//
 
-	final double humanTimes[] = { 1.11, 1.17, 1.22, 1.17, 1.20, 1.22, 1.15,
-			1.23, 1.36, 1.20, 1.22, 1.26, 1.25, 1.36, 1.29, 1.26, 1.47, 1.47 };
+	final double humanTimes[] = { 1.11, 1.17, 1.22, 1.17, 1.20, 1.22, 1.15, 1.23, 1.36, 1.20, 1.22, 1.26, 1.25, 1.36,
+			1.29, 1.26, 1.47, 1.47 };
 
 	@Override
 	public int analysisIterations() {
@@ -125,9 +120,8 @@ public class U5Fan extends Task {
 			double r = Statistics.correlation(modelTimes, humanTimes);
 			getModel().output("\n=====\n");
 			for (int i = 0; i < tuples.length; i += 3)
-				getModel().output(
-						String.format("%.3f\t%.3f\t%.3f", modelTimes[i],
-								modelTimes[i + 1], modelTimes[i + 2]));
+				getModel()
+						.output(String.format("%.3f\t%.3f\t%.3f", modelTimes[i], modelTimes[i + 1], modelTimes[i + 2]));
 			getModel().output("R = " + r);
 		}
 

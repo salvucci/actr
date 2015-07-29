@@ -103,21 +103,18 @@ public class DualChoicePRP extends Task {
 
 	@Override
 	public void typeKey(char c) {
-		currentTrial.visualManualResponseTime = getModel().getTime()
-				- visualManualStartTime;
+		currentTrial.visualManualResponseTime = getModel().getTime() - visualManualStartTime;
 		label.setVisible(false);
 	}
 
 	@Override
 	public void speak(String s) {
-		currentTrial.auralVocalResponseTime = getModel().getTime()
-				- auralVocalStartTime;
+		currentTrial.auralVocalResponseTime = getModel().getTime() - auralVocalStartTime;
 	}
 
 	// Analysis Code
 
-	double humanRT[][] = { { .410, .415, .420, .415, .415 },
-			{ .475, .395, .350, .300, .295 } };
+	double humanRT[][] = { { .410, .415, .420, .415, .415 }, { .475, .395, .350, .300, .295 } };
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
@@ -151,12 +148,8 @@ public class DualChoicePRP extends Task {
 			getModel().output("Human:\t" + Utilities.toString(humanRT[1]));
 			getModel().output("Model:\t" + Utilities.toString(modelRT[1]));
 
-			getModel().output(
-					String.format("\nR = %.2f",
-							Statistics.correlation(modelRT, humanRT)));
-			getModel().output(
-					String.format("\nRMSE = %.2f",
-							Statistics.rmse(modelRT, humanRT)));
+			getModel().output(String.format("\nR = %.2f", Statistics.correlation(modelRT, humanRT)));
+			getModel().output(String.format("\nRMSE = %.2f", Statistics.rmse(modelRT, humanRT)));
 		}
 
 		return result;

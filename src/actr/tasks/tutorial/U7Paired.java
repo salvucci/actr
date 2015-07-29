@@ -19,12 +19,10 @@ public class U7Paired extends Task {
 	TaskLabel label;
 	double lastTime = 0;
 	int pairIndex = 0, pairItem = 0;
-	String[][] pairs = { { "bank", "0" }, { "card", "1" }, { "dart", "2" },
-			{ "face", "3" }, { "game", "4" }, { "hand", "5" }, { "jack", "6" },
-			{ "king", "7" }, { "lamb", "8" }, { "mask", "9" }, { "neck", "0" },
-			{ "pipe", "1" }, { "quip", "2" }, { "rope", "3" }, { "sock", "4" },
-			{ "tent", "5" }, { "vent", "6" }, { "wall", "7" }, { "xray", "8" },
-			{ "zinc", "9" } };
+	String[][] pairs = { { "bank", "0" }, { "card", "1" }, { "dart", "2" }, { "face", "3" }, { "game", "4" },
+			{ "hand", "5" }, { "jack", "6" }, { "king", "7" }, { "lamb", "8" }, { "mask", "9" }, { "neck", "0" },
+			{ "pipe", "1" }, { "quip", "2" }, { "rope", "3" }, { "sock", "4" }, { "tent", "5" }, { "vent", "6" },
+			{ "wall", "7" }, { "xray", "8" }, { "zinc", "9" } };
 	int iteration = 0;
 	final int runIterations = 8;
 	String response = null;
@@ -96,8 +94,7 @@ public class U7Paired extends Task {
 
 	// --- Analysis Code ---//
 
-	double humanTimes[] = { 0.0, 2.158, 1.967, 1.762, 1.680, 1.552, 1.467,
-			1.402 };
+	double humanTimes[] = { 0.0, 2.158, 1.967, 1.762, 1.680, 1.552, 1.467, 1.402 };
 	double humanCorrect[] = { 0.000, .526, .667, .798, .887, .924, .958, .954 };
 
 	@Override
@@ -117,24 +114,18 @@ public class U7Paired extends Task {
 				responsesCorrect += task.trials.elementAt(i).responsesCorrect;
 				responseTime += task.trials.elementAt(i).responseTotalTime;
 			}
-			modelTimes[i] = (responsesCorrect == 0) ? 0
-					: (responseTime / responsesCorrect);
-			modelCorrect[i] = (responses == 0) ? 0
-					: (1.0 * responsesCorrect / responses);
+			modelTimes[i] = (responsesCorrect == 0) ? 0 : (responseTime / responsesCorrect);
+			modelCorrect[i] = (responses == 0) ? 0 : (1.0 * responsesCorrect / responses);
 		}
 
 		if (output) {
 			getModel().output("\n=====\n");
 			getModel().output(
-					"Gazes [R = "
-							+ String.format("%.2f", Statistics.correlation(
-									modelTimes, humanTimes)) + "]:");
+					"Gazes [R = " + String.format("%.2f", Statistics.correlation(modelTimes, humanTimes)) + "]:");
 			getModel().output("Human:\t" + Utilities.toString(humanTimes));
 			getModel().output("Model:\t" + Utilities.toString(modelTimes));
-			getModel().output(
-					"\nGaze Durations [R = "
-							+ String.format("%.2f", Statistics.correlation(
-									modelCorrect, humanCorrect)) + "]:");
+			getModel().output("\nGaze Durations [R = "
+					+ String.format("%.2f", Statistics.correlation(modelCorrect, humanCorrect)) + "]:");
 			getModel().output("Human:\t" + Utilities.toString(humanCorrect));
 			getModel().output("Model:\t" + Utilities.toString(modelCorrect));
 		}

@@ -18,6 +18,9 @@ public class Procedural extends Module {
 	private Instantiation lastFiredInst;
 	private Map<Integer, Instantiation> lastFiredOnThread;
 
+	double actionTime = .050;
+	boolean variableProductionFiringTime = false;
+
 	boolean utilityLearning = false;
 	double utilityNoiseS = 0;
 	double utilityLearningAlpha = 0.2;
@@ -113,8 +116,7 @@ public class Procedural extends Module {
 			for (int i = 0; set.isEmpty() && i < buffers.numGoals(); i++) {
 				buffers.tryGoal(i);
 				if (threadedCognitionTrace)
-					model.output("*** (tct) trying goal "
-							+ buffers.get(Symbol.goal));
+					model.output("*** (tct) trying goal " + buffers.get(Symbol.goal));
 				Iterator<Production> it = productions.values().iterator();
 				while (it.hasNext()) {
 					Production p = it.next();
@@ -126,8 +128,7 @@ public class Procedural extends Module {
 		}
 
 		if (threadedCognitionTrace)
-			model.output("*** (tct) found " + set.size() + " match"
-					+ (set.size() == 1 ? "" : "es"));
+			model.output("*** (tct) found " + set.size() + " match" + (set.size() == 1 ? "" : "es"));
 
 		if (!set.isEmpty()) {
 			if (conflictSetTrace)
@@ -135,30 +136,26 @@ public class Procedural extends Module {
 			Iterator<Instantiation> itInst = set.iterator();
 			Instantiation highestU = itInst.next();
 			if (conflictSetTrace)
-				model.output("* ("
-						+ String.format("%.3f", highestU.getUtility()) + ") "
-						+ highestU);
+				model.output("* (" + String.format("%.3f", highestU.getUtility()) + ") " + highestU);
 			while (itInst.hasNext()) {
 				Instantiation inst = itInst.next();
 				if (conflictSetTrace)
-					model.output("* ("
-							+ String.format("%.3f", inst.getUtility()) + ") "
-							+ inst);
+					model.output("* (" + String.format("%.3f", inst.getUtility()) + ") " + inst);
 				if (inst.getUtility() > highestU.getUtility())
 					highestU = inst;
 			}
 
 			final Instantiation finalInst = highestU;
 			if (conflictSetTrace)
-				model.output("-> ("
-						+ String.format("%.3f", finalInst.getUtility()) + ") "
-						+ finalInst);
+				model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
+
+			double realActionTime = actionTime;
+			if (model.randomizeTime && variableProductionFiringTime)
+				realActionTime = model.randomizeTime(realActionTime);
 
 			if (finalInst.getProduction().isBreakPoint()) {
-				model.addEvent(new Event(model.getTime() + .049, "procedural",
-						"about to fire "
-								+ finalInst.getProduction().getName()
-										.getString().toUpperCase()) {
+				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+						"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
 					@Override
 					public void action() {
 						model.output("------", "break");
@@ -170,15 +167,11 @@ public class Procedural extends Module {
 			String extra = "";
 			if (buffers.numGoals() > 1) {
 				Chunk goal = buffers.get(Symbol.goal);
-				extra = " ["
-						+ ((goal != null) ? goal.getName().getString() : "nil")
-						+ "]";
+				extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
 			}
 
-			model.addEvent(new Event(model.getTime() + .050, "procedural",
-					"** "
-							+ finalInst.getProduction().getName().getString()
-									.toUpperCase() + " **" + extra) {
+			model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+					"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
 				@Override
 				public void action() {
 					fire(finalInst, buffers);
@@ -196,14 +189,12 @@ public class Procedural extends Module {
 			Instantiation lastFired = (!productionCompilationThreaded) ? lastFiredInst
 					: lastFiredOnThread.get(new Integer(inst.getThreadID()));
 
-			if (lastFired != null
-					&& inst.getTime() - lastFired.getTime() > model
-							.getProcedural().productionCompilationThresholdTime) {
+			if (lastFired != null && inst.getTime()
+					- lastFired.getTime() > model.getProcedural().productionCompilationThresholdTime) {
 				if (productionCompilationTrace)
 					model.output("*** (pct) no compilation: too much time between firings");
 			} else if (lastFired != null) {
-				Production newp = new Compilation(lastFired, inst, model)
-						.compile();
+				Production newp = new Compilation(lastFired, inst, model).compile();
 
 				if (newp != null) {
 					Production oldp = exists(newp);
@@ -211,31 +202,22 @@ public class Procedural extends Module {
 						double alpha = utilityLearningAlpha;
 
 						if (productionCompilationAddUtilities) {
-							double sum = lastFired.getProduction().getUtility()
-									+ inst.getProduction().getUtility();
-							oldp.setUtility(oldp.getUtility() + alpha
-									* (sum - oldp.getUtility()));
+							double sum = lastFired.getProduction().getUtility() + inst.getProduction().getUtility();
+							oldp.setUtility(oldp.getUtility() + alpha * (sum - oldp.getUtility()));
 						} else {
 							oldp.setUtility(oldp.getUtility()
-									+ alpha
-									* (lastFired.getProduction().getUtility() - oldp
-											.getUtility()));
+									+ alpha * (lastFired.getProduction().getUtility() - oldp.getUtility()));
 						}
 
 						if (productionCompilationTrace)
-							model.output("*** (pct) strengthening "
-									+ oldp.getName() + " [u="
-									+ String.format("%.3f", oldp.getUtility())
-									+ "]");
+							model.output("*** (pct) strengthening " + oldp.getName() + " [u="
+									+ String.format("%.3f", oldp.getUtility()) + "]");
 					} else {
 						model.getProcedural().add(newp);
 						if (productionCompilationTrace) {
 							model.output("\n*** (pct)\n");
-							model.output(""
-									+ lastFired.getProduction().toString(
-											lastFired));
-							model.output(""
-									+ inst.getProduction().toString(inst));
+							model.output("" + lastFired.getProduction().toString(lastFired));
+							model.output("" + inst.getProduction().toString(inst));
 							model.output("" + newp);
 							// model.output
 							// ("*** (pct) new production:\n"+newp);

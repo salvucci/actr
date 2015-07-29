@@ -36,15 +36,10 @@ class AboutDialog extends JDialog {
 		icon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		JLabel text = new JLabel(
-				"<html><center>"
-						+ "<font size=4><b>ACT-R</b></font><br>"
-						+ "<font size=2>"
-						+ Main.getVersion()
-						+ "</font><br><br>"
-						+ "<font size=2>Application by Dario Salvucci &copy; 2010</font><br><br>"
+				"<html><center>" + "<font size=4><b>ACT-R</b></font><br>" + "<font size=2>" + Main.getVersion()
+						+ "</font><br><br>" + "<font size=2>Application by Dario Salvucci &copy; 2010</font><br><br>"
 						+ "<font size=2>Icon image by Niels Taatgen &copy; 2007</font><br><br>"
-						+ "<font size=2>Cognitive theory by John R. Anderson<br>"
-						+ "and the ACT-R community</font><br>"
+						+ "<font size=2>Cognitive theory by John R. Anderson<br>" + "and the ACT-R community</font><br>"
 						+ "</center></html>");
 		text.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -66,24 +61,21 @@ class AboutDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().registerKeyboardAction(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(center, BorderLayout.CENTER);
 
 		pack();
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		setLocation(d.width / 2 - getWidth() / 2, d.height / 2 - getHeight()
-				/ 2);
+		setLocation(d.width / 2 - getWidth() / 2, d.height / 2 - getHeight() / 2);
 		setVisible(true);
 	}
 }

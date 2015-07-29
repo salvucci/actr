@@ -60,30 +60,24 @@ public class Audio extends Module {
 	 *            value)
 	 */
 	public void addAural(final String id, String type, String content) {
-		final AuralObject ao = new AuralObject(Symbol.get(id),
-				Symbol.get(type), Symbol.get(content));
+		final AuralObject ao = new AuralObject(Symbol.get(id), Symbol.get(type), Symbol.get(content));
 		final Chunk auralloc = createAuralLocChunk(ao);
 		if (auralloc != null) {
-			double detectDelay = (auralloc.get(Symbol.kind) == Symbol.tone) ? toneDetectDelay
-					: digitDetectDelay;
-			model.addEvent(new Event(model.getTime() + detectDelay, "audio",
-					"audio-event [" + auralloc.getName() + "]") {
-				@Override
-				public void action() {
-					audicon.put(Symbol.get(id), ao);
-					if (model.bufferStuffing
-							&& model.getBuffers().get(Symbol.aurloc) == null) {
-						if (model.verboseTrace)
-							model.output("audio",
-									"unrequested [" + auralloc.getName() + "]");
-						model.getBuffers().set(Symbol.aurloc, auralloc);
-						model.getBuffers().setSlot(Symbol.aurlocState,
-								Symbol.state, Symbol.free);
-						model.getBuffers().setSlot(Symbol.aurlocState,
-								Symbol.buffer, Symbol.unrequested);
-					}
-				}
-			});
+			double detectDelay = (auralloc.get(Symbol.kind) == Symbol.tone) ? toneDetectDelay : digitDetectDelay;
+			model.addEvent(
+					new Event(model.getTime() + detectDelay, "audio", "audio-event [" + auralloc.getName() + "]") {
+						@Override
+						public void action() {
+							audicon.put(Symbol.get(id), ao);
+							if (model.bufferStuffing && model.getBuffers().get(Symbol.aurloc) == null) {
+								if (model.verboseTrace)
+									model.output("audio", "unrequested [" + auralloc.getName() + "]");
+								model.getBuffers().set(Symbol.aurloc, auralloc);
+								model.getBuffers().setSlot(Symbol.aurlocState, Symbol.state, Symbol.free);
+								model.getBuffers().setSlot(Symbol.aurlocState, Symbol.buffer, Symbol.unrequested);
+							}
+						}
+					});
 		}
 		model.noteTaskUpdated();
 	}
@@ -123,20 +117,15 @@ public class Audio extends Module {
 			final Chunk auralloc = findAuralLocation(request);
 			if (auralloc != null) {
 				if (model.verboseTrace)
-					model.output("audio", "find-sound [" + auralloc.getName()
-							+ "]");
+					model.output("audio", "find-sound [" + auralloc.getName() + "]");
 				model.getBuffers().set(Symbol.aurloc, auralloc);
-				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.state,
-						Symbol.free);
-				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.buffer,
-						Symbol.full);
+				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.state, Symbol.free);
+				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.buffer, Symbol.full);
 			} else {
 				if (model.verboseTrace)
 					model.output("audio", "find-sound-failure");
-				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.state,
-						Symbol.error);
-				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.buffer,
-						Symbol.empty);
+				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.state, Symbol.error);
+				model.getBuffers().setSlot(Symbol.aurlocState, Symbol.buffer, Symbol.empty);
 			}
 		}
 
@@ -160,26 +149,20 @@ public class Audio extends Module {
 				return;
 			}
 			Symbol kind = auralloc.get(Symbol.kind);
-			final Chunk aural = new Chunk(Symbol.getUnique(kind.getString()),
-					model);
+			final Chunk aural = new Chunk(Symbol.getUnique(kind.getString()), model);
 			aural.set(Symbol.isa, kind);
 			aural.set(Symbol.event, aurallocName);
 			aural.set(Symbol.content, ao.content);
-			double recodeDelay = (auralloc.get(Symbol.kind) == Symbol.tone) ? toneRecodeDelay
-					: digitRecodeDelay;
-			model.getBuffers().setSlot(Symbol.auralState, Symbol.state,
-					Symbol.busy);
-			model.getBuffers().setSlot(Symbol.auralState, Symbol.buffer,
-					Symbol.requested);
+			double recodeDelay = (auralloc.get(Symbol.kind) == Symbol.tone) ? toneRecodeDelay : digitRecodeDelay;
+			model.getBuffers().setSlot(Symbol.auralState, Symbol.state, Symbol.busy);
+			model.getBuffers().setSlot(Symbol.auralState, Symbol.buffer, Symbol.requested);
 			model.addEvent(new Event(model.getTime() + recodeDelay, "audio",
 					"audio-encoding-complete [" + aural.getName() + "]") {
 				@Override
 				public void action() {
 					model.getBuffers().set(Symbol.aural, aural);
-					model.getBuffers().setSlot(Symbol.auralState, Symbol.state,
-							Symbol.free);
-					model.getBuffers().setSlot(Symbol.auralState,
-							Symbol.buffer, Symbol.full);
+					model.getBuffers().setSlot(Symbol.auralState, Symbol.state, Symbol.free);
+					model.getBuffers().setSlot(Symbol.auralState, Symbol.buffer, Symbol.full);
 				}
 			});
 			// XXX doesn't handle failure

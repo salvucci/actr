@@ -128,12 +128,8 @@ public class U7Choice extends Task {
 			getModel().output("Human:\t" + Utilities.toString(humanRT));
 			getModel().output("Model:\t" + Utilities.toString(modelRT));
 
-			getModel().output(
-					String.format("\nR = %.2f",
-							Statistics.correlation(modelRT, humanRT)));
-			getModel().output(
-					String.format("\nRMSE = %.2f",
-							Statistics.rmse(modelRT, humanRT)));
+			getModel().output(String.format("\nR = %.2f", Statistics.correlation(modelRT, humanRT)));
+			getModel().output(String.format("\nRMSE = %.2f", Statistics.rmse(modelRT, humanRT)));
 		}
 
 		return result;

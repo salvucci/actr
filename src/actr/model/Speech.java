@@ -25,19 +25,14 @@ public class Speech extends Module {
 	}
 
 	double prepareMovement(double time, String text) {
-		time += (lastText == null) ? prepFirstText
-				: (lastText.equals(text) ? prepSameText : prepDiffText);
-		model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation,
-				Symbol.busy);
-		model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor,
-				Symbol.busy);
-		model.getBuffers()
-				.setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
+		time += (lastText == null) ? prepFirstText : (lastText.equals(text) ? prepSameText : prepDiffText);
+		model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
+		model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor, Symbol.busy);
+		model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
 		model.addEvent(new Event(time, "speech", "preparation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState,
-						Symbol.preparation, Symbol.free);
+				model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
 			}
 		});
 		lastText = text;
@@ -49,10 +44,8 @@ public class Speech extends Module {
 		model.addEvent(new Event(time, "speech", "initiation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor,
-						Symbol.free);
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution,
-						Symbol.busy);
+				model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor, Symbol.free);
+				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution, Symbol.busy);
 			}
 		});
 		return time;
@@ -62,10 +55,8 @@ public class Speech extends Module {
 		model.addEvent(new Event(time, "speech", "finish-movement") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution,
-						Symbol.free);
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.state,
-						Symbol.free);
+				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution, Symbol.free);
+				model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
 			}
 		});
 	}
@@ -91,33 +82,26 @@ public class Speech extends Module {
 		if (request.get(Symbol.isa) == Symbol.get("clear")) {
 			if (model.verboseTrace)
 				model.output("speech", "clear");
-			model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation,
-					Symbol.busy);
-			model.getBuffers().setSlot(Symbol.vocalState, Symbol.state,
-					Symbol.busy);
-			model.addEvent(new Event(eventTime + clearTime, "speech",
-					"change state last none prep free") {
+			model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
+			model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
+			model.addEvent(new Event(eventTime + clearTime, "speech", "change state last none prep free") {
 				@Override
 				public void action() {
 					lastText = null;
-					model.getBuffers().setSlot(Symbol.vocalState,
-							Symbol.preparation, Symbol.free);
-					model.getBuffers().setSlot(Symbol.vocalState, Symbol.state,
-							Symbol.free);
+					model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
+					model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
 				}
 			});
 			return;
 		}
 
 		else if (request.get(Symbol.isa) == Symbol.get("speak")) {
-			final String text = request.get(Symbol.get("string")).getString()
-					.replace("\"", "");
+			final String text = request.get(Symbol.get("string")).getString().replace("\"", "");
 			if (model.verboseTrace)
 				model.output("speech", "speak \"" + text + "\"");
 			eventTime = prepareMovement(eventTime, text);
 			eventTime = initiateMovement(eventTime);
-			model.addEvent(new Event(eventTime, "speech", "output-speech \""
-					+ text + "\"") {
+			model.addEvent(new Event(eventTime, "speech", "output-speech \"" + text + "\"") {
 				@Override
 				public void action() {
 					model.getTask().speak(text);
@@ -129,14 +113,12 @@ public class Speech extends Module {
 		}
 
 		else if (request.get(Symbol.isa) == Symbol.get("subvocalize")) {
-			final String text = request.get(Symbol.get("string")).getString()
-					.replace("\"", "");
+			final String text = request.get(Symbol.get("string")).getString().replace("\"", "");
 			if (model.verboseTrace)
 				model.output("speech", "subvocalize \"" + text + "\"");
 			eventTime = prepareMovement(eventTime, text);
 			eventTime = initiateMovement(eventTime);
-			model.addEvent(new Event(eventTime, "", "output-subvocalize \""
-					+ text + "\"") {
+			model.addEvent(new Event(eventTime, "", "output-subvocalize \"" + text + "\"") {
 				@Override
 				public void action() {
 					sendVocalToAudio(text);

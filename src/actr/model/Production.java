@@ -135,8 +135,7 @@ public class Production {
 		return timesFired;
 	}
 
-	void setParameter(String parameter, String value, Tokenizer t)
-			throws Exception {
+	void setParameter(String parameter, String value, Tokenizer t) throws Exception {
 		if (parameter.equals(":u"))
 			u = Double.valueOf(value);
 		else if (parameter.equals(":reward")) {
@@ -309,17 +308,14 @@ public class Production {
 	Instantiation instantiate(Buffers buffers) {
 		boolean savedWhyNotTrace = model.getProcedural().whyNotTrace;
 		SlotCondition prodGoalSC = getSlotCondition(Symbol.goal, Symbol.isa);
-		Symbol prodGoalType = (prodGoalSC != null) ? prodGoalSC.getValue()
-				: null;
+		Symbol prodGoalType = (prodGoalSC != null) ? prodGoalSC.getValue() : null;
 		Symbol bufGoalType = buffers.getSlot(Symbol.goal, Symbol.isa);
-		if (prodGoalType != bufGoalType
-				&& !(prodGoalType == null || prodGoalType.isVariable()))
+		if (prodGoalType != bufGoalType && !(prodGoalType == null || prodGoalType.isVariable()))
 			model.getProcedural().whyNotTrace = false;
 
 		if (model.getProcedural().whyNotTrace)
 			model.output(name.getString());
-		double instU = u
-				+ Utilities.getNoise(model.getProcedural().utilityNoiseS);
+		double instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		Instantiation inst = new Instantiation(this, model.getTime(), instU);
 
 		for (int i = 0; i < conditions.size(); i++) {
@@ -332,8 +328,7 @@ public class Production {
 			}
 		}
 
-		Iterator<Instantiation.DelayedSlotCondition> it = inst
-				.getDelayedSlotConditions();
+		Iterator<Instantiation.DelayedSlotCondition> it = inst.getDelayedSlotConditions();
 		while (it.hasNext()) {
 			Instantiation.DelayedSlotCondition dsc = it.next();
 			if (model.getProcedural().whyNotTrace)
@@ -359,8 +354,7 @@ public class Production {
 
 		for (int i = 0; i < conditions.size(); i++) {
 			BufferCondition bc = conditions.elementAt(i);
-			if (bc.getPrefix() == '=' && bc.getBuffer() != Symbol.goal
-					&& bc.getBuffer() != Symbol.temporal
+			if (bc.getPrefix() == '=' && bc.getBuffer() != Symbol.goal && bc.getBuffer() != Symbol.temporal
 			// && bc.getBuffer()!=Symbol.imaginal
 			) {
 				Symbol buffer = bc.getBuffer();
@@ -384,8 +378,7 @@ public class Production {
 
 	void specialize(Symbol variable, Symbol value) {
 		if (value == null) {
-			model.outputError("cannot specialize " + variable
-					+ " to null value");
+			model.outputError("cannot specialize " + variable + " to null value");
 			return;
 		}
 		for (int i = 0; i < conditions.size(); i++)

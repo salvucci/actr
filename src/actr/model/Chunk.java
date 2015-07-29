@@ -263,16 +263,13 @@ public class Chunk {
 		if (time <= creationTime)
 			time = creationTime + .001;
 		if (model.getDeclarative().optimizedLearning) {
-			baseLevel = Math.log(useCount
-					/ (1 - model.getDeclarative().baseLevelDecayRate))
-					- model.getDeclarative().baseLevelDecayRate
-					* Math.log(time - creationTime);
+			baseLevel = Math.log(useCount / (1 - model.getDeclarative().baseLevelDecayRate))
+					- model.getDeclarative().baseLevelDecayRate * Math.log(time - creationTime);
 		} else {
 			double sum = 0;
 			for (int i = 0; i < uses.size(); i++) {
 				double use = uses.elementAt(i).doubleValue();
-				sum += Math.pow(time - use,
-						-model.getDeclarative().baseLevelDecayRate);
+				sum += Math.pow(time - use, -model.getDeclarative().baseLevelDecayRate);
 			}
 			baseLevel = Math.log(sum);
 		}
@@ -313,8 +310,7 @@ public class Chunk {
 		if (cj.appearsInSlotsOf(ci) == 0 && cj.getName() != ci.getName())
 			return 0;
 		else
-			return model.getDeclarative().maximumAssociativeStrength
-					- Math.log(cj.fan);
+			return model.getDeclarative().maximumAssociativeStrength - Math.log(cj.fan);
 	}
 
 	double computeSpreadingActivation(Chunk goal, double totalW) {
@@ -334,11 +330,9 @@ public class Chunk {
 			if (cj == null)
 				continue;
 			numGoalSlots++;
-			if (model.getDeclarative().activationTrace
-					&& computeSji(cj, this) != 0)
-				model.output("***    spreading activation " + goal.getName()
-						+ ": " + cj.getName() + " -> " + this.getName() + " ["
-						+ String.format("%.3f", computeSji(cj, this)) + "]");
+			if (model.getDeclarative().activationTrace && computeSji(cj, this) != 0)
+				model.output("***    spreading activation " + goal.getName() + ": " + cj.getName() + " -> "
+						+ this.getName() + " [" + String.format("%.3f", computeSji(cj, this)) + "]");
 			sum += computeSji(cj, this);
 		}
 		double wji = (numGoalSlots == 0) ? 0 : totalW / numGoalSlots;
@@ -364,21 +358,18 @@ public class Chunk {
 			if (model.getDeclarative().goalActivation > 0) {
 				Chunk goal = model.getBuffers().get(Symbol.goal);
 				if (goal != null)
-					activation += computeSpreadingActivation(goal,
-							model.getDeclarative().goalActivation);
+					activation += computeSpreadingActivation(goal, model.getDeclarative().goalActivation);
 			}
 			if (model.getDeclarative().imaginalActivation > 0) {
 				Chunk imaginal = model.getBuffers().get(Symbol.imaginal);
 				if (imaginal != null)
-					activation += computeSpreadingActivation(imaginal,
-							model.getDeclarative().imaginalActivation);
+					activation += computeSpreadingActivation(imaginal, model.getDeclarative().imaginalActivation);
 			}
 		}
 		if (model.getDeclarative().partialMatching)
 			activation += computePartialMatch(request);
 		if (model.getDeclarative().activationNoiseS != 0)
-			activation += Utilities
-					.getNoise(model.getDeclarative().activationNoiseS);
+			activation += Utilities.getNoise(model.getDeclarative().activationNoiseS);
 		return activation;
 	}
 

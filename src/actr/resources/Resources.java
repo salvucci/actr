@@ -24,11 +24,9 @@ public class Resources {
 	public static Image getImage(String name) {
 		try {
 			if (Main.inApplet())
-				return Main.getApplet().getImage(
-						Main.getApplet().getCodeBase(), "resources/" + name);
+				return Main.getApplet().getImage(Main.getApplet().getCodeBase(), "resources/" + name);
 			else
-				return Toolkit.getDefaultToolkit().getImage(
-						Resources.class.getResource(name));
+				return Toolkit.getDefaultToolkit().getImage(Resources.class.getResource(name));
 		} catch (Exception e) {
 			return null;
 		}

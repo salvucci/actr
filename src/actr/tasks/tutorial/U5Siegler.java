@@ -14,8 +14,7 @@ public class U5Siegler extends Task {
 
 	int tupleIndex = 0;
 	double lastTime = 0;
-	int[][] tuples = { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 2 }, { 2, 3 },
-			{ 3, 3 } };
+	int[][] tuples = { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 2 }, { 2, 3 }, { 3, 3 } };
 	String response;
 	String responses[] = new String[tuples.length];
 
@@ -43,8 +42,7 @@ public class U5Siegler extends Task {
 		lastTime = time;
 	}
 
-	static final String numbers[] = { "zero", "one", "two", "three", "four",
-			"five", "six", "seven", "eight", "other" };
+	static final String numbers[] = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "other" };
 
 	int getIndex(String s) {
 		for (int i = 0; i < numbers.length; i++)
@@ -60,12 +58,9 @@ public class U5Siegler extends Task {
 
 	// --- Analysis Code ---//
 
-	static final double humanCounts[][] = {
-			{ 0, .05, .86, 0, .02, 0, .02, 0, 0, .06 },
-			{ 0, .04, .07, .75, .04, 0, .02, 0, 0, .09 },
-			{ 0, .02, 0, .10, .75, .05, .01, .03, 0, .06 },
-			{ .02, 0, .04, .05, .80, .04, 0, .05, 0, 0 },
-			{ 0, 0, .07, .09, .25, .45, .08, .01, .01, .06 },
+	static final double humanCounts[][] = { { 0, .05, .86, 0, .02, 0, .02, 0, 0, .06 },
+			{ 0, .04, .07, .75, .04, 0, .02, 0, 0, .09 }, { 0, .02, 0, .10, .75, .05, .01, .03, 0, .06 },
+			{ .02, 0, .04, .05, .80, .04, 0, .05, 0, 0 }, { 0, 0, .07, .09, .25, .45, .08, .01, .01, .06 },
 			{ .04, 0, 0, .05, .21, .09, .48, 0, .02, .11 } };
 
 	@Override

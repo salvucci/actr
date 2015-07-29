@@ -69,11 +69,9 @@ class SlotCondition {
 		}
 
 		if (operator == null)
-			return (testValue == bufferValue)
-					|| model.getDeclarative().isa(bufferValue, testValue);
+			return (testValue == bufferValue) || model.getDeclarative().isa(bufferValue, testValue);
 		else if (operator.equals("-"))
-			return (testValue != bufferValue)
-					&& !model.getDeclarative().isa(bufferValue, testValue);
+			return (testValue != bufferValue) && !model.getDeclarative().isa(bufferValue, testValue);
 		else {
 			double bufferNumber = Double.valueOf(bufferValue.getString());
 			double testNumber = Double.valueOf(testValue.getString());
@@ -107,8 +105,7 @@ class SlotCondition {
 		if (operator != null)
 			s += operator + " ";
 		s += slot + " " + value;
-		if (inst != null && value.isVariable()
-				&& (used == null || !used.contains(value))) {
+		if (inst != null && value.isVariable() && (used == null || !used.contains(value))) {
 			Symbol v = inst.get(value);
 			if (v != null) {
 				s = String.format("%-35s", s);

@@ -62,10 +62,8 @@ class Toolbar extends JToolBar {
 		addSeparator();
 
 		JButton runButton = addButton(actions.runAction, 20);
-		final String[][] speedOptions = { { "5x Slower", "0.2" },
-				{ "3x Slower", "0.33" }, { "Real-Time", "1" },
-				{ "3x Faster", "3" }, { "5x Faster", "5" },
-				{ "10x Faster", "10" } };
+		final String[][] speedOptions = { { "5x Slower", "0.2" }, { "3x Slower", "0.33" }, { "Real-Time", "1" },
+				{ "3x Faster", "3" }, { "5x Faster", "5" }, { "10x Faster", "10" } };
 		addDropButton("Run Speed", runButton, speedOptions, 2, new Setter() {
 			@Override
 			public void set(String s) {
@@ -76,16 +74,14 @@ class Toolbar extends JToolBar {
 		add(Box.createHorizontalStrut(6));
 
 		JButton runAnalysisButton = addButton(actions.runAnalysisAction, 20);
-		final String[][] iterationOptions = { { "Task Default", "" },
-				{ "1", "1" }, { "3", "3" }, { "5", "5" }, { "10", "10" },
-				{ "20", "20" }, { "50", "50" }, { "100", "100" } };
-		addDropButton("Number of Iterations", runAnalysisButton,
-				iterationOptions, 0, new Setter() {
-					@Override
-					public void set(String s) {
-						iterations = s;
-					}
-				});
+		final String[][] iterationOptions = { { "Task Default", "" }, { "1", "1" }, { "3", "3" }, { "5", "5" },
+				{ "10", "10" }, { "20", "20" }, { "50", "50" }, { "100", "100" } };
+		addDropButton("Number of Iterations", runAnalysisButton, iterationOptions, 0, new Setter() {
+			@Override
+			public void set(String s) {
+				iterations = s;
+			}
+		});
 
 		add(Box.createHorizontalStrut(6));
 
@@ -108,8 +104,7 @@ class Toolbar extends JToolBar {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				if (button.isEnabled())
-					button.setBorder(BorderFactory
-							.createBevelBorder(BevelBorder.RAISED));
+					button.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 			}
 
 			@Override
@@ -128,8 +123,8 @@ class Toolbar extends JToolBar {
 		return addButton(action, 26);
 	}
 
-	JButton addDropButton(String title, final JButton primary,
-			String[][] options, int defaultOption, final Setter setter) {
+	JButton addDropButton(String title, final JButton primary, String[][] options, int defaultOption,
+			final Setter setter) {
 		final JButton button = new JButton(Resources.getIcon("DropArrow16.gif"));
 		final JPopupMenu menu = new JPopupMenu();
 		JMenuItem titleItem = new JMenuItem(title);
@@ -166,10 +161,8 @@ class Toolbar extends JToolBar {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				button.setBorder(BorderFactory
-						.createBevelBorder(BevelBorder.RAISED));
-				primary.setBorder(BorderFactory
-						.createBevelBorder(BevelBorder.RAISED));
+				button.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+				primary.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 			}
 
 			@Override

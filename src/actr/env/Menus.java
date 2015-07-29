@@ -16,12 +16,10 @@ class Menus extends JMenuBar {
 	private Preferences prefs;
 	private JMenu fileMenu, editMenu, runMenu, outputMenu;
 	private JMenu openRecentMenu;
-	private int accelerator = Toolkit.getDefaultToolkit()
-			.getMenuShortcutKeyMask();
-	private String appletFiles[] = { "U1Addition.actr", "U1Count.actr",
-			"U1Semantic.actr", "U1Tutor.actr", "U2Demo.actr",
-			"U3Sperling.actr", "U4Paired.actr", "U5Fan.actr", "U5Grouped.actr",
-			"U5Siegler.actr", "U6BST.actr", "U7Paired.actr" };
+	private int accelerator = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	private String appletFiles[] = { "U1Addition.actr", "U1Count.actr", "U1Semantic.actr", "U1Tutor.actr",
+			"U2Demo.actr", "U3Sperling.actr", "U4Paired.actr", "U5Fan.actr", "U5Grouped.actr", "U5Siegler.actr",
+			"U6BST.actr", "U7Paired.actr" };
 
 	Menus(Actions actions, Preferences prefs) {
 		this(actions, prefs, false);
@@ -44,8 +42,7 @@ class Menus extends JMenuBar {
 				fileMenu.addSeparator();
 				addToMenu(fileMenu, actions.closeAction, KeyEvent.VK_W);
 				addToMenu(fileMenu, actions.saveAction, KeyEvent.VK_S);
-				addToMenu(fileMenu, actions.saveAsAction, KeyEvent.VK_S,
-						accelerator + ActionEvent.SHIFT_MASK);
+				addToMenu(fileMenu, actions.saveAsAction, KeyEvent.VK_S, accelerator + ActionEvent.SHIFT_MASK);
 				fileMenu.addSeparator();
 				addToMenu(fileMenu, actions.printAction, KeyEvent.VK_P);
 				if (!Main.onMac()) {
@@ -59,8 +56,7 @@ class Menus extends JMenuBar {
 		} else // Main.inApplet()
 		{
 			for (int i = 0; i < appletFiles.length; i++)
-				addToMenu(fileMenu,
-						actions.createAppletFileAction(appletFiles[i]));
+				addToMenu(fileMenu, actions.createAppletFileAction(appletFiles[i]));
 			fileMenu.addSeparator();
 			addToMenu(fileMenu, actions.closeAction, KeyEvent.VK_W);
 		}
@@ -76,8 +72,7 @@ class Menus extends JMenuBar {
 			editMenu.addSeparator();
 			addToMenu(editMenu, actions.findAction, KeyEvent.VK_F);
 			addToMenu(editMenu, actions.findNextAction, KeyEvent.VK_G);
-			addToMenu(editMenu, actions.findPreviousAction, KeyEvent.VK_G,
-					accelerator + ActionEvent.SHIFT_MASK);
+			addToMenu(editMenu, actions.findPreviousAction, KeyEvent.VK_G, accelerator + ActionEvent.SHIFT_MASK);
 			if (!Main.onMac()) {
 				editMenu.addSeparator();
 				addToMenu(editMenu, actions.prefsAction);
@@ -85,13 +80,11 @@ class Menus extends JMenuBar {
 
 			runMenu = new JMenu("Run");
 			addToMenu(runMenu, actions.runAction, KeyEvent.VK_R);
-			addToMenu(runMenu, actions.runAnalysisAction, KeyEvent.VK_R,
-					accelerator + ActionEvent.SHIFT_MASK);
+			addToMenu(runMenu, actions.runAnalysisAction, KeyEvent.VK_R, accelerator + ActionEvent.SHIFT_MASK);
 
 			runMenu.addSeparator();
 			addToMenu(runMenu, actions.stopAction, KeyEvent.VK_PERIOD);
-			addToMenu(runMenu, actions.resumeAction, KeyEvent.VK_PERIOD,
-					accelerator + ActionEvent.SHIFT_MASK);
+			addToMenu(runMenu, actions.resumeAction, KeyEvent.VK_PERIOD, accelerator + ActionEvent.SHIFT_MASK);
 
 			outputMenu = new JMenu("Output");
 			addToMenu(outputMenu, actions.outputBuffersAction);
@@ -114,8 +107,7 @@ class Menus extends JMenuBar {
 	}
 
 	void addToMenu(JMenu menu, Action action, int vk, int modifiers) {
-		action.putValue(Action.ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(vk, modifiers));
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(vk, modifiers));
 		JMenuItem item = new JMenuItem(action);
 		item.setIcon(null);
 		menu.add(item);
@@ -139,8 +131,7 @@ class Menus extends JMenuBar {
 		for (int i = 0; i < prefs.recentFiles.size(); i++) {
 			String filename = prefs.recentFiles.elementAt(i);
 			if (filename != null && !filename.equals("")) {
-				Action action = actions.createOpenRecentAction(new File(
-						filename));
+				Action action = actions.createOpenRecentAction(new File(filename));
 				addToMenu(openRecentMenu, action, KeyEvent.VK_1 + i);
 			}
 		}

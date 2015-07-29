@@ -38,6 +38,8 @@ public class Model {
 	boolean verboseTrace = true;
 	boolean runUntilStop = false;
 	boolean bufferStuffing = true;
+	boolean randomizeTime = false;
+	double randomizeTimeValue = 3;
 
 	private Model(Frame frame) {
 		this.frame = frame;
@@ -268,6 +270,15 @@ public class Model {
 		return time;
 	}
 
+	double randomizeTime(double time) {
+		if (randomizeTime) {
+			double min = time * ((randomizeTimeValue - 1) / randomizeTimeValue);
+			double max = time * ((randomizeTimeValue + 1) / randomizeTimeValue);
+			return min + (max - min) * Utilities.random.nextDouble();
+		} else
+			return time;
+	}
+
 	/**
 	 * Returns true if the model is running in real time.
 	 * 
@@ -298,24 +309,15 @@ public class Model {
 		imaginal.initialize();
 
 		buffers.set(Symbol.goalState, createBufferStateChunk("goal", true));
-		buffers.set(Symbol.retrievalState,
-				createBufferStateChunk("retrieval-state", true));
-		buffers.set(Symbol.vislocState,
-				createBufferStateChunk("visloc-state", true));
-		buffers.set(Symbol.visualState,
-				createBufferStateChunk("visual-state", true));
-		buffers.set(Symbol.aurlocState,
-				createBufferStateChunk("aurloc-state", true));
-		buffers.set(Symbol.auralState,
-				createBufferStateChunk("aural-state", true));
-		buffers.set(Symbol.manualState,
-				createBufferStateChunk("manual-state", false));
-		buffers.set(Symbol.vocalState,
-				createBufferStateChunk("vocal-state", false));
-		buffers.set(Symbol.imaginalState,
-				createBufferStateChunk("imaginal-state", true));
-		buffers.set(Symbol.temporalState,
-				createBufferStateChunk("temporal-state", true));
+		buffers.set(Symbol.retrievalState, createBufferStateChunk("retrieval-state", true));
+		buffers.set(Symbol.vislocState, createBufferStateChunk("visloc-state", true));
+		buffers.set(Symbol.visualState, createBufferStateChunk("visual-state", true));
+		buffers.set(Symbol.aurlocState, createBufferStateChunk("aurloc-state", true));
+		buffers.set(Symbol.auralState, createBufferStateChunk("aural-state", true));
+		buffers.set(Symbol.manualState, createBufferStateChunk("manual-state", false));
+		buffers.set(Symbol.vocalState, createBufferStateChunk("vocal-state", false));
+		buffers.set(Symbol.imaginalState, createBufferStateChunk("imaginal-state", true));
+		buffers.set(Symbol.temporalState, createBufferStateChunk("temporal-state", true));
 
 		buffers.setSlot(Symbol.manualState, Symbol.where, Symbol.keyboard);
 	}
@@ -442,23 +444,18 @@ public class Model {
 		while (!stop && (events.hasMoreEvents() || runUntilStop)) {
 			Event event = events.next();
 			if (realTime && (event.getTime() > time))
-				incrementalSleep(Math.round(1000
-						* (event.getTime() - time)
-						* (1.0 / (realTimeMultiplier == 0 ? 1
-								: realTimeMultiplier))));
+				incrementalSleep(Math.round(
+						1000 * (event.getTime() - time) * (1.0 / (realTimeMultiplier == 0 ? 1 : realTimeMultiplier))));
 			time = event.getTime();
 
 			taskUpdated = false;
-			if (verboseTrace && !event.getModule().equals("task")
-					&& !event.getModule().equals("bold")
+			if (verboseTrace && !event.getModule().equals("task") && !event.getModule().equals("bold")
 					&& !event.getModule().equals(""))
 				output(event.getModule(), event.getDescription());
 			event.action();
 
-			if (!event.getModule().equals("procedural")
-					&& !event.getModule().equals("bold")
-					&& (taskUpdated || !event.getModule().equals("task"))
-					&& !events.scheduled("procedural"))
+			if (!event.getModule().equals("procedural") && !event.getModule().equals("bold")
+					&& (taskUpdated || !event.getModule().equals("task")) && !events.scheduled("procedural"))
 				procedural.findInstantiations(buffers);
 		}
 		if (verboseTrace) {
@@ -519,17 +516,29 @@ public class Model {
 	void setParameter(String parameter, String value, Tokenizer t) {
 		if (parameter.equals(":esc")) {
 			if (value.equals("nil"))
-				recordWarning("unsupported parameter value: " + parameter + " "
-						+ value, t);
+				recordWarning("unsupported parameter value: " + parameter + " " + value, t);
 		} else if (parameter.equals(":v"))
 			verboseTrace = !value.equals("nil");
 		else if (parameter.equals(":real-time")) {
 			realTime = !value.equals("nil");
-			realTimeMultiplier = (!value.equals("nil")) ? Double.valueOf(value)
-					: 0;
+			realTimeMultiplier = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		} else if (parameter.equals(":rus"))
 			runUntilStop = !value.equals("nil");
+		else if (parameter.equals(":randomize-time")) {
+			randomizeTime = !value.equals("nil");
+			if (randomizeTime) {
+				try {
+					randomizeTimeValue = Double.valueOf(value);
+				} catch (NumberFormatException e) {
+					randomizeTimeValue = 3;
+				}
+			}
+		}
 
+		else if (parameter.equals(":dat"))
+			procedural.actionTime = Double.valueOf(value);
+		else if (parameter.equals(":vpft"))
+			procedural.variableProductionFiringTime = !value.equals("nil");
 		else if (parameter.equals(":ul"))
 			procedural.utilityLearning = !value.equals("nil");
 		else if (parameter.equals(":egs"))
@@ -541,8 +550,7 @@ public class Model {
 		else if (parameter.equals(":iu"))
 			procedural.initialUtility = Double.valueOf(value);
 		else if (parameter.equals(":tt"))
-			procedural.productionCompilationThresholdTime = Double
-					.valueOf(value);
+			procedural.productionCompilationThresholdTime = Double.valueOf(value);
 		else if (parameter.equals(":nu"))
 			procedural.productionCompilationNewUtility = Double.valueOf(value);
 		else if (parameter.equals(":cst"))
@@ -556,8 +564,7 @@ public class Model {
 			declarative.latencyFactor = Double.valueOf(value);
 		else if (parameter.equals(":bll")) {
 			declarative.baseLevelLearning = (!value.equals("nil"));
-			declarative.baseLevelDecayRate = (!value.equals("nil")) ? Double
-					.valueOf(value) : 0;
+			declarative.baseLevelDecayRate = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		} else if (parameter.equals(":ol"))
 			declarative.optimizedLearning = !value.equals("nil");
 		else if (parameter.equals(":optimized-fan"))
@@ -570,12 +577,10 @@ public class Model {
 			declarative.imaginalActivation = Double.valueOf(value);
 		else if (parameter.equals(":mas")) {
 			declarative.spreadingActivation = (!value.equals("nil"));
-			declarative.maximumAssociativeStrength = (!value.equals("nil")) ? Double
-					.valueOf(value) : 0;
+			declarative.maximumAssociativeStrength = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		} else if (parameter.equals(":mp")) {
 			declarative.partialMatching = (!value.equals("nil"));
-			declarative.mismatchPenalty = (!value.equals("nil")) ? Double
-					.valueOf(value) : 0;
+			declarative.mismatchPenalty = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		} else if (parameter.equals(":declarative-num-finsts"))
 			declarative.declarativeNumFinsts = Integer.valueOf(value);
 		else if (parameter.equals(":declarative-finst-span"))
@@ -635,8 +640,7 @@ public class Model {
 
 		else if (parameter.equals(":buffer-chunk-decay")) {
 			buffers.bufferChunkDecay = (!value.equals("nil"));
-			buffers.bufferChunkLife = (!value.equals("nil")) ? Double
-					.valueOf(value) : 0;
+			buffers.bufferChunkLife = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		}
 
 		else if (parameter.equals(":tct"))
@@ -645,8 +649,7 @@ public class Model {
 		else if (parameter.equals(":pc-threaded"))
 			procedural.productionCompilationThreaded = (!value.equals("nil"));
 		else if (parameter.equals(":pc-add-utilities"))
-			procedural.productionCompilationAddUtilities = (!value
-					.equals("nil"));
+			procedural.productionCompilationAddUtilities = (!value.equals("nil"));
 
 		else if (parameter.equals(":emma"))
 			vision.useEMMA = (!value.equals("nil"));

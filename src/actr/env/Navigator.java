@@ -60,8 +60,7 @@ class Navigator extends JPanel {
 
 		setMinimumSize(new Dimension(1, 1));
 		setBorder(BorderFactory.createLineBorder(Color.gray));
-		setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createLineBorder(Color.gray),
+		setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.gray),
 				BorderFactory.createEmptyBorder(3, 9, 3, 3)));
 	}
 
@@ -72,8 +71,7 @@ class Navigator extends JPanel {
 		Vector<Marker> v = document.getCommandMarkers();
 		for (int i = 0; i < v.size(); i++) {
 			Marker marker = v.elementAt(i);
-			if (!marker.getText().startsWith("(p ")
-					&& !marker.getText().startsWith("(spp "))
+			if (!marker.getText().startsWith("(p ") && !marker.getText().startsWith("(spp "))
 				commandCB.addItem(marker);
 		}
 
@@ -93,8 +91,7 @@ class Navigator extends JPanel {
 	private void goToSelected(Frame frame, Marker marker) {
 		if (marker == null)
 			return;
-		int pos = frame.getDocument()
-				.findPreviousParen('(', marker.getOffset());
+		int pos = frame.getDocument().findPreviousParen('(', marker.getOffset());
 		Editor editor = frame.getEditor();
 		editor.setCaretPosition(pos);
 		editor.scrollToVisible(pos);

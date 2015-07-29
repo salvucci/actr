@@ -132,15 +132,13 @@ public class DualChoicePTS extends Task {
 
 	@Override
 	public void typeKey(char c) {
-		currentTrial.visualManualResponseTime = getModel().getTime()
-				- visualManualStartTime;
+		currentTrial.visualManualResponseTime = getModel().getTime() - visualManualStartTime;
 		label.setVisible(false);
 	}
 
 	@Override
 	public void speak(String s) {
-		currentTrial.auralVocalResponseTime = getModel().getTime()
-				- auralVocalStartTime;
+		currentTrial.auralVocalResponseTime = getModel().getTime() - auralVocalStartTime;
 	}
 
 	// Analysis Code
@@ -189,17 +187,12 @@ public class DualChoicePTS extends Task {
 			getModel().output("Human:\t" + Utilities.toString(humanRT[0]));
 			getModel().output("Model:\t" + Utilities.toString(modelRT[0]));
 
-			getModel()
-					.output("\nTask #2: Visual-Manual, Single- vs. Dual-Task");
+			getModel().output("\nTask #2: Visual-Manual, Single- vs. Dual-Task");
 			getModel().output("Human:\t" + Utilities.toString(humanRT[1]));
 			getModel().output("Model:\t" + Utilities.toString(modelRT[1]));
 
-			getModel().output(
-					String.format("\nR = %.2f",
-							Statistics.correlation(modelRT, humanRT)));
-			getModel().output(
-					String.format("\nRMSE = %.2f",
-							Statistics.rmse(modelRT, humanRT)));
+			getModel().output(String.format("\nR = %.2f", Statistics.correlation(modelRT, humanRT)));
+			getModel().output(String.format("\nRMSE = %.2f", Statistics.rmse(modelRT, humanRT)));
 		}
 
 		return result;

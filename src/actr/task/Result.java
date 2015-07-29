@@ -39,10 +39,8 @@ public class Result {
 				rString = ">.99";
 			String errorString = String.format("%.2f", error);
 			String pointsString = String.format("%d", points);
-			String extra = (includeRMSE) ? ("   (RMSE = "
-					+ String.format("%.2f", rmse) + ")") : "";
-			return nameString + rString + "    " + errorString + "    "
-					+ pointsString + extra;
+			String extra = (includeRMSE) ? ("   (RMSE = " + String.format("%.2f", rmse) + ")") : "";
+			return nameString + rString + "    " + errorString + "    " + pointsString + extra;
 		}
 	}
 
@@ -77,8 +75,7 @@ public class Result {
 	}
 
 	public Result(String name, double model[][], double human[][]) {
-		measures.add(new Measure(name, Statistics.flatten(model), Statistics
-				.flatten(human)));
+		measures.add(new Measure(name, Statistics.flatten(model), Statistics.flatten(human)));
 	}
 
 	public void add(String name, double r, double error, int points) {
@@ -90,8 +87,7 @@ public class Result {
 	}
 
 	public void add(String name, double model[][], double human[][]) {
-		measures.add(new Measure(name, Statistics.flatten(model), Statistics
-				.flatten(human)));
+		measures.add(new Measure(name, Statistics.flatten(model), Statistics.flatten(human)));
 	}
 
 	static public String headerString() {

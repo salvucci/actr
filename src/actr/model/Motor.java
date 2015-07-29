@@ -99,14 +99,12 @@ public class Motor extends Module {
 
 	void moveHandToMouse() {
 		rightHand = mouseKey;
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.where,
-				Symbol.mouse);
+		model.getBuffers().setSlot(Symbol.manualState, Symbol.where, Symbol.mouse);
 	}
 
 	void moveHandToHome() {
 		rightHand = rightHomeKey;
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.where,
-				Symbol.keyboard);
+		model.getBuffers().setSlot(Symbol.manualState, Symbol.where, Symbol.keyboard);
 	}
 
 	private class IncrementalMove {
@@ -114,8 +112,7 @@ public class Motor extends Module {
 		double startTime, endTime;
 		int fracIndex;
 
-		IncrementalMove(double execTime, int startx, int starty, int endx,
-				int endy) {
+		IncrementalMove(double execTime, int startx, int starty, int endx, int endy) {
 			this.startx = startx;
 			this.starty = starty;
 			this.endx = endx;
@@ -130,8 +127,7 @@ public class Motor extends Module {
 		if (request.get(Symbol.isa) == Symbol.get("clear"))
 			return 1;
 		int n = request.slotCount();
-		if (lastMovement == null
-				|| (model.getTime() - lastMovementTime) > maxPrepTimeDifference)
+		if (lastMovement == null || (model.getTime() - lastMovementTime) > maxPrepTimeDifference)
 			return n;
 		if (request.get(Symbol.isa) != lastMovement.get(Symbol.isa))
 			return n;
@@ -147,21 +143,17 @@ public class Motor extends Module {
 		Iterator<Symbol> it = request.getSlotNames();
 		while (it.hasNext()) {
 			Symbol slot = it.next();
-			if (slot == Symbol.isa || slot == Symbol.hand
-					|| slot == Symbol.finger)
+			if (slot == Symbol.isa || slot == Symbol.hand || slot == Symbol.finger)
 				continue;
 			if (slot == Symbol.get("r")) {
 				Symbol rv = request.get(slot);
 				Symbol lv = lastMovement.get(slot);
-				if (rv != null && lv != null
-						&& Math.abs(rv.toDouble() - lv.toDouble()) <= 2.0)
+				if (rv != null && lv != null && Math.abs(rv.toDouble() - lv.toDouble()) <= 2.0)
 					n--;
 			} else if (slot == Symbol.get("theta")) {
 				Symbol rv = request.get(slot);
 				Symbol lv = lastMovement.get(slot);
-				if (rv != null
-						&& lv != null
-						&& Math.abs(rv.toDouble() - lv.toDouble()) <= Math.PI / 4)
+				if (rv != null && lv != null && Math.abs(rv.toDouble() - lv.toDouble()) <= Math.PI / 4)
 					n--;
 			} else if (request.get(slot) == lastMovement.get(slot))
 				n--;
@@ -169,21 +161,17 @@ public class Motor extends Module {
 		return n;
 	}
 
-	private final double cumulative[] = { 0.000, 0.063, 0.269, 0.506, 0.697,
-			0.826, 0.905, 0.950, 0.975, 0.987, 1.0 };
+	private final double cumulative[] = { 0.000, 0.063, 0.269, 0.506, 0.697, 0.826, 0.905, 0.950, 0.975, 0.987, 1.0 };
 
 	private void incrementalMove(final IncrementalMove im) {
 		final double timeFrac = 1.0 * im.fracIndex / cumulative.length;
 		final double moveFrac = cumulative[im.fracIndex];
-		double eventTime = ((1.0 - timeFrac) * im.startTime)
-				+ (timeFrac * im.endTime);
+		double eventTime = ((1.0 - timeFrac) * im.startTime) + (timeFrac * im.endTime);
 		model.addEvent(new Event(eventTime, "task", "update") {
 			@Override
 			public void action() {
-				mx = (int) Math.round(((1.0 - moveFrac) * im.startx)
-						+ (moveFrac * im.endx));
-				my = (int) Math.round(((1.0 - moveFrac) * im.starty)
-						+ (moveFrac * im.endy));
+				mx = (int) Math.round(((1.0 - moveFrac) * im.startx) + (moveFrac * im.endx));
+				my = (int) Math.round(((1.0 - moveFrac) * im.starty) + (moveFrac * im.endy));
 				model.getTask().moveMouse(mx, my);
 				if (im.fracIndex < cumulative.length - 1) {
 					im.fracIndex++;
@@ -194,18 +182,14 @@ public class Motor extends Module {
 	}
 
 	private double prepareMovement(double time, Chunk request) {
-		time += featurePrepTime * countFeaturesToPrepare(request);
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation,
-				Symbol.busy);
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.processor,
-				Symbol.busy);
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.state,
-				Symbol.busy);
+		time += model.randomizeTime(featurePrepTime * countFeaturesToPrepare(request));
+		model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
+		model.getBuffers().setSlot(Symbol.manualState, Symbol.processor, Symbol.busy);
+		model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
 		model.addEvent(new Event(time, "motor", "preparation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.manualState,
-						Symbol.preparation, Symbol.free);
+				model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
 			}
 		});
 		lastMovement = request;
@@ -214,14 +198,12 @@ public class Motor extends Module {
 	}
 
 	private double initiateMovement(double time) {
-		time += movementInitiationTime;
+		time += model.randomizeTime(movementInitiationTime);
 		model.addEvent(new Event(time, "motor", "initiation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.manualState,
-						Symbol.processor, Symbol.free);
-				model.getBuffers().setSlot(Symbol.manualState,
-						Symbol.execution, Symbol.busy);
+				model.getBuffers().setSlot(Symbol.manualState, Symbol.processor, Symbol.free);
+				model.getBuffers().setSlot(Symbol.manualState, Symbol.execution, Symbol.busy);
 			}
 		});
 		return time;
@@ -232,15 +214,10 @@ public class Motor extends Module {
 			@Override
 			public void action() {
 				if (queuedMovements.size() == 0) {
-					model.getBuffers().setSlot(Symbol.manualState,
-							Symbol.execution, Symbol.free);
-					model.getBuffers().setSlot(Symbol.manualState,
-							Symbol.state, Symbol.free);
-					model.getBuffers().setSlot(
-							Symbol.manualState,
-							Symbol.where,
-							(rightHand.equals(mouseKey) ? Symbol.mouse
-									: Symbol.keyboard));
+					model.getBuffers().setSlot(Symbol.manualState, Symbol.execution, Symbol.free);
+					model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.free);
+					model.getBuffers().setSlot(Symbol.manualState, Symbol.where,
+							(rightHand.equals(mouseKey) ? Symbol.mouse : Symbol.keyboard));
 				} else {
 					Chunk c = queuedMovements.firstElement();
 					queuedMovements.removeElementAt(0);
@@ -266,19 +243,14 @@ public class Motor extends Module {
 		if (request.get(Symbol.isa) == Symbol.get("clear")) {
 			if (model.verboseTrace)
 				model.output("motor", "clear");
-			model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation,
-					Symbol.busy);
-			model.getBuffers().setSlot(Symbol.manualState, Symbol.state,
-					Symbol.busy);
-			model.addEvent(new Event(model.getTime() + featurePrepTime,
-					"motor", "change state last none prep free") {
+			model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
+			model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
+			model.addEvent(new Event(model.getTime() + featurePrepTime, "motor", "change state last none prep free") {
 				@Override
 				public void action() {
 					lastMovement = null;
-					model.getBuffers().setSlot(Symbol.manualState,
-							Symbol.preparation, Symbol.free);
-					model.getBuffers().setSlot(Symbol.manualState,
-							Symbol.state, Symbol.free);
+					model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
+					model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.free);
 				}
 			});
 			return;
@@ -301,8 +273,7 @@ public class Motor extends Module {
 					model.outputWarning("bad key '" + key + "'");
 					return;
 				}
-				Chunk c = Parser.parseNewChunk(model,
-						Symbol.getUnique("press-key"), "isa " + slots);
+				Chunk c = Parser.parseNewChunk(model, Symbol.getUnique("press-key"), "isa " + slots);
 				c.setRequest(true);
 				queuedMovements.addElement(c);
 			}
@@ -328,8 +299,7 @@ public class Motor extends Module {
 				model.outputWarning("bad key '" + key + "'");
 				return;
 			}
-			request = Parser.parseNewChunk(model,
-					Symbol.getUnique("press-key"), "isa " + slots);
+			request = Parser.parseNewChunk(model, Symbol.getUnique("press-key"), "isa " + slots);
 			seen = true;
 		}
 
@@ -337,8 +307,7 @@ public class Motor extends Module {
 			if (!seen && model.verboseTrace)
 				model.output("motor", "hand-to-mouse");
 			String slots = "isa point-hand-at-key hand right to-key mouse";
-			request = Parser.parseNewChunk(model,
-					Symbol.getUnique("hand-to-mouse"), slots);
+			request = Parser.parseNewChunk(model, Symbol.getUnique("hand-to-mouse"), slots);
 			targetWidth = 4.0;
 			seen = true;
 		}
@@ -347,8 +316,7 @@ public class Motor extends Module {
 			if (!seen && model.verboseTrace)
 				model.output("motor", "hand-to-home");
 			String slots = "isa point-hand-at-key hand right to-key j";
-			request = Parser.parseNewChunk(model,
-					Symbol.getUnique("hand-to-home"), slots);
+			request = Parser.parseNewChunk(model, Symbol.getUnique("hand-to-home"), slots);
 			targetWidth = 4.0;
 			seen = true;
 		}
@@ -362,8 +330,8 @@ public class Motor extends Module {
 				return;
 			}
 			Chunk loc = model.getVision().getVisualLocation(locName);
-			final Point locpt = new Point(loc.get(Symbol.get("screen-x"))
-					.toInt(), loc.get(Symbol.get("screen-y")).toInt());
+			final Point locpt = new Point(loc.get(Symbol.get("screen-x")).toInt(),
+					loc.get(Symbol.get("screen-y")).toInt());
 			Point mousePoint = new Point(mx, my);
 			double r = Utilities.pixels2angle(mousePoint.distanceTo(locpt));
 			if (r == 0)
@@ -373,8 +341,7 @@ public class Motor extends Module {
 			double fittsTime = fitts(mouseFittsCoeff, r, width);
 			final double moveTime = Math.max(burstTime, fittsTime);
 			String slots = "isa ply hand right r " + r + " theta " + theta;
-			Chunk featRequest = Parser.parseNewChunk(model,
-					Symbol.getUnique("move-cursor"), slots);
+			Chunk featRequest = Parser.parseNewChunk(model, Symbol.getUnique("move-cursor"), slots);
 
 			eventTime = prepareMovement(eventTime, featRequest);
 			eventTime = initiateMovement(eventTime);
@@ -382,18 +349,17 @@ public class Motor extends Module {
 				model.addEvent(new Event(eventTime, "task", "none") {
 					@Override
 					public void action() {
-						incrementalMove(new IncrementalMove(moveTime, mx, my,
-								locpt.x, locpt.y));
+						incrementalMove(new IncrementalMove(moveTime, mx, my, locpt.x, locpt.y));
 					}
 				});
-			eventTime += moveTime;
+			eventTime += model.randomizeTime(moveTime);
 			model.addEvent(new Event(eventTime, "motor", "move cursor " + locpt) {
 				@Override
 				public void action() {
 					model.getTask().moveMouse(locpt.x, locpt.y);
 				}
 			});
-			eventTime += burstTime;
+			eventTime += model.randomizeTime(burstTime);
 			finishMovement(eventTime);
 		}
 
@@ -405,20 +371,20 @@ public class Motor extends Module {
 				return;
 			}
 			String slots = "isa punch hand right finger index";
-			Chunk featRequest = Parser.parseNewChunk(model,
-					Symbol.getUnique("click-mouse"), slots);
+			Chunk featRequest = Parser.parseNewChunk(model, Symbol.getUnique("click-mouse"), slots);
 
 			eventTime = prepareMovement(eventTime, featRequest);
 			eventTime = initiateMovement(eventTime);
-			eventTime += keyClosureTime;
+			double actualKeyClosureTime = model.randomizeTime(keyClosureTime);
+			eventTime += actualKeyClosureTime;
 			model.addEvent(new Event(eventTime, "motor", "output mouse click") {
 				@Override
 				public void action() {
 					model.getTask().clickMouse();
 				}
 			});
-			eventTime -= keyClosureTime;
-			eventTime += 2 * burstTime;
+			eventTime -= actualKeyClosureTime;
+			eventTime += model.randomizeTime(2 * burstTime);
 			finishMovement(eventTime);
 		}
 
@@ -433,19 +399,16 @@ public class Motor extends Module {
 			if (!seen && model.verboseTrace)
 				model.output("motor", "point-hand-at-key " + hand + " " + toKey);
 			final Point keypos = getKeyPosition(toKey).copy();
-			double r = (hand == Symbol.right) ? rightHand.distanceTo(keypos)
-					: leftHand.distanceTo(keypos);
-			double theta = (hand == Symbol.right) ? rightHand.angleTo(keypos)
-					: leftHand.angleTo(keypos);
+			double r = (hand == Symbol.right) ? rightHand.distanceTo(keypos) : leftHand.distanceTo(keypos);
+			double theta = (hand == Symbol.right) ? rightHand.angleTo(keypos) : leftHand.angleTo(keypos);
 			double fittsTime = fitts(mouseFittsCoeff, r, targetWidth);
 			double moveTime = Math.max(burstTime, fittsTime);
 			String slots = "isa ply hand right r " + r + " theta " + theta;
-			Chunk featRequest = Parser.parseNewChunk(model,
-					Symbol.getUnique("point-hand-at-key"), slots);
+			Chunk featRequest = Parser.parseNewChunk(model, Symbol.getUnique("point-hand-at-key"), slots);
 
 			eventTime = prepareMovement(eventTime, featRequest);
 			eventTime = initiateMovement(eventTime);
-			eventTime += Math.max(burstTime, moveTime);
+			eventTime += model.randomizeTime(Math.max(burstTime, moveTime));
 			model.addEvent(new Event(eventTime, "motor", "move hand " + toKey) {
 				@Override
 				public void action() {
@@ -455,7 +418,7 @@ public class Motor extends Module {
 						leftHand = keypos;
 				}
 			});
-			eventTime += burstTime;
+			eventTime += model.randomizeTime(burstTime);
 			finishMovement(eventTime);
 		}
 
@@ -473,7 +436,8 @@ public class Motor extends Module {
 
 			eventTime = prepareMovement(eventTime, request);
 			eventTime = initiateMovement(eventTime);
-			eventTime += keyClosureTime;
+			double actualKeyClosureTime = model.randomizeTime(keyClosureTime);
+			eventTime += actualKeyClosureTime;
 			model.addEvent(new Event(eventTime, "motor", "output key " + key) {
 				@Override
 				public void action() {
@@ -483,8 +447,8 @@ public class Motor extends Module {
 						model.getTask().typeKey(convertToChar(key));
 				}
 			});
-			eventTime -= keyClosureTime;
-			eventTime += 2 * burstTime;
+			eventTime -= actualKeyClosureTime;
+			eventTime += model.randomizeTime(2 * burstTime);
 			finishMovement(eventTime);
 		}
 
@@ -494,8 +458,7 @@ public class Motor extends Module {
 			Symbol r = request.get(Symbol.get("r"));
 			Symbol theta = request.get(Symbol.get("theta"));
 			if (!seen && model.verboseTrace)
-				model.output("motor", "peck " + hand + " " + finger + " " + r
-						+ " " + theta);
+				model.output("motor", "peck " + hand + " " + finger + " " + r + " " + theta);
 			if (hand == Symbol.right && rightHand.equals(mouseKey)) {
 				model.outputWarning("hand not on keyboard");
 				return;
@@ -507,14 +470,14 @@ public class Motor extends Module {
 
 			eventTime = prepareMovement(eventTime, request);
 			eventTime = initiateMovement(eventTime);
-			eventTime += Math.max(burstTime, fittsTime);
+			eventTime += model.randomizeTime(Math.max(burstTime, fittsTime));
 			model.addEvent(new Event(eventTime, "motor", "output key " + key) {
 				@Override
 				public void action() {
 					model.getTask().typeKey(convertToChar(key));
 				}
 			});
-			eventTime += burstTime;
+			eventTime += model.randomizeTime(burstTime);
 			finishMovement(eventTime);
 		}
 
@@ -524,8 +487,7 @@ public class Motor extends Module {
 			Symbol r = request.get(Symbol.get("r"));
 			Symbol theta = request.get(Symbol.get("theta"));
 			if (!seen && model.verboseTrace)
-				model.output("motor", "peck-recoil " + hand + " " + finger
-						+ " " + r + " " + theta);
+				model.output("motor", "peck-recoil " + hand + " " + finger + " " + r + " " + theta);
 			if (hand == Symbol.right && rightHand.equals(mouseKey)) {
 				model.outputWarning("hand not on keyboard");
 				return;
@@ -538,14 +500,14 @@ public class Motor extends Module {
 
 			eventTime = prepareMovement(eventTime, request);
 			eventTime = initiateMovement(eventTime);
-			eventTime += Math.max(burstTime, moveTime);
+			eventTime += model.randomizeTime(Math.max(burstTime, moveTime));
 			model.addEvent(new Event(eventTime, "motor", "output key " + key) {
 				@Override
 				public void action() {
 					model.getTask().typeKey(convertToChar(key));
 				}
 			});
-			eventTime += burstTime + moveTime;
+			eventTime += model.randomizeTime(burstTime + moveTime);
 			finishMovement(eventTime);
 		}
 	}
@@ -649,26 +611,20 @@ public class Motor extends Module {
 	}
 
 	String keymap[][] = {
-			{ "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9",
-					"f10", "f11", "f12", "f13", "f14", "f15" },
+			{ "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14",
+					"f15" },
 			{},
-			{ "backquote", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-					"-", "hyphen", "=", "delete", "help", "home", "pageup",
-					"clear", "=", "/", "*" },
-			{ "tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[",
-					"]", "backslash", "forward-delete", "end", "page-up",
-					"keypad-7", "keypad-8", "keypad-9", "keypad-hyphen" },
-			{ "caps-lock", "a", "s", "d", "f", "g", "h", "j", "k", "l",
-					"semicolon", "quote", "return", "keypad-4", "keypad-5",
-					"keypad-6", "keypad-plus" },
-			{ "shift", "z", "x", "c", "v", "b", "n", "m", "comma", "period",
-					"dot", "/", "right-shift", "up-arrow", "keypad-1",
-					"keypad-2", "keypad-3", "keypad-enter" },
-			{ "left-control", "left-option", "left-command", "spc", "spc",
-					"spc", "spc", "spc", "spc", "spc", "spc", "right-command",
-					"right-option", "right-control", "left-arrow",
-					"down-arrow", "right-arrow", "keypad-0", "keypad-period",
-					"enter" } };
+			{ "backquote", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "hyphen", "=", "delete", "help",
+					"home", "pageup", "clear", "=", "/", "*" },
+			{ "tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "backslash", "forward-delete", "end",
+					"page-up", "keypad-7", "keypad-8", "keypad-9", "keypad-hyphen" },
+			{ "caps-lock", "a", "s", "d", "f", "g", "h", "j", "k", "l", "semicolon", "quote", "return", "keypad-4",
+					"keypad-5", "keypad-6", "keypad-plus" },
+			{ "shift", "z", "x", "c", "v", "b", "n", "m", "comma", "period", "dot", "/", "right-shift", "up-arrow",
+					"keypad-1", "keypad-2", "keypad-3", "keypad-enter" },
+			{ "left-control", "left-option", "left-command", "spc", "spc", "spc", "spc", "spc", "spc", "spc", "spc",
+					"right-command", "right-option", "right-control", "left-arrow", "down-arrow", "right-arrow",
+					"keypad-0", "keypad-period", "enter" } };
 
 	private void populateKeys() {
 		for (int y = 0; y < keymap.length; y++)
@@ -679,10 +635,8 @@ public class Motor extends Module {
 
 	private void populateKeyCommands() {
 		keycmds.put("space", "punch hand left finger thumb");
-		keycmds.put("backquote",
-				"peck-recoil hand left finger pinkie r 2.24 theta -2.03");
-		keycmds.put("tab",
-				"peck-recoil hand left finger pinkie r 1.41 theta -2.36");
+		keycmds.put("backquote", "peck-recoil hand left finger pinkie r 2.24 theta -2.03");
+		keycmds.put("tab", "peck-recoil hand left finger pinkie r 1.41 theta -2.36");
 		keycmds.put("1", "peck-recoil hand left finger pinkie r 2 theta -1.57");
 		keycmds.put("q", "peck-recoil hand left finger pinkie r 1 theta -1.57");
 		keycmds.put("a", "punch hand left finger pinkie");
@@ -699,19 +653,14 @@ public class Motor extends Module {
 		keycmds.put("r", "peck-recoil hand left finger index r 1 theta -1.57");
 		keycmds.put("f", "punch hand left finger index");
 		keycmds.put("v", "peck-recoil hand left finger index r 1 theta 1.57");
-		keycmds.put("5",
-				"peck-recoil hand left finger index r 2.24 theta -1.11");
-		keycmds.put("t",
-				"peck-recoil hand left finger index r 1.41 theta -0.79");
+		keycmds.put("5", "peck-recoil hand left finger index r 2.24 theta -1.11");
+		keycmds.put("t", "peck-recoil hand left finger index r 1.41 theta -0.79");
 		keycmds.put("g", "peck-recoil hand left finger index r 1 theta 0");
 		keycmds.put("b", "peck-recoil hand left finger index r 1.41 theta 0.79");
-		keycmds.put("6",
-				"peck-recoil hand right finger index r 2.24 theta -2.03");
-		keycmds.put("y",
-				"peck-recoil hand right finger index r 1.41 theta -2.36");
+		keycmds.put("6", "peck-recoil hand right finger index r 2.24 theta -2.03");
+		keycmds.put("y", "peck-recoil hand right finger index r 1.41 theta -2.36");
 		keycmds.put("h", "peck-recoil hand right finger index r 1 theta 3.14");
-		keycmds.put("n",
-				"peck-recoil hand right finger index r 1.41 theta 2.36");
+		keycmds.put("n", "peck-recoil hand right finger index r 1.41 theta 2.36");
 		keycmds.put("7", "peck-recoil hand right finger index r 2 theta -1.57");
 		keycmds.put("u", "peck-recoil hand right finger index r 1 theta -1.57");
 		keycmds.put("j", "punch hand right finger index");
@@ -719,27 +668,20 @@ public class Motor extends Module {
 		keycmds.put("8", "peck-recoil hand right finger middle r 2 theta -1.57");
 		keycmds.put("i", "peck-recoil hand right finger middle r 1 theta -1.57");
 		keycmds.put("k", "punch hand right finger middle");
-		keycmds.put("comma",
-				"peck-recoil hand right finger middle r 1 theta 1.57");
+		keycmds.put("comma", "peck-recoil hand right finger middle r 1 theta 1.57");
 		keycmds.put("9", "peck-recoil hand right finger ring r 2 theta -1.57");
 		keycmds.put("o", "peck-recoil hand right finger ring r 1 theta -1.57");
 		keycmds.put("l", "punch hand right finger ring");
-		keycmds.put("period",
-				"peck-recoil hand right finger ring r 1 theta 1.57");
+		keycmds.put("period", "peck-recoil hand right finger ring r 1 theta 1.57");
 		keycmds.put("0", "peck-recoil hand right finger pinkie r 2 theta -1.57");
 		keycmds.put("p", "peck-recoil hand right finger pinkie r 1 theta -1.57");
 		keycmds.put("semicolon", "punch hand right finger pinkie");
-		keycmds.put("slash",
-				"peck-recoil hand right finger pinkie r 1 theta 1.57");
-		keycmds.put("hyphen",
-				"peck-recoil hand right finger pinkie r 2.24 theta -1.11");
-		keycmds.put("-",
-				"peck-recoil hand right finger pinkie r 2.24 theta -1.11");
-		keycmds.put("[",
-				"peck-recoil hand right finger pinkie r 1.41 theta -0.78");
+		keycmds.put("slash", "peck-recoil hand right finger pinkie r 1 theta 1.57");
+		keycmds.put("hyphen", "peck-recoil hand right finger pinkie r 2.24 theta -1.11");
+		keycmds.put("-", "peck-recoil hand right finger pinkie r 2.24 theta -1.11");
+		keycmds.put("[", "peck-recoil hand right finger pinkie r 1.41 theta -0.78");
 		keycmds.put("quote", "peck-recoil hand right finger pinkie r 1 theta 0");
-		keycmds.put("return",
-				"peck-recoil hand right finger pinkie r 2 theta 0");
+		keycmds.put("return", "peck-recoil hand right finger pinkie r 2 theta 0");
 		keycmds.put("mouse", "punch hand right finger index");
 	}
 }

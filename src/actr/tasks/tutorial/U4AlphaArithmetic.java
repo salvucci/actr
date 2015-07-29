@@ -16,18 +16,12 @@ import actr.task.Utilities;
 public class U4AlphaArithmetic extends Task {
 	// Task Code
 
-	private final String trialTuples[][] = { { "A", "2", "C", "K" },
-			{ "D", "2", "F", "K" }, { "B", "3", "E", "K" },
-			{ "E", "3", "H", "K" }, { "C", "4", "G", "K" },
-			{ "F", "4", "J", "K" }, { "A", "2", "D", "D" },
-			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" },
-			{ "E", "3", "I", "D" }, { "C", "4", "H", "D" },
-			{ "F", "4", "K", "D" }, { "A", "2", "C", "K" },
-			{ "D", "2", "F", "K" }, { "B", "3", "E", "K" },
-			{ "E", "3", "H", "K" }, { "C", "4", "G", "K" },
-			{ "F", "4", "J", "K" }, { "A", "2", "D", "D" },
-			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" },
-			{ "E", "3", "I", "D" }, { "C", "4", "H", "D" },
+	private final String trialTuples[][] = { { "A", "2", "C", "K" }, { "D", "2", "F", "K" }, { "B", "3", "E", "K" },
+			{ "E", "3", "H", "K" }, { "C", "4", "G", "K" }, { "F", "4", "J", "K" }, { "A", "2", "D", "D" },
+			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" }, { "E", "3", "I", "D" }, { "C", "4", "H", "D" },
+			{ "F", "4", "K", "D" }, { "A", "2", "C", "K" }, { "D", "2", "F", "K" }, { "B", "3", "E", "K" },
+			{ "E", "3", "H", "K" }, { "C", "4", "G", "K" }, { "F", "4", "J", "K" }, { "A", "2", "D", "D" },
+			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" }, { "E", "3", "I", "D" }, { "C", "4", "H", "D" },
 			{ "F", "4", "K", "D" } };
 
 	private TaskLabel addend1Label, addend2Label, sumLabel;
@@ -106,14 +100,12 @@ public class U4AlphaArithmetic extends Task {
 
 	@Override
 	public void typeKey(char c) {
-		currentTrial.responseTime = getModel().getTime()
-				- currentTrialStartTime;
+		currentTrial.responseTime = getModel().getTime() - currentTrialStartTime;
 	}
 
 	// Analysis Code
 
-	private double humanRT[][] = { { 1.84, 2.46, 2.82 }, { 1.21, 1.45, 1.42 },
-			{ 1.14, 1.21, 1.17 } };
+	private double humanRT[][] = { { 1.84, 2.46, 2.82 }, { 1.21, 1.45, 1.42 }, { 1.14, 1.21, 1.17 } };
 
 	@Override
 	public int analysisIterations() {
@@ -141,8 +133,7 @@ public class U4AlphaArithmetic extends Task {
 				Trial trial = task.trials.elementAt(j);
 
 				int blockIndex = trial.block - 1;
-				int sizeIndex = (trial.addend2.equals("2") ? 0 : (trial.addend2
-						.equals("3") ? 1 : 2));
+				int sizeIndex = (trial.addend2.equals("2") ? 0 : (trial.addend2.equals("3") ? 1 : 2));
 
 				modelRT[blockIndex][sizeIndex] += trial.responseTime;
 				modelCount[blockIndex][sizeIndex] += 1;
@@ -164,12 +155,8 @@ public class U4AlphaArithmetic extends Task {
 			getModel().output("\nModel");
 			printTable(modelRT);
 
-			getModel().output(
-					String.format("\nR = %.2f",
-							Statistics.correlation(modelRT, humanRT)));
-			getModel().output(
-					String.format("\nRMSE = %.2f",
-							Statistics.rmse(modelRT, humanRT)));
+			getModel().output(String.format("\nR = %.2f", Statistics.correlation(modelRT, humanRT)));
+			getModel().output(String.format("\nRMSE = %.2f", Statistics.rmse(modelRT, humanRT)));
 		}
 
 		return result;

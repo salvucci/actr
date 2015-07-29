@@ -19,8 +19,8 @@ public class Bold {
 	double boldIncrement = .200; // 1.5;
 	double boldSettle = 40;
 
-	private final Symbol buffers[] = { Symbol.retrieval, Symbol.imaginal,
-			Symbol.visual, Symbol.aural, Symbol.manual, Symbol.vocal };
+	private final Symbol buffers[] = { Symbol.retrieval, Symbol.imaginal, Symbol.visual, Symbol.aural, Symbol.manual,
+			Symbol.vocal };
 	private final double boldMax = maximum();
 
 	private class Span {
@@ -88,8 +88,7 @@ public class Bold {
 		model.updateVisuals();
 
 		if (model.getEvents().hasMoreEvents()) {
-			model.addEvent(new actr.model.Event(
-					model.getTime() + boldIncrement, "bold", "") {
+			model.addEvent(new actr.model.Event(model.getTime() + boldIncrement, "bold", "") {
 				@Override
 				public void action() {
 					update();
@@ -103,14 +102,12 @@ public class Bold {
 	}
 
 	void recordActivity(Symbol buffer) {
-		Symbol stateBuffer = (buffer.isState()) ? buffer : Symbol.get("?"
-				+ buffer.getString());
+		Symbol stateBuffer = (buffer.isState()) ? buffer : Symbol.get("?" + buffer.getString());
 		Chunk c = model.getBuffers().get(stateBuffer);
-		boolean active = (c.get(Symbol.buffer) != Symbol.empty || (c
-				.get(Symbol.state) != Symbol.free && c.get(Symbol.state) != Symbol.error));
+		boolean active = (c.get(Symbol.buffer) != Symbol.empty
+				|| (c.get(Symbol.state) != Symbol.free && c.get(Symbol.state) != Symbol.error));
 
-		buffer = (buffer.isState()) ? Symbol.get(buffer.getString()
-				.substring(1)) : buffer;
+		buffer = (buffer.isState()) ? Symbol.get(buffer.getString().substring(1)) : buffer;
 		Activity activity = activities.get(buffer);
 		if (activity != null)
 			activity.add(model.getTime(), active);
@@ -142,8 +139,7 @@ public class Bold {
 			Span span = spans.elementAt(i);
 			if (span.active) {
 				double start = span.startTime;
-				double end = (i + 1 < spans.size()) ? spans.elementAt(i + 1).startTime
-						: current;
+				double end = (i + 1 < spans.size()) ? spans.elementAt(i + 1).startTime : current;
 				if (end >= current - boldSettle)
 					sum += span(start, end, current);
 			}

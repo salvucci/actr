@@ -35,10 +35,8 @@ public class Temporal extends Module {
 			timeChunk.set(Symbol.ticks, Symbol.get(0));
 			model.getBuffers().set(Symbol.temporal, timeChunk);
 
-			model.getBuffers().setSlot(Symbol.temporalState, Symbol.buffer,
-					Symbol.full);
-			model.getBuffers().setSlot(Symbol.temporalState, Symbol.state,
-					Symbol.busy);
+			model.getBuffers().setSlot(Symbol.temporalState, Symbol.buffer, Symbol.full);
+			model.getBuffers().setSlot(Symbol.temporalState, Symbol.state, Symbol.busy);
 
 			model.removeEvents("temporal");
 			queueTickIncrement();
@@ -46,16 +44,14 @@ public class Temporal extends Module {
 	}
 
 	void queueTickIncrement() {
-		model.addEvent(new Event(model.getTime() + tick, "temporal",
-				"increment ticks [" + (ticks + 1) + "]") {
+		model.addEvent(new Event(model.getTime() + tick, "temporal", "increment ticks [" + (ticks + 1) + "]") {
 			@Override
 			public void action() {
 				ticks++;
 				tick *= timeMultiplier;
 				tick += Utilities.getNoise(timeNoise * tick);
 
-				model.getBuffers().setSlot(Symbol.temporal, Symbol.ticks,
-						Symbol.get(ticks));
+				model.getBuffers().setSlot(Symbol.temporal, Symbol.ticks, Symbol.get(ticks));
 
 				queueTickIncrement();
 			}

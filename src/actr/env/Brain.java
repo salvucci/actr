@@ -18,8 +18,8 @@ class Brain extends JPanel {
 	private Frame frame;
 	private Vector<Region> regions = new Vector<Region>();
 
-	private final Image images[] = { Resources.getImage("brain1.png"),
-			Resources.getImage("brain2.png"), Resources.getImage("brain3.png") };
+	private final Image images[] = { Resources.getImage("brain1.png"), Resources.getImage("brain2.png"),
+			Resources.getImage("brain3.png") };
 	private final double scale = .75;
 	private final int sizes[][] = { { 110, 130 }, { 115, 125 }, { 120, 120 } };
 	private final int centers[][] = { { 0, -150 }, { 0, 0 }, { 0, 150 } };
@@ -93,12 +93,10 @@ class Brain extends JPanel {
 		return colors;
 	}
 
-	private void paintActivation(Graphics2D g2d, int x, int y, Color colors[],
-			Region region) {
+	private void paintActivation(Graphics2D g2d, int x, int y, Color colors[], Region region) {
 		float fractions[] = { .4f, .7f, 1.0f };
 		int r = 10;
-		RadialGradientPaint paint = new RadialGradientPaint(x, y, r, fractions,
-				colors);
+		RadialGradientPaint paint = new RadialGradientPaint(x, y, r, fractions, colors);
 		g2d.setPaint(paint);
 		g2d.fillOval(x - r, y - r, 2 * r, 2 * r);
 
@@ -122,15 +120,13 @@ class Brain extends JPanel {
 			int y = centers[i][1];
 			int w = sizes[i][0];
 			int h = sizes[i][1];
-			g2d.drawImage(images[i], x - w / 2, y - h / 2, w, h, Color.black,
-					null);
+			g2d.drawImage(images[i], x - w / 2, y - h / 2, w, h, Color.black, null);
 		}
 
 		if (frame.getModel() != null) {
 			for (int n = 0; n < regions.size(); n++) {
 				Region region = regions.elementAt(n);
-				double bold = frame.getModel().getBold()
-						.getValue(Symbol.get(region.buffer));
+				double bold = frame.getModel().getBold().getValue(Symbol.get(region.buffer));
 
 				if (bold > 0) {
 					Color colors[] = getColors(bold);

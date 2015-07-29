@@ -188,8 +188,7 @@ public class Buffers {
 				double tt = (ttd == null) ? 0 : ttd.doubleValue();
 				if (tt + bufferChunkLife < model.getTime()) {
 					if (model.verboseTrace)
-						model.output("buffers", buffer
-								+ " cleared (buffer decay)");
+						model.output("buffers", buffer + " cleared (buffer decay)");
 					clear(buffer);
 					it = buffers.keySet().iterator(); // buffers hashset has
 														// changed!
@@ -246,14 +245,12 @@ public class Buffers {
 	@Override
 	public String toString() {
 		String s = "Buffers:\n";
-		s += String.format("%-16s", Symbol.goal) + " : " + get(Symbol.goal)
-				+ "\n";
+		s += String.format("%-16s", Symbol.goal) + " : " + get(Symbol.goal) + "\n";
 		Iterator<Symbol> it = buffers.keySet().iterator();
 		while (it.hasNext()) {
 			Symbol buffer = it.next();
 			if (!buffer.isState() && buffer != Symbol.goal)
-				s += String.format("%-16s", buffer) + " : " + get(buffer)
-						+ "\n";
+				s += String.format("%-16s", buffer) + " : " + get(buffer) + "\n";
 		}
 
 		s += "\nStates:\n";
@@ -261,8 +258,7 @@ public class Buffers {
 		while (it.hasNext()) {
 			Symbol buffer = it.next();
 			if (buffer.isState() && buffer != Symbol.goalState)
-				s += String.format("%-16s", buffer) + " : " + get(buffer)
-						+ "\n";
+				s += String.format("%-16s", buffer) + " : " + get(buffer) + "\n";
 		}
 
 		s += "\nGoals:\n";

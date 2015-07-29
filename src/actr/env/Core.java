@@ -30,8 +30,7 @@ public class Core {
 
 	void startup() {
 		try {
-			Starter starter = (Starter) (Class.forName(starterClass)
-					.newInstance());
+			Starter starter = (Starter) (Class.forName(starterClass).newInstance());
 			starter.startup(this);
 		} catch (Exception e) {
 			if (fileToOpen != null)
@@ -113,8 +112,7 @@ public class Core {
 	 * opens the file.
 	 */
 	public void openFrame() {
-		FileDialog fileDialog = new FileDialog(currentFrame(), "Open...",
-				FileDialog.LOAD);
+		FileDialog fileDialog = new FileDialog(currentFrame(), "Open...", FileDialog.LOAD);
 		fileDialog.setDirectory(prefs.getMostRecentPath());
 		fileDialog.setVisible(true);
 		if (fileDialog.getFile() == null)
@@ -138,8 +136,7 @@ public class Core {
 			frame.toFront();
 		else {
 			frame = currentFrame();
-			if (frame != null && frame.getFile() == null
-					&& !frame.getDocument().isChanged())
+			if (frame != null && frame.getFile() == null && !frame.getDocument().isChanged())
 				frame.open(file);
 			else
 				newFrame(file);
@@ -234,8 +231,7 @@ public class Core {
 		InvisibleFrame(Core core) {
 			super();
 			setUndecorated(true);
-			Menus menus = new Menus(new Actions(core, null),
-					core.getPreferences(), true);
+			Menus menus = new Menus(new Actions(core, null), core.getPreferences(), true);
 			setJMenuBar(menus);
 			pack();
 			setSize(1, 1);

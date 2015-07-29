@@ -37,8 +37,7 @@ class SaveDialog extends JDialog {
 		left.add(new JLabel(icon));
 		left.add(Box.createVerticalGlue());
 
-		String text = "<html><font size=3><b>Do you want to save the changes you made in<br>the document \""
-				+ filename
+		String text = "<html><font size=3><b>Do you want to save the changes you made in<br>the document \"" + filename
 				+ "\"?</b></font><font size=2><br><br>Your changes will be lost if you don't save them.</font></html>";
 
 		JButton dontSaveButton = new JButton("Don't Save");
@@ -92,8 +91,7 @@ class SaveDialog extends JDialog {
 				save = false;
 				dialog.setVisible(false);
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.META_MASK),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.META_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().registerKeyboardAction(new ActionListener() {
 			@Override
@@ -101,8 +99,7 @@ class SaveDialog extends JDialog {
 				cancel = true;
 				dialog.setVisible(false);
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().setDefaultButton(saveButton);
 
@@ -112,8 +109,7 @@ class SaveDialog extends JDialog {
 		pack();
 
 		Point pt = frame.getLocationOnScreen();
-		setLocation((int) (pt.getX() + frame.getWidth() / 2 - getWidth() / 2),
-				(int) pt.getY() + 23);
+		setLocation((int) (pt.getX() + frame.getWidth() / 2 - getWidth() / 2), (int) pt.getY() + 23);
 
 		setVisible(true);
 	}

@@ -13,17 +13,14 @@ class Preferences {
 	String font;
 	int fontSize;
 	boolean autoHilite, autoIndent;
-	Color commandColor, parameterColor, productionColor, chunkColor,
-			bufferColor, commentColor;
+	Color commandColor, parameterColor, productionColor, chunkColor, bufferColor, commentColor;
 	int indentSpaces;
 	Vector<String> recentFiles = new Vector<String>();
 
 	private static final String prefsFilePath = ((Main.inApplet()) ? null
-			: (Main.onMac()) ? System.getProperty("user.home")
-					+ "/Library/Preferences/actr.txt"
-					: ((Main.onNix()) ? System.getProperty("user.home")
-							+ "/.actr" : System.getProperty("user.home")
-							+ File.separator + "actrprefs.txt"));
+			: (Main.onMac()) ? System.getProperty("user.home") + "/Library/Preferences/actr.txt"
+					: ((Main.onNix()) ? System.getProperty("user.home") + "/.actr"
+							: System.getProperty("user.home") + File.separator + "actrprefs.txt"));
 
 	private final int maxRecentFiles = 5;
 

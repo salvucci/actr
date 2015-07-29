@@ -200,20 +200,15 @@ class BufferAction {
 		specials.add(s);
 	}
 
-	private void storeInMemory(Symbol buffer, Instantiation inst,
-			boolean forceVisual) {
+	private void storeInMemory(Symbol buffer, Instantiation inst, boolean forceVisual) {
 		Chunk bufferChunk = model.getBuffers().get(buffer);
-		if (bufferChunk != null
-				&& (forceVisual || ((buffer != Symbol.visloc
-						&& buffer != Symbol.aurloc && buffer != Symbol.visual && buffer != Symbol.aural)))) {
+		if (bufferChunk != null && (forceVisual || ((buffer != Symbol.visloc && buffer != Symbol.aurloc
+				&& buffer != Symbol.visual && buffer != Symbol.aural)))) {
 			if (model.verboseTrace)
-				model.output("declarative",
-						"store chunk [" + bufferChunk.getName() + "] "
-								+ bufferChunk);
+				model.output("declarative", "store chunk [" + bufferChunk.getName() + "] " + bufferChunk);
 			Chunk newChunk = model.getDeclarative().add(bufferChunk);
 			if (newChunk != bufferChunk && model.verboseTrace)
-				model.output("declarative",
-						"merged into [" + newChunk.getName() + "]");
+				model.output("declarative", "merged into [" + newChunk.getName() + "]");
 			if (newChunk != bufferChunk)
 				inst.replaceValue(bufferChunk.getName(), newChunk.getName());
 		}
@@ -230,8 +225,7 @@ class BufferAction {
 			if (direct == null)
 				direct = model.getBuffers().getBufferChunk(directSymbol);
 			if (direct == null) {
-				model.outputWarning(directAction + " -> " + directSymbol
-						+ " not a valid chunk");
+				model.outputWarning(directAction + " -> " + directSymbol + " not a valid chunk");
 				return;
 			}
 			direct = direct.copy();
@@ -267,8 +261,7 @@ class BufferAction {
 				String special = specials.elementAt(i);
 				if (Symbol.get(special).isVariable()) {
 					Symbol value = inst.get(Symbol.get(special));
-					special = (value == null) ? "<unbound variable>" : value
-							.getString();
+					special = (value == null) ? "<unbound variable>" : value.getString();
 				}
 				tokens.add(special);
 				s += special + ((i == specials.size() - 1) ? "" : " ");

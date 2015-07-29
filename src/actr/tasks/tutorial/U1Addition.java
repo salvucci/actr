@@ -11,8 +11,8 @@ import actr.task.Task;
 public class U1Addition extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		boolean ok = (getModel().getProcedural().getLastProductionFired()
-				.getName().getString().contains("terminate-addition"));
+		boolean ok = (getModel().getProcedural().getLastProductionFired().getName().getString()
+				.contains("terminate-addition"));
 		return new Result("U1Addition", ok);
 	}
 }

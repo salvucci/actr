@@ -129,8 +129,7 @@ public class Instantiation {
 		return time;
 	}
 
-	void addDelayedSlotCondition(Symbol buffer, SlotCondition sc,
-			Chunk bufferChunk) {
+	void addDelayedSlotCondition(Symbol buffer, SlotCondition sc, Chunk bufferChunk) {
 		DelayedSlotCondition dsc = new DelayedSlotCondition();
 		dsc.buffer = buffer;
 		dsc.slotCondition = sc;

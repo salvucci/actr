@@ -50,8 +50,7 @@ class SlotAction {
 		if (operator == null)
 			bufferChunk.set(realSlot, realValue);
 		else
-			bufferChunk.addRequestCondition(new SlotCondition(operator,
-					realSlot, realValue, model));
+			bufferChunk.addRequestCondition(new SlotCondition(operator, realSlot, realValue, model));
 	}
 
 	void specialize(Symbol variable, Symbol instvalue) {

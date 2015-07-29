@@ -31,8 +31,7 @@ public class U2Demo extends actr.task.Task {
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		boolean ok = (getModel().getProcedural().getLastProductionFired()
-				.getName().getString().contains("respond"));
+		boolean ok = (getModel().getProcedural().getLastProductionFired().getName().getString().contains("respond"));
 		return new Result("U2Demo", ok);
 	}
 }
