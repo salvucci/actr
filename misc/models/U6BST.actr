@@ -1,0 +1,510 @@
+;;
+;; Unit 6: Building Sticks Model
+;; from the CMU ACT-R Tutorials
+;;
+
+(set-task "actr.tasks.tutorial.U6BST")
+
+(sgp :v nil :egs 3 :ul t) ;; :show-focus t :esc t :ncnar nil :trace-detail medium)
+
+(start-hand-at-mouse)
+
+(add-dm (goal isa try-strategy state start))
+
+(p start-trial
+    =goal>
+        isa      try-strategy
+        state    start
+    ?visual-location>
+        buffer unrequested
+==>
+        ;; !eval! (print-utilities)
+    =goal>
+        state find-line
+)
+
+(p find-next-line
+    =goal>
+        isa      try-strategy
+        state    find-line
+==>
+    +visual-location>
+        isa      visual-location
+        :attended nil
+        kind     line
+        screen-y lowest
+    =goal>
+        state looking
+)
+
+(p attend-line
+    =goal>
+        isa      try-strategy
+        state    looking
+    =visual-location>
+        isa      visual-location
+    ?visual>
+        state    free
+==>
+        
+    =goal>
+        state    attending
+    +visual>
+        isa move-attention
+        screen-pos =visual-location
+)
+
+(p encode-line-a
+    =goal>
+        isa      try-strategy
+        state    attending
+    =visual>
+        isa      line
+        screen-pos =pos
+    ?imaginal>
+        buffer empty
+        state  free
+==>
+    +imaginal>
+        isa encoding
+        a-loc    =pos
+    =goal>
+        state    find-line
+)
+
+(p encode-line-b
+    =goal>
+        isa      try-strategy
+        state    attending
+    =imaginal>
+        isa encoding
+        a-loc    =a
+        b-loc    nil
+    =visual>
+        isa      line
+        screen-pos =pos
+==>
+    =imaginal>
+        b-loc    =pos
+    =goal>
+        state    find-line)
+
+(p encode-line-c
+    =goal>
+        isa      try-strategy
+        state    attending
+    =imaginal>
+        isa encoding
+        b-loc    =b
+        c-loc    nil
+    =visual>
+        isa      line
+        screen-pos =pos
+==>
+    =imaginal>
+        c-loc    =pos
+    =goal>
+        state    find-line
+)
+
+(p encode-line-goal
+    =goal>
+        isa      try-strategy
+        state    attending
+    =imaginal>
+        isa encoding
+        c-loc    =c
+        goal-loc nil
+    =visual>
+        isa      line
+        screen-pos =pos
+        width    =length
+    ?visual>
+        state    free
+==>
+    =imaginal>
+        goal-loc =pos
+        length   =length
+        
+    =goal>
+        state    encode-under
+    +visual>
+        isa      move-attention
+        screen-pos =c
+)
+
+(p encode-under
+    =goal>
+        isa      try-strategy
+        state    encode-under
+    =imaginal>
+        isa encoding
+        b-loc    =b
+        length   =goal-len
+    =visual>
+        isa      line
+        width    =c-len
+    ?visual>
+        state    free
+==>
+    !bind! =val (- =goal-len =c-len)
+    =imaginal>
+        under =val
+    =goal>
+        state    encode-over
+    +visual>
+        isa      move-attention
+        screen-pos =b
+)
+
+(p encode-over
+    =goal>
+        isa      try-strategy
+        state    encode-over
+    =imaginal>
+        isa encoding
+        length   =goal-len
+    =visual>
+        isa      line
+        width    =b-len
+==>
+    !bind! =val (- =b-len =goal-len)
+    =imaginal>
+        over =val
+    =goal>
+        state    choose-strategy
+)
+
+(p encode-line-current
+    =goal>
+        isa      try-strategy
+        state    attending
+    =imaginal>
+        isa encoding
+        goal-loc =goal-loc
+    =visual>
+        isa      line
+        width    =current-len
+    ?visual>
+        state    free
+==>
+    =imaginal>
+        length   =current-len
+    =goal>
+        state    calculate-difference
+    +visual>
+        isa      move-attention
+        screen-pos =goal-loc
+)
+
+(p calculate-difference
+    =goal>
+        isa      try-strategy
+        state    calculate-difference
+    =imaginal>
+        isa encoding
+        length   =current-len
+    =visual>
+        isa      line
+        width    =goal-len
+==>
+    !bind! =val (abs (- =current-len =goal-len))
+    =imaginal>
+        length =val
+    =goal>
+        state    consider-next
+)
+
+(p check-for-done
+    =goal>
+        isa      try-strategy
+        state    consider-next
+    =imaginal>
+        isa encoding
+        length   0
+==>
+    =goal>
+        state    check-for-done
+    +visual-location>
+        isa      visual-location
+        > screen-y 200
+)
+
+(p find-done
+    =goal>
+        isa      try-strategy
+        state    check-for-done
+    =visual-location>
+        isa      visual-location
+    ?visual>
+        state    free
+==>
+    +visual>
+        isa      move-attention
+        screen-pos =visual-location
+    =goal>
+        state    read-done
+)
+
+(p read-done
+    =goal>
+        isa      try-strategy
+        state    read-done
+    =visual>
+        isa      text
+        value    "done"
+==>
+    +goal>
+        isa      try-strategy
+        state    start)
+
+(p consider-c
+    =goal>
+        isa      try-strategy
+        state    consider-next
+    =imaginal>
+        isa encoding
+        c-loc    =c-loc
+        > length   0
+    ?visual>
+        state free
+==>
+    =imaginal>
+    =goal>
+        state    evaluate-c
+    +visual>
+        isa     move-attention
+        screen-pos =c-loc
+)
+
+(p choose-c
+    =goal>
+        isa      try-strategy
+        state    evaluate-c
+    =imaginal>
+        isa encoding
+        length   =difference
+    =visual>
+        isa      line
+        <= width   =difference
+==>
+    =imaginal>
+    =goal>
+        state    prepare-mouse
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 85
+)
+
+(p consider-a
+    =goal>
+        isa      try-strategy
+        state    evaluate-c
+    =imaginal>
+        isa encoding
+        a-loc    =a-loc
+        length   =difference
+    =visual>
+        isa      line
+        > width    =difference
+    ?visual>
+        state free
+==>
+    =imaginal>
+    =goal>
+        state    evaluate-a
+    +visual>
+        isa      move-attention
+        screen-pos =a-loc
+)
+
+(p choose-a
+    =goal>
+        isa      try-strategy
+        state    evaluate-a
+    =imaginal>
+        isa encoding
+        length   =difference
+    =visual>
+        isa      line
+        <= width   =difference
+==>
+    =imaginal>
+    =goal>
+        state    prepare-mouse
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 35
+)
+
+(p reset
+    =goal>
+        isa      try-strategy
+        state    evaluate-a
+    =imaginal>
+        isa encoding
+        length   =difference
+    =visual>
+        isa      line
+        > width    =difference
+==>
+    =imaginal>
+    =goal>
+        state    prepare-mouse
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 135
+)
+
+(p decide-over
+    =goal>
+        isa      try-strategy
+        state    choose-strategy
+        strategy nil
+    =imaginal>
+        isa encoding
+        under    =under
+        over     =over
+    !eval! (< =over (- =under 25))
+==>
+    =imaginal>
+    =goal>
+        state    prepare-mouse
+        strategy over
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 60
+)
+
+(p force-over
+    =goal>
+        isa      try-strategy
+        state    choose-strategy
+        - strategy over
+==>
+    =goal>
+        state    prepare-mouse
+        strategy over
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 60
+)
+
+(p decide-under
+    =goal>
+        isa      try-strategy
+        state    choose-strategy
+        strategy nil
+    =imaginal>
+        isa encoding
+        over     =over
+        under    =under
+    !eval! (< =under (- =over 25))
+==>
+    =imaginal>
+    =goal>
+        state    prepare-mouse
+        strategy under
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 85
+)
+
+(p force-under
+    =goal>
+        isa      try-strategy
+        state    choose-strategy
+        - strategy under
+==>
+    =goal>
+        state    prepare-mouse
+        strategy under
+    +visual-location>
+        isa      visual-location
+        kind     oval
+        screen-y 85
+)
+
+(p move-mouse
+    =goal>
+        isa      try-strategy
+        state    prepare-mouse
+    =visual-location>
+        isa      visual-location
+    ?visual>
+        state   free
+    ?manual>
+        state   free
+==>
+    =visual-location>
+    +visual>
+        isa      move-attention
+        screen-pos =visual-location
+    =goal>
+        state    move-mouse
+    +manual>
+        isa      move-cursor
+        loc      =visual-location
+)
+
+(p click-mouse
+    =goal>
+        isa      try-strategy
+        state    move-mouse
+    ?manual>
+        state    free
+==>
+    =goal>
+        state    wait-for-click
+    +manual>
+        isa      click-mouse
+)
+
+(p look-for-current
+    =goal>
+        isa      try-strategy
+        state    wait-for-click
+    ?manual>
+        state    free
+    =visual-location>
+        isa      visual-location
+        < screen-y 100
+==>
+    +visual-location>
+        isa      visual-location
+        :attended nil
+        kind     line
+        screen-y highest
+    =goal>
+        state    looking
+)
+
+(p pick-another-strategy
+    =goal>
+        isa      try-strategy
+        state    wait-for-click
+    ?manual>
+        state free
+    =visual-location>
+        isa      visual-location
+        > screen-y 100
+==>
+    =goal>
+        state choose-strategy
+)
+
+(goal-focus goal)
+
+(spp decide-over :u 13)
+(spp decide-under :u 13)
+(spp force-over :u 10)
+(spp force-under :u 10)
+
+(spp pick-another-strategy :reward 0)
+(spp read-done :reward 20)

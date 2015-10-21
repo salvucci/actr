@@ -1,0 +1,77 @@
+;;
+;; Unit 2: Demo Model
+;; from the CMU ACT-R Tutorials
+;;
+
+(set-task "actr.tasks.tutorial.U2Demo")
+
+(sgp :v t) ;; :needs-mouse nil :show-focus t :trace-detail high)
+
+(add-dm 
+    (start isa chunk) (attend isa chunk)
+    (respond isa chunk) (done isa chunk)
+    (goal isa read-letters state start))
+
+(p find-unattended-letter
+    =goal>
+        ISA         read-letters
+        state       start
+==>
+    +visual-location>
+        ISA         visual-location
+        :attended    nil
+    =goal>
+        state       find-location
+)
+
+(p attend-letter
+    =goal>
+        ISA         read-letters
+        state       find-location
+    =visual-location>
+        ISA         visual-location
+        
+    ?visual>
+        state        free
+        
+==>
+    +visual>
+        ISA         move-attention
+        screen-pos  =visual-location
+    =goal>
+        state       attend
+)
+
+(p encode-letter
+    =goal>
+        ISA         read-letters
+        state       attend
+    =visual>
+        ISA         text
+        value       =letter
+==>
+    =goal>
+        state       respond
+    +imaginal>
+        isa         array
+        letter      =letter
+)
+
+(p respond
+    =goal>
+        ISA         read-letters
+        state       respond
+    =imaginal>
+        isa         array
+        letter      =letter
+    ?manual>   
+        state       free
+==>
+    =goal>
+        state       done
+    +manual>
+        ISA         press-key
+        key         =letter
+)
+
+(goal-focus goal)
