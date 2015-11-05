@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
  */
 public class Main extends JApplet {
 	/** The application's version string. */
-	private static final String version = "1.3";
+	private static final String VERSION = "1.3";
 
 	/** The single core class used in the application. */
 	public static Core core = null;
@@ -104,13 +104,13 @@ public class Main extends JApplet {
 				while ((c = in.read()) != -1)
 					sw.write(c);
 				in.close();
-				return version + " r" + sw.toString();
+				return VERSION + " r" + sw.toString();
 			} catch (Exception e) {
 				e.printStackTrace();
-				return version;
+				return VERSION;
 			}
 		} else
-			return version;
+			return VERSION;
 	}
 
 	/**
