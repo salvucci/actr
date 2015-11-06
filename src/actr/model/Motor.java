@@ -29,7 +29,7 @@ public class Motor extends Module {
 	double defaultTargetWidth = 1.0;
 
 	final double keyClosureTime = .010;
-	final double maxPrepTimeDifference = 5.0; // new XXX was 10.0
+	final double maxPrepTimeDifference = 10.0; // new XXX was 10.0 (change from 5 to 10 by Ehsan for fatigue module)
 	final Point leftHomeKey = new Point(4, 4);
 	final Point rightHomeKey = new Point(7, 4);
 	final Point mouseKey = new Point(28, 2);

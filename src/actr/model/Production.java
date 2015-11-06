@@ -15,10 +15,12 @@ public class Production {
 	private Vector<BufferCondition> conditions;
 	private Vector<BufferAction> actions;
 	private double u;
+	private double p = 1; // the probability that the goal will achieve with the current this produciton 
 	private boolean hasReward = false;
 	private double reward = 0;
 	private boolean breakPoint = false;
 	private int timesFired = 0;
+	private boolean constantUtility = false;
 
 	Production(Symbol name, Model model) {
 		this.name = name;
@@ -81,18 +83,13 @@ public class Production {
 	 * 
 	 * @return the utility value
 	 */
-	public double getUtility() {
-		return u;
-	}
-
-	void setName(Symbol name) {
-		this.name = name;
-	}
-
-	void setUtility(double x) {
-		u = x;
-	}
-
+	public double getUtility() { return u; }
+	public double getProbability() { return p; }
+	
+	void setName (Symbol name) { this.name = name; }
+	void setUtility (double x) { u = x; }
+	void setProbability (double x) { p = x; } 
+	
 	/**
 	 * Checks whether this production has an associated reward.
 	 * 
@@ -135,17 +132,22 @@ public class Production {
 		return timesFired;
 	}
 
-	void setParameter(String parameter, String value, Tokenizer t) throws Exception {
-		if (parameter.equals(":u"))
+	void setParameter (String parameter, String value, Tokenizer t) throws Exception
+	{
+		if (parameter.equals(":u")) {
 			u = Double.valueOf(value);
-		else if (parameter.equals(":reward")) {
+			constantUtility = true;
+		}
+		else if (parameter.equals(":p")) p = Double.valueOf(value);
+		else if (parameter.equals(":reward"))
+		{
 			hasReward = true;
 			reward = Double.valueOf(value);
-		} else if (parameter.equals(":break"))
-			breakPoint = !value.equals("nil");
-		else
-			model.recordWarning("unknown production parameter " + parameter, t);
+		}
+		else if (parameter.equals(":break")) breakPoint = !value.equals("nil");
+		else model.recordWarning ("unknown production parameter "+parameter, t);
 	}
+
 
 	Iterator<BufferCondition> getConditions() {
 		return conditions.iterator();
@@ -157,7 +159,6 @@ public class Production {
 				return conditions.elementAt(i);
 		return null;
 	}
-
 	boolean hasBufferCondition(Symbol buffer) {
 		return getBufferCondition(buffer) != null;
 	}
@@ -315,8 +316,18 @@ public class Production {
 
 		if (model.getProcedural().whyNotTrace)
 			model.output(name.getString());
-		double instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
-		Instantiation inst = new Instantiation(this, model.getTime(), instU);
+		
+		/* 
+		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
+		 */
+		double instU;
+		if (model.getFatigue().fatigue_enabled && !constantUtility)
+			instU  = u * model.getFatigue().compute_fp() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
+		else
+			instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
+		//System.out.println("u  ::: " + instU + "----" + name);
+
+		Instantiation inst = new Instantiation (this, model.getTime(), instU);
 
 		for (int i = 0; i < conditions.size(); i++) {
 			BufferCondition bc = conditions.elementAt(i);

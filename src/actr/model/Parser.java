@@ -75,7 +75,19 @@ class Parser {
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-				} else if (t.getToken().equals("set-parameter")) {
+				// For the sleep schedule in Fatigue model	
+				}else if (t.getToken().equals("set-schedule")) {
+					t.advance();
+					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+						parseSchedule(model);
+					}
+					if (!t.getToken().equals(")"))
+						model.recordError(t);
+					t.advance();
+					model.getFatigue().setSched();
+				} 
+				
+				else if (t.getToken().equals("set-parameter")) {
 					t.advance();
 					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
 						String parameter = t.getToken();
@@ -469,6 +481,24 @@ class Parser {
 		t.advance();
 
 		return c;
+	}
+	// fatigue mode : seting up the sleep schedule 
+	void parseSchedule(Model model) throws Exception {
+		if (!t.getToken().equals("("))
+			model.recordError(t);
+		t.advance();
+		if (!Utilities.isNumericPos(t.getToken()))
+			model.recordError(t);
+		model.getFatigue().wake.add(Double.valueOf(t.getToken()));
+		t.advance();
+		if (t.getToken().equals(")") || !Utilities.isNumericPos(t.getToken()))
+			model.recordError(t);
+		model.getFatigue().asleep.add(Double.valueOf(t.getToken()));
+		t.advance();
+		if (!t.getToken().equals(")"))
+			model.recordError(t);
+		t.advance();
+
 	}
 
 	static Chunk parseNewChunk(Model model, Symbol name, String slots) {

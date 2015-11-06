@@ -33,6 +33,8 @@ public class Model {
 	private Vector<ParseError> errors;
 	private Frame frame;
 
+	private Fatigue fatigue;
+
 	boolean realTime = false;
 	double realTimeMultiplier = 1;
 	boolean verboseTrace = true;
@@ -58,6 +60,8 @@ public class Model {
 		task = new Task();
 		taskUpdated = false;
 		errors = new Vector<ParseError>();
+
+		fatigue = new Fatigue(this);
 
 		initialize();
 	}
@@ -118,6 +122,15 @@ public class Model {
 		return compile(file, frame, null);
 	}
 
+	/**
+	 * Gets the fatigue module.
+	 * 
+	 * @return the fatigue module
+	 */
+	public Fatigue getFatigue() {
+		return fatigue;
+	}
+	
 	/**
 	 * Gets the declarative module.
 	 * 
@@ -307,6 +320,7 @@ public class Model {
 		motor.initialize();
 		speech.initialize();
 		imaginal.initialize();
+		fatigue.initialize();
 
 		buffers.set(Symbol.goalState, createBufferStateChunk("goal", true));
 		buffers.set(Symbol.retrievalState, createBufferStateChunk("retrieval-state", true));
@@ -331,6 +345,7 @@ public class Model {
 		declarative.update();
 		imaginal.update();
 		procedural.update();
+		// fatigue.update();
 	}
 
 	/**
@@ -534,12 +549,19 @@ public class Model {
 				}
 			}
 		}
-
-		else if (parameter.equals(":dat"))
+		
+		else if (parameter.equals(":dat")){
 			procedural.actionTime = Double.valueOf(value);
+			fatigue.fatigue_dat = Double.valueOf(value);
+		}
 		else if (parameter.equals(":vpft"))
 			procedural.variableProductionFiringTime = !value.equals("nil");
-		else if (parameter.equals(":ul"))
+		
+		else if (parameter.equals(":ut")) {
+			procedural.utilityUseThreshold = !value.equals("nil");
+			procedural.utilityThreshold = (!value.equals("nil")) ? Double
+					.valueOf(value) : 0;
+		} else if (parameter.equals(":ul"))
 			procedural.utilityLearning = !value.equals("nil");
 		else if (parameter.equals(":egs"))
 			procedural.utilityNoiseS = Double.valueOf(value);
@@ -664,6 +686,51 @@ public class Model {
 		else if (parameter.equals(":case-sensitive"))
 			t.caseSensitive = (!value.equals("nil"));
 
+		// Fatigue parameters
+		else if (parameter.equals(":fatigue")){
+			fatigue.fatigue_enabled = (!value.equals("nil"));
+			procedural.utilityUseThreshold = !value.equals("nil");
+		}
+		else if (parameter.equals(":stimulus"))
+			fatigue.fatigue_stimulus = Double.valueOf(value);
+		else if (parameter.equals(":fp-dec"))
+			fatigue.fatigue_fp_dec = Double.valueOf(value);
+		else if (parameter.equals(":fp"))
+			fatigue.fatigue_fp = Double.valueOf(value);
+		else if (parameter.equals(":fd-dec"))
+			fatigue.fatigue_fd_dec = Double.valueOf(value);
+		else if (parameter.equals(":fd"))
+			fatigue.fatigue_fd = Double.valueOf(value);
+		else if (parameter.equals(":fpbmc"))
+			fatigue.fatigue_fpbmc = Double.valueOf(value);
+		else if (parameter.equals(":fpmc"))
+			fatigue.fatigue_fpmc = Double.valueOf(value);
+		else if (parameter.equals(":utbmc"))
+			fatigue.fatigue_utbmc = Double.valueOf(value);
+		else if (parameter.equals(":utmc"))
+			fatigue.fatigue_utmc = Double.valueOf(value);
+		else if (parameter.equals(":ut0"))
+			fatigue.fatigue_ut0 = Double.valueOf(value);
+		else if (parameter.equals(":fdbmc"))
+			fatigue.fatigue_fdbmc = Double.valueOf(value);
+		else if (parameter.equals(":fdc"))
+			fatigue.fatigue_fdc = Double.valueOf(value);
+		else if (parameter.equals(":hour"))
+			fatigue.fatigue_hour = Double.valueOf(value);
+		else if (parameter.equals(":fp-percent"))
+			fatigue.fatigue_fp_percent = Double.valueOf(value);
+		else if (parameter.equals(":fd-percent"))
+			fatigue.fatigue_fd_percent = Double.valueOf(value);
+		else if (parameter.equals(":pu-tot"))
+			fatigue.PU_TOT = Double.valueOf(value);
+		else if (parameter.equals(":ut-tot"))
+			fatigue.UT_TOT = Double.valueOf(value);
+		else if (parameter.equals(":hour"))
+			fatigue.fatigue_hour= Double.valueOf(value);
+		else if (parameter.equals(":set-schedule"))
+			System.out.println(value);
+			// fatigue.fatigue_hour= Double.valueOf(value);
+		
 		else
 			recordWarning("ignoring parameter " + parameter, t);
 	}

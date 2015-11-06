@@ -65,8 +65,8 @@ public class Utilities {
 	 */
 	public static String toString(double a[]) {
 		String s = "";
-		for (int i = 0; i < a.length; i++)
-			s += String.format("%.3f", a[i]) + (i < a.length - 1 ? "\t" : "");
+		for (int i=0 ; i<a.length ; i++)
+			s += String.format("%.2f",a[i]) + (i<a.length-1 ? " " : "");
 		return s;
 	}
 }
