@@ -32,15 +32,14 @@ public class Procedural extends Module {
 	double productionCompilationNewUtility = 0;
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
+	double fatigueUtilityThreshold = 0;
+	double fatigueUtility = 0;
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
 	boolean productionCompilationTrace = false;
 	boolean threadedCognitionTrace = false;
-	
-	//fatigue
-	double fatigue_ut = 0;
-	double fatigue_u = 0;
+
 	Procedural(Model model) {
 		this.model = model;
 		productions = new HashMap<Symbol, Production>();
@@ -107,11 +106,11 @@ public class Procedural extends Module {
 
 	public double getFatigueUtility() {
 
-	return fatigue_u;
+		return fatigueUtility;
 	}
 
 	public double getFatigueUtilityThreshold() {
-		return fatigue_ut;
+		return fatigueUtilityThreshold;
 	}
 
 	void findInstantiations(final Buffers buffers) {
@@ -165,7 +164,9 @@ public class Procedural extends Module {
 
 			final Instantiation finalInst = highestU;
 
-			//System.out.println(model.getTime() + "  " + highestU.getProduction().getName() +  "  u: " + highestU.getUtility() + "----" );
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// highestU.getUtility() + "----" );
 
 			// Scaling the instantiation production which has the highest
 			// utility
@@ -174,28 +175,29 @@ public class Procedural extends Module {
 			// highestU.setUtility(highestU.getUtility()
 			// * model.getFatigue().fatigue_fp);
 
-			//			System.out.println(model.getTime() + "  " + highestU.getProduction().getName() +  "  u: " + 
-			//					(highestU.getUtility()* model.getFatigue().compute_fp() +  Utilities.getNoise(model.getProcedural().utilityNoiseS))
-			//					+ "----" );
-			//			System.out.println(model.getTime() + "  " + highestU.getProduction().getName() +  "  ut: " + 
-			//					(model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)
-			//					+ "----" );
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// (highestU.getUtility()* model.getFatigue().compute_fp() +
+			// Utilities.getNoise(model.getProcedural().utilityNoiseS))
+			// + "----" );
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " ut: " +
+			// (model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)
+			// + "----" );
 
-			// for being able to return the utility and utility threshold after applying fatigue mechanism
-			fatigue_u = initialUtility* model.getFatigue().compute_fp();
-			fatigue_ut = model.getFatigue().compute_ft() * model.getProcedural().utilityThreshold;
+			// for being able to return the utility and utility threshold after
+			// applying fatigue mechanism
+			fatigueUtility = initialUtility * model.getFatigue().computeFP();
+			fatigueUtilityThreshold = model.getFatigue().computeFT() * model.getProcedural().utilityThreshold;
 
 			double realActionTime = actionTime;
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (model.getFatigue().fatigue_enabled
-					&&  
-					highestU.getUtility()
-					< (model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)) {
+			if (model.getFatigue().fatigueEnabled && highestU
+					.getUtility() < (model.getFatigue().computeFT() * model.getProcedural().utilityThreshold)) {
 				if (conflictSetTrace)
-					model.output(String.format(
-							"[utility below current threshold of %.3f]",
+					model.output(String.format("[utility below current threshold of %.3f]",
 							model.getProcedural().utilityThreshold));
 
 				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
@@ -206,13 +208,11 @@ public class Procedural extends Module {
 				});
 			} else {
 				if (conflictSetTrace)
-					model.output("-> ("
-							+ String.format("%.3f", finalInst.getUtility())
-							+ ") " + finalInst);
+					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
 
 				if (finalInst.getProduction().isBreakPoint()) {
-					model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural", "about to fire "
-							+ finalInst.getProduction().getName().getString().toUpperCase()) {
+					model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+							"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
 						public void action() {
 							model.output("------", "break");
 							model.stop();
@@ -223,16 +223,12 @@ public class Procedural extends Module {
 				String extra = "";
 				if (buffers.numGoals() > 1) {
 					Chunk goal = buffers.get(Symbol.goal);
-					extra = " ["
-							+ ((goal != null) ? goal.getName().getString()
-									: "nil") + "]";
+					extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
 				}
 
 				// model.addEvent(new Event(model.getTime() + .050 ,
-				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural", "** "
-						+ finalInst.getProduction().getName()
-						.getString().toUpperCase() + " **"
-						+ extra) {
+				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+						"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
 					public void action() {
 						fire(finalInst, buffers);
 						findInstantiations(buffers);
@@ -245,7 +241,6 @@ public class Procedural extends Module {
 	// void fatigueUpdate()
 	// {
 	// fatigue_fp = Math.max(0.000001, fatigue_fp - fatigue_fp_dec );
-	//
 	// }
 
 	void fire(Instantiation inst, Buffers buffers) {

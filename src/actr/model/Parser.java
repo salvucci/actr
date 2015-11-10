@@ -75,18 +75,18 @@ class Parser {
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-				// For the sleep schedule in Fatigue model	
-				}else if (t.getToken().equals("set-schedule")) {
+					// For the sleep schedule in Fatigue model
+				} else if (t.getToken().equals("set-schedule")) {
 					t.advance();
 					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						parseSchedule(model);
+						parseSleepSchedule(model);
 					}
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-					model.getFatigue().setSched();
-				} 
-				
+					model.getFatigue().setSleepSchedule();
+				}
+
 				else if (t.getToken().equals("set-parameter")) {
 					t.advance();
 					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
@@ -482,18 +482,18 @@ class Parser {
 
 		return c;
 	}
-	// fatigue mode : seting up the sleep schedule 
-	void parseSchedule(Model model) throws Exception {
+
+	void parseSleepSchedule(Model model) throws Exception {
 		if (!t.getToken().equals("("))
 			model.recordError(t);
 		t.advance();
 		if (!Utilities.isNumericPos(t.getToken()))
 			model.recordError(t);
-		model.getFatigue().wake.add(Double.valueOf(t.getToken()));
+		model.getFatigue().addWake(Double.valueOf(t.getToken()));
 		t.advance();
 		if (t.getToken().equals(")") || !Utilities.isNumericPos(t.getToken()))
 			model.recordError(t);
-		model.getFatigue().asleep.add(Double.valueOf(t.getToken()));
+		model.getFatigue().addSleep(Double.valueOf(t.getToken()));
 		t.advance();
 		if (!t.getToken().equals(")"))
 			model.recordError(t);

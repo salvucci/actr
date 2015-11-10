@@ -552,7 +552,7 @@ public class Model {
 		
 		else if (parameter.equals(":dat")){
 			procedural.actionTime = Double.valueOf(value);
-			fatigue.fatigue_dat = Double.valueOf(value);
+			fatigue.fatigueDAT = Double.valueOf(value);
 		}
 		else if (parameter.equals(":vpft"))
 			procedural.variableProductionFiringTime = !value.equals("nil");
@@ -688,45 +688,45 @@ public class Model {
 
 		// Fatigue parameters
 		else if (parameter.equals(":fatigue")){
-			fatigue.fatigue_enabled = (!value.equals("nil"));
+			fatigue.fatigueEnabled = (!value.equals("nil"));
 			procedural.utilityUseThreshold = !value.equals("nil");
 		}
 		else if (parameter.equals(":stimulus"))
-			fatigue.fatigue_stimulus = Double.valueOf(value);
+			fatigue.fatigueStimulus = Double.valueOf(value);
 		else if (parameter.equals(":fp-dec"))
-			fatigue.fatigue_fp_dec = Double.valueOf(value);
+			fatigue.fatigueFPDec = Double.valueOf(value);
 		else if (parameter.equals(":fp"))
-			fatigue.fatigue_fp = Double.valueOf(value);
+			fatigue.fatigueFP = Double.valueOf(value);
 		else if (parameter.equals(":fd-dec"))
-			fatigue.fatigue_fd_dec = Double.valueOf(value);
+			fatigue.fatigueFDDec = Double.valueOf(value);
 		else if (parameter.equals(":fd"))
-			fatigue.fatigue_fd = Double.valueOf(value);
+			fatigue.fatigueFD = Double.valueOf(value);
 		else if (parameter.equals(":fpbmc"))
-			fatigue.fatigue_fpbmc = Double.valueOf(value);
+			fatigue.fatigueFPBMC = Double.valueOf(value);
 		else if (parameter.equals(":fpmc"))
-			fatigue.fatigue_fpmc = Double.valueOf(value);
+			fatigue.fatigueFPMC = Double.valueOf(value);
 		else if (parameter.equals(":utbmc"))
-			fatigue.fatigue_utbmc = Double.valueOf(value);
+			fatigue.fatigueUTBMC = Double.valueOf(value);
 		else if (parameter.equals(":utmc"))
-			fatigue.fatigue_utmc = Double.valueOf(value);
+			fatigue.fatigueUTMC = Double.valueOf(value);
 		else if (parameter.equals(":ut0"))
-			fatigue.fatigue_ut0 = Double.valueOf(value);
+			fatigue.fatigueUT0 = Double.valueOf(value);
 		else if (parameter.equals(":fdbmc"))
-			fatigue.fatigue_fdbmc = Double.valueOf(value);
+			fatigue.fatigueFDBMC = Double.valueOf(value);
 		else if (parameter.equals(":fdc"))
-			fatigue.fatigue_fdc = Double.valueOf(value);
+			fatigue.fatigueFDC = Double.valueOf(value);
 		else if (parameter.equals(":hour"))
-			fatigue.fatigue_hour = Double.valueOf(value);
+			fatigue.fatigueHour = Double.valueOf(value);
 		else if (parameter.equals(":fp-percent"))
-			fatigue.fatigue_fp_percent = Double.valueOf(value);
+			fatigue.fatigueFPPercent = Double.valueOf(value);
 		else if (parameter.equals(":fd-percent"))
-			fatigue.fatigue_fd_percent = Double.valueOf(value);
+			fatigue.fatigueFDPercent = Double.valueOf(value);
 		else if (parameter.equals(":pu-tot"))
-			fatigue.PU_TOT = Double.valueOf(value);
+			fatigue.puTOT = Double.valueOf(value);
 		else if (parameter.equals(":ut-tot"))
-			fatigue.UT_TOT = Double.valueOf(value);
+			fatigue.utTOT = Double.valueOf(value);
 		else if (parameter.equals(":hour"))
-			fatigue.fatigue_hour= Double.valueOf(value);
+			fatigue.fatigueHour= Double.valueOf(value);
 		else if (parameter.equals(":set-schedule"))
 			System.out.println(value);
 			// fatigue.fatigue_hour= Double.valueOf(value);

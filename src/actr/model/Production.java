@@ -321,8 +321,8 @@ public class Production {
 		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
 		 */
 		double instU;
-		if (model.getFatigue().fatigue_enabled && !constantUtility)
-			instU  = u * model.getFatigue().compute_fp() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
+		if (model.getFatigue().fatigueEnabled && !constantUtility)
+			instU  = u * model.getFatigue().computeFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		else
 			instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		//System.out.println("u  ::: " + instU + "----" + name);
