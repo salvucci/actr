@@ -68,6 +68,6 @@ class SlotAction {
 	 */
 	@Override
 	public String toString() {
-		return (operator != null ? operator : "") + slot + " " + value;
+		return "      " + (operator != null ? operator : "") + slot + " " + value;
 	}
 }
