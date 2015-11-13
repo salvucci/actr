@@ -19,6 +19,8 @@
     :dat .040
     :randomize-time t
     :vpft t
+    
+    :max-prepration-time-diff 10.0
 )
 
 (goal-focus goal)

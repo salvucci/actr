@@ -74,42 +74,42 @@ public class PVT extends Task {
 		addUpdate(1.0);
 
 		try {
-			File block1file = new File("./PVTmodel/Block1.txt");
+			File block1file = new File("./test/fatigue/pvt/Block1.txt");
 			if (!block1file.exists())
 				block1file.createNewFile();
 			b1Stream = new PrintStream(block1file);
 
-			File block2file = new File("./PVTmodel/Block2.txt");
+			File block2file = new File("./test/fatigue/pvt/Block2.txt");
 			if (!block2file.exists())
 				block2file.createNewFile();
 			b2Stream = new PrintStream(block2file);
 
-			File block3file = new File("./PVTmodel/Block3.txt");
+			File block3file = new File("./test/fatigue/pvt/Block3.txt");
 			if (!block3file.exists())
 				block3file.createNewFile();
 			b3Stream = new PrintStream(block3file);
 
-			File block4file = new File("./PVTmodel/Block4.txt");
+			File block4file = new File("./test/fatigue/pvt/Block4.txt");
 			if (!block4file.exists())
 				block4file.createNewFile();
 			b4Stream = new PrintStream(block4file);
 
-			File block5file = new File("./PVTmodel/Block5.txt");
+			File block5file = new File("./test/fatigue/pvt/Block5.txt");
 			if (!block5file.exists())
 				block5file.createNewFile();
 			b5Stream = new PrintStream(block5file);
 
-			File block6file = new File("./PVTmodel/Block6.txt");
+			File block6file = new File("./test/fatigue/pvt/Block6.txt");
 			if (!block6file.exists())
 				block6file.createNewFile();
 			b6Stream = new PrintStream(block6file);
 
-			File block7file = new File("./PVTmodel/Block7.txt");
+			File block7file = new File("./test/fatigue/pvt/Block7.txt");
 			if (!block7file.exists())
 				block7file.createNewFile();
 			b7Stream = new PrintStream(block7file);
 
-			File uut = new File("./PVTmodel/UUT.txt");
+			File uut = new File("./test/fatigue/pvt/UUT.txt");
 			if (!uut.exists())
 				uut.createNewFile();
 			uutStream = new PrintStream(uut);
@@ -331,7 +331,7 @@ public class PVT extends Task {
 		// writing the numbers to file
 		try {
 
-			File PVT35min = new File("./PVTmodel/PVT35min.txt");
+			File PVT35min = new File("./test/fatigue/pvt/PVT35min.txt");
 			if (!PVT35min.exists())
 				PVT35min.createNewFile();
 			PrintStream PVTfile = new PrintStream(PVT35min);

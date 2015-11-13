@@ -644,6 +644,8 @@ public class Model {
 			motor.minFittsTime = Double.valueOf(value);
 		else if (parameter.equals(":default-target-width"))
 			motor.defaultTargetWidth = Double.valueOf(value);
+		else if (parameter.equals(":max-prepration-time-diff")) // this variable is for maxPrepTimeDifference in the motor module
+			motor.maxPrepTimeDifference = Double.valueOf(value);
 
 		else if (parameter.equals(":syllable-rate"))
 			speech.syllableRate = Double.valueOf(value);
