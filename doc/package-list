@@ -2,4 +2,5 @@ actr.env
 actr.model
 actr.resources
 actr.task
+actr.tasks.test.fatigue
 actr.tasks.tutorial

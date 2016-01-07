@@ -28,7 +28,8 @@ public class Motor extends Module {
 	double minFittsTime = .100;
 	double defaultTargetWidth = 1.0;
 
-	double maxPrepTimeDifference = 5.0; // new XXX was 10.0 (change from 5 to 10 by Ehsan for fatigue module)
+	double maxPrepTimeDifference = 5.0; // new XXX was 10.0 (change from 5 to 10
+										// by Ehsan for fatigue module)
 	final double keyClosureTime = .010;
 	final Point leftHomeKey = new Point(4, 4);
 	final Point rightHomeKey = new Point(7, 4);
@@ -333,6 +334,16 @@ public class Motor extends Module {
 			final Point locpt = new Point(loc.get(Symbol.get("screen-x")).toInt(),
 					loc.get(Symbol.get("screen-y")).toInt());
 			Point mousePoint = new Point(mx, my);
+
+			Symbol noise = request.get(Symbol.get("noise"));
+			if (noise != null) {
+				double fraction = noise.isNumber() ? noise.toDouble() : 0.1;
+				double distance = mousePoint.distanceTo(locpt);
+				double noiseSD = fraction * distance;
+				locpt.x = (int) Math.round(locpt.x + Utilities.gaussianNoise(noiseSD));
+				locpt.y = (int) Math.round(locpt.y + Utilities.gaussianNoise(noiseSD));
+			}
+
 			double r = Utilities.pixels2angle(mousePoint.distanceTo(locpt));
 			if (r == 0)
 				return;

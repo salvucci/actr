@@ -38,6 +38,20 @@ public class Utilities {
 	}
 
 	/**
+	 * Gets a noise value sampled from an approximation of the normal
+	 * distribution.
+	 * 
+	 * @param sd
+	 *            the standard deviation
+	 * @return a value sampled from this distribution
+	 */
+	public static double gaussianNoise(double sd) {
+		double v = sd * sd;
+		double s = Math.sqrt(3.0 * v) / Math.PI;
+		return (s == 0) ? 0 : Utilities.getNoise(s);
+	}
+
+	/**
 	 * Converts a value from degrees to radians.
 	 * 
 	 * @param degrees
@@ -150,25 +164,26 @@ public class Utilities {
 		else
 			throw new Exception();
 	}
-	
-	public static boolean isNumeric(String s) {  
-	    return s.matches("[-+]?\\d*\\.?\\d+");  
+
+	public static boolean isNumeric(String s) {
+		return s.matches("[-+]?\\d*\\.?\\d+");
 	}
-	public static boolean isNumericPos(String s) {  
-	    return s.matches("\\d*\\.?\\d+");  
+
+	public static boolean isNumericPos(String s) {
+		return s.matches("\\d*\\.?\\d+");
 	}
-	public static String toString (double a[])
-	{
+
+	public static String toString(double a[]) {
 		String s = "";
-		for (int i=0 ; i<a.length ; i++)
-			s += String.format("%.8f",a[i]) + (i<a.length-1 ? " " : "");
+		for (int i = 0; i < a.length; i++)
+			s += String.format("%.8f", a[i]) + (i < a.length - 1 ? " " : "");
 		return s;
 	}
-	public static String toString (ArrayList<Double> a)
-	{
+
+	public static String toString(ArrayList<Double> a) {
 		String s = "";
-		for (int i=0 ; i<a.size() ; i++)
-			s += String.format("%.8f",a.get(i)) + (i<a.size()-1 ? " " : "");
+		for (int i = 0; i < a.size(); i++)
+			s += String.format("%.8f", a.get(i)) + (i < a.size() - 1 ? " " : "");
 		return s;
 	}
 }

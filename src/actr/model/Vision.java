@@ -461,12 +461,6 @@ public class Vision extends Module {
 		}
 	}
 
-	private double gaussianNoise(double sd) {
-		double v = sd * sd;
-		double s = Math.sqrt(3.0 * v) / Math.PI;
-		return (s == 0) ? 0 : Utilities.getNoise(s);
-	}
-
 	private double computeEccentricity(VisualObject vo) {
 		double dx = eyeX - vo.x;
 		double dy = eyeY - vo.y;
@@ -479,7 +473,7 @@ public class Vision extends Module {
 		double frequency = (freqdouble != null) ? freqdouble.doubleValue() : emmaDefaultFrequency;
 		double t_enc = (emmaEncodingTimeFactor * (-Math.log(frequency))
 				* Math.exp(emmaEncodingExponentFactor * computeEccentricity(vo)));
-		double noise = gaussianNoise(t_enc / 3.0);
+		double noise = Utilities.gaussianNoise(t_enc / 3.0);
 		if (noise < -2.0 * t_enc / 3.0)
 			noise = -2.0 * t_enc / 3.0;
 		t_enc += noise;
@@ -592,8 +586,8 @@ public class Vision extends Module {
 					@Override
 					public void action() {
 						double sd = .1 * Utilities.angle2pixels(computeEccentricity(vo));
-						eyeX = vo.x + (int) (Math.round(gaussianNoise(sd)));
-						eyeY = vo.y + (int) (Math.round(gaussianNoise(sd)));
+						eyeX = vo.x + (int) (Math.round(Utilities.gaussianNoise(sd)));
+						eyeY = vo.y + (int) (Math.round(Utilities.gaussianNoise(sd)));
 						model.getTask().moveEye(eyeX, eyeY);
 
 						if (vo.encodingStart + vo.encodingTime > model.getTime()) {
