@@ -185,14 +185,14 @@ public class Procedural extends Module {
 			// (model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)
 			// + "----" );
 
-			// for being able to return the utility and utility threshold after
-			// applying fatigue mechanism
-			fatigueUtility = initialUtility * model.getFatigue().computeFP();
-			fatigueUtilityThreshold = model.getFatigue().computeFT() * model.getProcedural().utilityThreshold;
-
 			double realActionTime = actionTime;
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
+
+			if (model.getFatigue().fatigueEnabled) {
+				fatigueUtility = initialUtility * model.getFatigue().computeFP();
+				fatigueUtilityThreshold = model.getFatigue().computeFT() * model.getProcedural().utilityThreshold;
+			}
 
 			if (model.getFatigue().fatigueEnabled && highestU
 					.getUtility() < (model.getFatigue().computeFT() * model.getProcedural().utilityThreshold)) {
@@ -227,7 +227,9 @@ public class Procedural extends Module {
 				}
 
 				// model.addEvent(new Event(model.getTime() + .050 ,
-				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+				// model.addEvent(new Event(model.getTime() + (realActionTime -
+				// .001), "procedural",
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
 						"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
 					public void action() {
 						fire(finalInst, buffers);

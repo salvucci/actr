@@ -130,7 +130,7 @@ public class Model {
 	public Fatigue getFatigue() {
 		return fatigue;
 	}
-	
+
 	/**
 	 * Gets the declarative module.
 	 * 
@@ -549,18 +549,16 @@ public class Model {
 				}
 			}
 		}
-		
-		else if (parameter.equals(":dat")){
+
+		else if (parameter.equals(":dat")) {
 			procedural.actionTime = Double.valueOf(value);
 			fatigue.fatigueDAT = Double.valueOf(value);
-		}
-		else if (parameter.equals(":vpft"))
+		} else if (parameter.equals(":vpft"))
 			procedural.variableProductionFiringTime = !value.equals("nil");
-		
+
 		else if (parameter.equals(":ut")) {
 			procedural.utilityUseThreshold = !value.equals("nil");
-			procedural.utilityThreshold = (!value.equals("nil")) ? Double
-					.valueOf(value) : 0;
+			procedural.utilityThreshold = (!value.equals("nil")) ? Double.valueOf(value) : 0;
 		} else if (parameter.equals(":ul"))
 			procedural.utilityLearning = !value.equals("nil");
 		else if (parameter.equals(":egs"))
@@ -639,12 +637,12 @@ public class Model {
 		else if (parameter.equals(":peck-fitts-coeff"))
 			motor.peckFittsCoeff = Double.valueOf(value);
 		else if (parameter.equals(":mouse-fitts-coeff"))
-			motor.mouseFittsCoeff = Double.valueOf(value); // new
+			motor.mouseFittsCoeff = Double.valueOf(value);
 		else if (parameter.equals(":min-fitts-time"))
 			motor.minFittsTime = Double.valueOf(value);
 		else if (parameter.equals(":default-target-width"))
 			motor.defaultTargetWidth = Double.valueOf(value);
-		else if (parameter.equals(":max-prepration-time-diff")) // this variable is for maxPrepTimeDifference in the motor module
+		else if (parameter.equals(":max-prep-time-diff"))
 			motor.maxPrepTimeDifference = Double.valueOf(value);
 
 		else if (parameter.equals(":syllable-rate"))
@@ -689,11 +687,10 @@ public class Model {
 			t.caseSensitive = (!value.equals("nil"));
 
 		// Fatigue parameters
-		else if (parameter.equals(":fatigue")){
+		else if (parameter.equals(":fatigue")) {
 			fatigue.fatigueEnabled = (!value.equals("nil"));
 			procedural.utilityUseThreshold = !value.equals("nil");
-		}
-		else if (parameter.equals(":stimulus"))
+		} else if (parameter.equals(":stimulus"))
 			fatigue.fatigueStimulus = Double.valueOf(value);
 		else if (parameter.equals(":fp-dec"))
 			fatigue.fatigueFPDec = Double.valueOf(value);
@@ -728,11 +725,11 @@ public class Model {
 		else if (parameter.equals(":ut-tot"))
 			fatigue.utTOT = Double.valueOf(value);
 		else if (parameter.equals(":hour"))
-			fatigue.fatigueHour= Double.valueOf(value);
+			fatigue.fatigueHour = Double.valueOf(value);
 		else if (parameter.equals(":set-schedule"))
 			System.out.println(value);
-			// fatigue.fatigue_hour= Double.valueOf(value);
-		
+		// fatigue.fatigue_hour= Double.valueOf(value);
+
 		else
 			recordWarning("ignoring parameter " + parameter, t);
 	}
