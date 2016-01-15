@@ -337,7 +337,7 @@ public class Motor extends Module {
 
 			Symbol noise = request.get(Symbol.get("noise"));
 			if (noise != null) {
-				double fraction = noise.isNumber() ? noise.toDouble() : 0.1;
+				double fraction = noise.isNumber() ? noise.toDouble() : 0;
 				double distance = mousePoint.distanceTo(locpt);
 				double noiseSD = fraction * distance;
 				locpt.x = (int) Math.round(locpt.x + Utilities.gaussianNoise(noiseSD));
