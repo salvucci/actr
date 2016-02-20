@@ -248,10 +248,12 @@ public class Chunk {
 		Iterator<Symbol> it = getSlotNames();
 		while (it.hasNext()) {
 			Symbol slot = it.next();
-			Symbol value = get(slot);
-			Symbol value2 = c2.get(slot);
-			if (value != value2)
-				return false;
+			if (!slot.equals(Symbol.location)) {
+				Symbol value = get(slot);
+				Symbol value2 = c2.get(slot);
+				if (value != value2)
+					return false;
+			}
 		}
 		return true;
 	}

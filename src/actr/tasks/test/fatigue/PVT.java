@@ -4,9 +4,18 @@ import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-
 import actr.model.Symbol;
 import actr.task.*;
+
+/**
+ * Model of PVT test on time on task
+ * 
+ * Paper: Functional Equivalence of sleep loss and time on task effects in sustained attention
+ * 
+ * Bella Z. Vaksler, Glenn Gunzelmann, Air force research lab
+ * 
+ * @author Ehsan Khosroshahi
+ */
 
 public class PVT extends Task {
 	private TaskLabel label;
