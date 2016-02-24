@@ -17,7 +17,7 @@ import actr.task.*;
  * @author Ehsan Khosroshahi
  */
 
-public class PVT extends Task {
+public class PVT35min extends Task {
 	private TaskLabel label;
 	private double lastTime = 0;
 	private String stimulus = "\u2588";
@@ -61,7 +61,7 @@ public class PVT extends Task {
 		double responseTotalTime = 0;
 	}
 
-	public PVT() {
+	public PVT35min() {
 		super();
 		label = new TaskLabel("", 200, 150, 40, 20);
 		add(label);
@@ -302,7 +302,7 @@ public class PVT extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		double[] modelTimes = new double[runIterations];
-		PVT task = (PVT) tasks[0];
+		PVT35min task = (PVT35min) tasks[0];
 
 		// int allResponses = 0;
 		double Responses[] = new double[7];
