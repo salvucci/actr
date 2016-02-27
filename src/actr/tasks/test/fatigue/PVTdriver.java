@@ -29,6 +29,15 @@ public class PVTdriver extends Task {
 	private String response = null;
 	private double responseTime = 0;
 
+	private double [] timesOfPVT = {
+		//	
+			45.0, 48.0, 51.0, 54.0, //day1 
+			69.0, 72.0, 75.0, 78.0, //day2
+			93.0, 96.0, 99.0, 102.0,//day3
+			117.0,120.0,123.0,126.0,//day4
+			141.0,144.0,147.0,150.0 //day5
+			};
+	int sessionNumber = 0;  // starts from 0
 	
 	private Session currentSession;
 	private Vector<Session> sessions = new Vector<Session>();
@@ -71,6 +80,9 @@ public class PVTdriver extends Task {
 		currentSession = new Session();
 		stimulusVisibility = false;
 
+		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+		getModel().getFatigue().startFatigueSession();
+		
 		addUpdate(1.0);
 
 		try {
@@ -83,8 +95,6 @@ public class PVTdriver extends Task {
 			e.printStackTrace();
 		}
 
-		// this was for when you want to reset the numbers at each session
-		// getModel().getFatigue().resetFatigueModule();
 	}
 
 	@Override
@@ -100,16 +110,38 @@ public class PVTdriver extends Task {
 			// setting up the state to wait
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),
 					Symbol.get("stimulus"));
+			
+			
+			// calling percentage reset after any new task presentation (audio or visual)
+			getModel().getFatigue().fatigueResetPercentages();
+			
+			// TO DO
+			// handling the sleep attacks 
+			
 		}
 
 		// Starting a new Session
 		else {
 
+			System.out.println("session # : " + sessionNumber);
 			System.out.println(currentSession.totalSessionTime);
 			System.out.println("responses ==> " + currentSession.responses);
 			
-
-			getModel().stop();
+			sessionNumber++;
+			// go to the next session or stop the model
+			if (sessionNumber < timesOfPVT.length ){
+				sessions.add(currentSession);
+				currentSession = new Session();
+				stimulusVisibility = false;
+				currentSession.startTime = getModel().getTime();
+				getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+				getModel().getFatigue().startFatigueSession();
+				addUpdate(1.0);
+			}else{
+				sessions.add(currentSession);
+				getModel().stop();
+			}
+			
 
 		}
 	}
@@ -146,11 +178,10 @@ public class PVTdriver extends Task {
 																						// time
 			else if (responseTime > .500 && responseTime < 30.0)
 				currentSession.lapses++;
-			else if (responseTime >= 30.0)
+			else if (responseTime >= 30.0){
 				currentSession.sleepAttacks++;
-			
-			System.out.println("Sleep attack at time ==>" + getModel().getTime());
-
+				System.out.println("Sleep attack at time ==>" + getModel().getTime());
+			}
 			// setting up the state to wait
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
 
@@ -169,27 +200,28 @@ public class PVTdriver extends Task {
 
 		getModel().output("******* Proportion of Responses **********\n");
 		getModel()
-				.output("FS  "
+				.output("#\tFS  "
 						+ " ---------------------------    Alert Responses    --------------------------- "
 						+ " Alert Responses "
 						+ " ---------------------------    Alert Responses    ---------------------------- "
 						+ "L    SA");
 		double[] AlertResponsesProportion = new double[35];
-		for (int i = 0; i < 35; i++)
-			AlertResponsesProportion[i] = (double) task.currentSession.alertResponse[i] / task.currentSession.responses;
-		
-		getModel().output(
-				String.format("%.2f", (double) task.currentSession.falseStarts / task.currentSession.responses) + " "
-						+ Utilities.toString(AlertResponsesProportion) + " "
-						+ String.format("%.2f", (double) task.currentSession.lapses / task.currentSession.responses) + " "
-						+ String.format("%.2f", (double) task.currentSession.sleepAttacks / task.currentSession.responses));
 
-		getModel().output("\nNumber of lapses in the session: "+ task.currentSession.lapses);
-		
-		
+		for (int s = 0; s < task.sessions.size(); s++) {
+			for (int i = 0; i < 35; i++)
+				AlertResponsesProportion[i] = (double) task.sessions.get(s).alertResponse[i] / task.sessions.get(s).responses;
+
+			getModel().output(s + "\t"+
+					String.format("%.2f", (double) task.sessions.get(s).falseStarts / task.sessions.get(s).responses) + " "
+							+ Utilities.toString(AlertResponsesProportion) + " "
+							+ String.format("%.2f", (double) task.sessions.get(s).lapses / task.sessions.get(s).responses) + " "
+							+ String.format("%.2f", (double) task.sessions.get(s).sleepAttacks / task.sessions.get(s).responses));
+
+			getModel().output("\nNumber of lapses in the session " + s + "\t:"+ task.sessions.get(s).lapses + "\n");
+		}
+
 		getModel().output("\n*******************************************\n");
 
-	
 		Result result = new Result();
 		return result;
 	}

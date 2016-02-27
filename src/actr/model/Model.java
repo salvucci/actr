@@ -559,6 +559,7 @@ public class Model {
 		else if (parameter.equals(":ut")) {
 			procedural.utilityUseThreshold = !value.equals("nil");
 			procedural.utilityThreshold = (!value.equals("nil")) ? Double.valueOf(value) : 0;
+			fatigue.fatigueUT0 = Double.valueOf(value);  // setting up the initial utility
 		} else if (parameter.equals(":ul"))
 			procedural.utilityLearning = !value.equals("nil");
 		else if (parameter.equals(":egs"))

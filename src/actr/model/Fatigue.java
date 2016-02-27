@@ -12,43 +12,40 @@ import java.util.TreeMap;
 public class Fatigue extends Module {
 	private Model model;
 
-	boolean fatigueEnabled = false;
-	boolean runWithMicrolapses = false;
-	double fatigueStimulus = 1.0;
-	double fatigueFPDec = 0.01440861; // new model: 0.01440861
+	boolean fatigueEnabled = false; 	// Turns fatigue module off / on
+	boolean runWithMicrolapses = false; 
+	double fatigueStimulus = 1.0;  		/* Signals a reset to fp based on specified scalar.  
+										fp <- stimulus.  Resets decrements */
+	double fatigueFPDec = 0.01440861; 	// Decrease in fp after each microlapse
 	double fatigueFPOriginal = 0;
-	double fatigueFP = 1.0; // 1.0
-	double fatigueUT = 0;
+	double fatigueFP = 1.0;  			// "fatigue parameter" value scales utility calculations
+	double fatigueUT = 0;  				//Utility threshold (from utilty module)
 	double fatigueDAT = 0;
 
 	double fatigueFDDec = 0.0;
 	double fatigueFD = 0;
 
-	double fatigueFPBMC = 0;
-	double fatigueFPMC = 0;
-	double fatigueUTBMC = 0;
-	double fatigueUTMC = 0;
-	double fatigueUT0 = 2.0643395401332;
-	double fatigueFDBMC = -0.02681;
-	double fatigueFDC = 0.95743;
-	double fatigueHour = 0;
-	double fatigueFPPercent = 1;
+	double fatigueFPBMC = 0; 			//Coefficient relating biomath value to fp
+	double fatigueFPMC = 0; 			// Coefficient relating minute within session to fp
+	double fatigueUTBMC = 0; 			//Coefficient relating biomath value to ut
+	double fatigueUTMC = 0;  			//oefficient relating minute within session to ut
+	double fatigueUT0 = 2.0643395401332;//Constant ut offset
+	double fatigueFDBMC = -0.02681;  	//Coefficient relating biomath value to fd
+	double fatigueFDC = 0.95743;  		// Constant fd offset
+	double fatigueFPPercent = 1; 		// The current percentage of fp after microlapses
 	double fatigueFDPercent = 1;
+	double fatigueHour = 0;   			/* Initiates a new session by providing the number of hours 
+										since the beginning of the sleep schedule */
+	double startTimeSC = 0;  			/* Records the time in second at the start of a session, 
+									    so proper within-session offsets can be calculated */
+
 
 	private ArrayList<Double> wake = new ArrayList<Double>();
 	private ArrayList<Double> asleep = new ArrayList<Double>();
 	private ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
-	// fatigue utility hook
-	double fp;
-	double ut;
-	double minutesPassed;
-
-	// minutes that the subject were doing the same task before
-	double startTimeSC = 0;
-	double biomathPrediction;
-
+	
 	// parameters regarding time-on-task model
 	double puTOT = 0; // production utility time-on-task
 	double utTOT = 0; // utility threshold time-on-task
@@ -81,10 +78,14 @@ public class Fatigue extends Module {
 		for (int i = 0; i < values.size(); i++)
 			pvalues.put(values.get(i).get(3), values.get(i).get(0));
 
-		// System.out.println(Pvalues.ceilingEntry(70.00));
-		// System.out.println(Pvalues);
+		 //System.out.println(pvalues.ceilingEntry(70.00).getValue());
+		 //System.out.println(Pvalues);
 	}
 
+	double computeBioMathValueForHour(){
+		return pvalues.ceilingEntry(fatigueHour).getValue();
+	}
+	
 	// fatigue modulation value at time t
 	double computeFP() {
 		return Math.pow(mpTime(), puTOT);
@@ -104,24 +105,39 @@ public class Fatigue extends Module {
 
 	// Calculate the number of minutes that have passed
 	double mpTime() {
-		return ((int) ((model.getTime() - startTimeSC) / 60));
-	}
-
-	public void startNewTask() {
-		startTimeSC = model.getTime();
+		return ((int) ((model.getTime() + startTimeSC) / 60));
 	}
 
 	@Override
 	void update() {
 		if (fatigueEnabled) {
-			fatigueFP = fatigueFPPercent * (1 - fatigueFPBMC * biomathPrediction) * Math.pow(1 + mpTime(), fatigueFPMC);
+			//System.out.println("startTimeSC: " + startTimeSC);
+			//System.out.println("mpTime: " + mpTime());
+			fatigueFP = fatigueFPPercent * (1 - fatigueFPBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueFPMC);
 			if (model.verboseTrace)
 				model.output("fatigue", "fp: " + fatigueFP);
-			fatigueUT = fatigueUT0 * (1 - fatigueUTBMC * biomathPrediction) * Math.pow(1 + mpTime(), fatigueUTMC);
+			fatigueUT = fatigueUT0 * (1 - fatigueUTBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueUTMC);
 			if (model.verboseTrace)
 				model.output("fatigue", "ut: " + fatigueUT);
 		}
 	}
+	
+	// Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
+	public void setFatigueHour(double hour) {
+		fatigueHour = hour;
+	}
+	
+	// When ever there is a new session this function should be called so the startTimeSc is set
+	public void startFatigueSession() {  
+		startTimeSC = model.getTime();
+	}
+	
+	// This method is called just after any new task presentation (audio or visual) 
+	public void fatigueResetPercentages(){
+		fatigueFPPercent = fatigueStimulus;
+		fatigueFDPercent = fatigueStimulus;
+	}
+	
 
 	public void setFatigueFP(double fp) {
 		fatigueFP = fp;
@@ -131,30 +147,30 @@ public class Fatigue extends Module {
 		return fatigueFPOriginal;
 	}
 
-	public void resetFatigueModule() {
-
-		fatigueFP = fatigueStimulus * fatigueFPOriginal;
-		fatigueUT = model.getProcedural().utilityThreshold;
-
-		// fatigue_pending = nil;
-		// fatigue_last_one_empty = nil;
-		//
-		// fatigue_fp_percent = 1;
-		// fatigue_fp = 1;
-		// fatigue_fp_dec = 0.01440861;
-		// fatigue_fd_percent = 1;
-		// fatigue_fd = 0;
-		// fatigue_stimulus =1;
-		// fatigue_fpbmc = 0;
-		// fatigue_fpmc = 0;
-		// fatigue_utbmc = 0;
-		// fatigue_utmc = 0;
-		// fatigue_ut0 = 2.0643395401332;
-		// fatigue_fdbmc =-0.02681;
-		// fatigue_fdc =0.95743;
-		// fatigue_hour =0;
-		// fatigue_start_time = 0;
-		// fatigue_ut= (car (no-output (sgp :ut))))
-		// fatigue_dat =(car (no-output (sgp :dat))));
-	}
+//	public void resetFatigueModule() {
+//
+//		fatigueFP = fatigueStimulus * fatigueFPOriginal;
+//		fatigueUT = model.getProcedural().utilityThreshold;
+//
+//		// fatigue_pending = nil;
+//		// fatigue_last_one_empty = nil;
+//		//
+//		// fatigue_fp_percent = 1;
+//		// fatigue_fp = 1;
+//		// fatigue_fp_dec = 0.01440861;
+//		// fatigue_fd_percent = 1;
+//		// fatigue_fd = 0;
+//		// fatigue_stimulus =1;
+//		// fatigue_fpbmc = 0;
+//		// fatigue_fpmc = 0;
+//		// fatigue_utbmc = 0;
+//		// fatigue_utmc = 0;
+//		// fatigue_ut0 = 2.0643395401332;
+//		// fatigue_fdbmc =-0.02681;
+//		// fatigue_fdc =0.95743;
+//		// fatigue_hour =0;
+//		// fatigue_start_time = 0;
+//		// fatigue_ut= (car (no-output (sgp :ut))))
+//		// fatigue_dat =(car (no-output (sgp :dat))));
+//	}
 }

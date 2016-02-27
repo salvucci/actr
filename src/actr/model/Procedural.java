@@ -32,8 +32,7 @@ public class Procedural extends Module {
 	double productionCompilationNewUtility = 0;
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
-	double fatigueUtilityThreshold = 0;
-	double fatigueUtility = 0;
+	
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
@@ -106,14 +105,17 @@ public class Procedural extends Module {
 
 	public double getFatigueUtility() {
 
-		return fatigueUtility;
+		return initialUtility * model.getFatigue().fatigueFP;
 	}
 
 	public double getFatigueUtilityThreshold() {
-		return fatigueUtilityThreshold;
+		return model.getFatigue().fatigueUT;
 	}
 
 	void findInstantiations(final Buffers buffers) {
+		if (model.getFatigue().fatigueEnabled){
+			model.getFatigue().update(); // update the FP and UT values in case of the fatigue mechanism
+		}
 		// if (model.verboseTrace) model.output ("procedural",
 		// "conflict-resolution");
 		buffers.removeDecayedChunks();
@@ -189,17 +191,15 @@ public class Procedural extends Module {
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (model.getFatigue().fatigueEnabled) {
-				fatigueUtility = initialUtility * model.getFatigue().computeFP();
-				fatigueUtilityThreshold = model.getFatigue().computeFT() * model.getProcedural().utilityThreshold;
-			}
 
-			if (model.getFatigue().fatigueEnabled && highestU
-					.getUtility() < (model.getFatigue().computeFT() * model.getProcedural().utilityThreshold)) {
+			if (model.getFatigue().fatigueEnabled && 
+					highestU.getUtility() < ( model.getFatigue().fatigueUT )) {
 				if (conflictSetTrace)
 					model.output(String.format("[utility below current threshold of %.3f]",
-							model.getProcedural().utilityThreshold));
+							model.getProcedural().utilityThreshold) + "[microlapse]");
 
+				//model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+				
 				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
 						"[no rule fired, utility below threshold]") {
 					public void action() {
@@ -239,11 +239,6 @@ public class Procedural extends Module {
 			}
 		}
 	}
-
-	// void fatigueUpdate()
-	// {
-	// fatigue_fp = Math.max(0.000001, fatigue_fp - fatigue_fp_dec );
-	// }
 
 	void fire(Instantiation inst, Buffers buffers) {
 		inst.getProduction().fire(inst);

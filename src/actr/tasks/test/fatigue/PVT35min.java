@@ -196,7 +196,7 @@ public class PVT35min extends Task {
 				currentBlock.startTime = getModel().getTime();
 				trial = 0;
 				iteration++;
-				getModel().getFatigue().startNewTask();
+				getModel().getFatigue().startFatigueSession();
 				addUpdate(0); // between iteration time
 			}
 			// when the number of iterations exceeds the the runIteration, it's

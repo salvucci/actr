@@ -322,7 +322,9 @@ public class Production {
 		 */
 		double instU;
 		if (model.getFatigue().fatigueEnabled && !constantUtility)
-			instU  = u * model.getFatigue().computeFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
+			//old version: just the affect of time on task 
+			//instU  = u * model.getFatigue().computeFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
+			instU  = u * model.getFatigue().fatigueFP +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		else
 			instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		//System.out.println("u  ::: " + instU + "----" + name);

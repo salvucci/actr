@@ -1,5 +1,5 @@
 (set-task "actr.tasks.test.fatigue.PVTdriver")
-(set-schedule (7.5 23.5)(31.5 47.5)(55.5 71.5)(79.5 94.5))
+(set-schedule (8.0 22.0)(32.0 39.0)(44.0 58.0)(68.0 82.0)(92.0 106.0)(116.0 130.0)(140.0 154.0))
 
 (add-dm
     (goal isa goal state wait)
@@ -8,15 +8,23 @@
 (sgp 
     :v nil
     :fatigue t   
-    :iu 2.8
+    :iu 2.7
     :ut 2.3
-    :pu-tot -0.05
-    :ut-tot -0.012
+    
+    :fpbmc .02
+    :fpmc 0
+    
+    :utbmc .01  
+    :utmc 0
+    
+    :fp-dec 0.0144
+    ;;:pu-tot -0.05
+    ;;:ut-tot -0.012
     
     :egs .25
     ;:cst t
     
-    :dat .040
+    :dat .05
     :randomize-time t
     :vpft t
     
