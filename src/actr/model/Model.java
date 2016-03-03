@@ -727,10 +727,14 @@ public class Model {
 			fatigue.utTOT = Double.valueOf(value);
 		else if (parameter.equals(":hour"))
 			fatigue.fatigueHour = Double.valueOf(value);
-		else if (parameter.equals(":set-schedule"))
-			System.out.println(value);
-		// fatigue.fatigue_hour= Double.valueOf(value);
-
+		else if (parameter.equals(":microlapses"))
+			fatigue.runWithMicrolapses = (!value.equals("nil"));
+		else if (parameter.equals(":p0"))
+			fatigue.fatigueP0 = Double.valueOf(value);
+		else if (parameter.equals(":u0"))
+			fatigue.fatigueU0 = Double.valueOf(value);
+		else if (parameter.equals(":k0"))
+			fatigue.fatigueK0 = Double.valueOf(value);
 		else
 			recordWarning("ignoring parameter " + parameter, t);
 	}

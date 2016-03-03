@@ -13,7 +13,7 @@ public class Fatigue extends Module {
 	private Model model;
 
 	boolean fatigueEnabled = false; 	// Turns fatigue module off / on
-	boolean runWithMicrolapses = false; 
+	boolean runWithMicrolapses = true; 
 	double fatigueStimulus = 1.0;  		/* Signals a reset to fp based on specified scalar.  
 										fp <- stimulus.  Resets decrements */
 	double fatigueFPDec = 0.01440861; 	// Decrease in fp after each microlapse
@@ -39,6 +39,9 @@ public class Fatigue extends Module {
 	double startTimeSC = 0;  			/* Records the time in second at the start of a session, 
 									    so proper within-session offsets can be calculated */
 
+	double fatigueP0 = 3.841432;  // the initial values of bioMath model
+	double fatigueU0 = 38.509212; // the initial values of bioMath model
+	double fatigueK0 = 0.019455;  // the initial values of bioMath model
 
 	private ArrayList<Double> wake = new ArrayList<Double>();
 	private ArrayList<Double> asleep = new ArrayList<Double>();
@@ -65,7 +68,7 @@ public class Fatigue extends Module {
 
 	void setSleepSchedule() {
 		// values : p , u , k , times
-		values = BioMathModel.sleepsched(wake, asleep, 3.841432, 38.509212, 0.019455);
+		values = BioMathModel.sleepsched(wake, asleep, fatigueP0 , fatigueU0, fatigueK0);
 		// for (int i = 0; i < values.size(); i++) {
 		// System.out.print(Utilities.toString(values.get(i)));
 		// System.out.println();
@@ -82,7 +85,7 @@ public class Fatigue extends Module {
 		 //System.out.println(Pvalues);
 	}
 
-	double computeBioMathValueForHour(){
+	public double computeBioMathValueForHour(){
 		return pvalues.ceilingEntry(fatigueHour).getValue();
 	}
 	

@@ -9,17 +9,16 @@
     :v nil
     :fatigue t   
     :iu 2.7
-    :ut 2.3
+    :ut 2.25
     
-    :fpbmc .02
+    ;;:microlapses nil
+    :fpbmc .015
     :fpmc 0
     
-    :utbmc .01  
+    :utbmc .008  
     :utmc 0
     
-    :fp-dec 0.0144
-    ;;:pu-tot -0.05
-    ;;:ut-tot -0.012
+    :fp-dec 0.005
     
     :egs .25
     ;:cst t

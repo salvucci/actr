@@ -198,10 +198,11 @@ public class Procedural extends Module {
 					model.output(String.format("[utility below current threshold of %.3f]",
 							model.getProcedural().utilityThreshold) + "[microlapse]");
 
-				//model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+				if (model.getFatigue().runWithMicrolapses )
+					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				
 				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
-						"[no rule fired, utility below threshold]") {
+						"[no rule fired, utility below threshold] [microlapse]") {
 					public void action() {
 						findInstantiations(buffers);
 					}
