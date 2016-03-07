@@ -190,9 +190,13 @@ public class Procedural extends Module {
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-
+			if (model.getFatigue().fatigueEnabled )  // for debugging fatigue
+				if (model.verboseTrace)
+					model.output("fatigue", "u:" + finalInst.getUtility() + " fp:"+ 
+							model.getFatigue().fatigueFP +" ut:" + model.getFatigue().fatigueUT);
+			
 			if (model.getFatigue().fatigueEnabled && 
-					highestU.getUtility() < ( model.getFatigue().fatigueUT )) {
+					finalInst.getUtility() < ( model.getFatigue().fatigueUT )) {
 				if (conflictSetTrace)
 					model.output(String.format("[utility below current threshold of %.3f]",
 							model.getProcedural().utilityThreshold) + "[microlapse]");
@@ -200,7 +204,7 @@ public class Procedural extends Module {
 				if (model.getFatigue().runWithMicrolapses )
 					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				
-				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
 						"[no rule fired, utility below threshold] [microlapse]") {
 					public void action() {
 						findInstantiations(buffers);
@@ -211,7 +215,7 @@ public class Procedural extends Module {
 					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
 
 				if (finalInst.getProduction().isBreakPoint()) {
-					model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
+					model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
 							"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
 						public void action() {
 							model.output("------", "break");

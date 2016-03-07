@@ -48,7 +48,7 @@ public class Fatigue extends Module {
 	private ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
-	
+
 
 	Fatigue(Model model) {
 		this.model = model;
@@ -64,28 +64,34 @@ public class Fatigue extends Module {
 	}
 
 	void setSleepSchedule() {
-		// values : p , u , k , times
-		values = BioMathModel.sleepsched(wake, asleep, fatigueP0 , fatigueU0, fatigueK0);
-		// for (int i = 0; i < values.size(); i++) {
-		// System.out.print(Utilities.toString(values.get(i)));
-		// System.out.println();
-		// }
+		if (!wake.isEmpty() && !asleep.isEmpty())  // check if the the model has setup the set-schedule function
+		{
+			// values : p , u , k , times
+			values = BioMathModel.sleepsched(wake, asleep, fatigueP0 , fatigueU0, fatigueK0);
+			// for (int i = 0; i < values.size(); i++) {
+			// System.out.print(Utilities.toString(values.get(i)));
+			// System.out.println();
+			// }
 
-		// given a schedule of sleep/wake hours in the form of '((awake1 sleep1)
-		// (awake2 sleep2)....)
-		// returns a hashtable with all performance values where keys are the
-		// time
-		for (int i = 0; i < values.size(); i++)
-			pvalues.put(values.get(i).get(3), values.get(i).get(0));
+			// given a schedule of sleep/wake hours in the form of '((awake1 sleep1)
+			// (awake2 sleep2)....)
+			// returns a hashtable with all performance values where keys are the
+			// time
+			for (int i = 0; i < values.size(); i++)
+				pvalues.put(values.get(i).get(3), values.get(i).get(0));
 
-		 //System.out.println(pvalues.ceilingEntry(70.00).getValue());
-		 //System.out.println(Pvalues);
+			//System.out.println(pvalues.ceilingEntry(70.00).getValue());
+			//System.out.println(Pvalues);
+		}
 	}
 
 	public double computeBioMathValueForHour(){
-		return pvalues.ceilingEntry(fatigueHour).getValue();
+		if (pvalues.isEmpty())
+			return 0;
+		else
+			return pvalues.ceilingEntry(fatigueHour).getValue();
 	}
-	
+
 	// Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 	void decrementFPFD() {
 		fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec);
@@ -101,30 +107,26 @@ public class Fatigue extends Module {
 	void update() {
 		if (fatigueEnabled) {
 			fatigueFP = fatigueFPPercent * (1 - fatigueFPBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueFPMC);
-			if (model.verboseTrace)
-				model.output("fatigue", "fp: " + fatigueFP);
 			fatigueUT = fatigueUT0 * (1 - fatigueUTBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueUTMC);
-			if (model.verboseTrace)
-				model.output("fatigue", "ut: " + fatigueUT);
 		}
 	}
-	
+
 	// Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
 	public void setFatigueHour(double hour) {
 		fatigueHour = hour;
 	}
-	
+
 	// When ever there is a new session this function should be called so the startTimeSc is set
 	public void startFatigueSession() {  
 		startTimeSC = model.getTime();
 	}
-	
+
 	// This method is called just after any new task presentation (audio or visual) 
 	public void fatigueResetPercentages(){
 		fatigueFPPercent = fatigueStimulus;
 		fatigueFDPercent = fatigueStimulus;
 	}
-	
+
 
 	public void setFatigueFP(double fp) {
 		fatigueFP = fp;
