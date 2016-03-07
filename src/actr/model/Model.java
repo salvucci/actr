@@ -721,10 +721,6 @@ public class Model {
 			fatigue.fatigueFPPercent = Double.valueOf(value);
 		else if (parameter.equals(":fd-percent"))
 			fatigue.fatigueFDPercent = Double.valueOf(value);
-		else if (parameter.equals(":pu-tot"))
-			fatigue.puTOT = Double.valueOf(value);
-		else if (parameter.equals(":ut-tot"))
-			fatigue.utTOT = Double.valueOf(value);
 		else if (parameter.equals(":hour"))
 			fatigue.fatigueHour = Double.valueOf(value);
 		else if (parameter.equals(":microlapses"))

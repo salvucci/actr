@@ -104,7 +104,6 @@ public class Procedural extends Module {
 	}
 
 	public double getFatigueUtility() {
-
 		return initialUtility * model.getFatigue().fatigueFP;
 	}
 

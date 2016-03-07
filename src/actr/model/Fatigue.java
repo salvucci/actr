@@ -49,9 +49,6 @@ public class Fatigue extends Module {
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
 	
-	// parameters regarding time-on-task model
-	double puTOT = 0; // production utility time-on-task
-	double utTOT = 0; // utility threshold time-on-task
 
 	Fatigue(Model model) {
 		this.model = model;
@@ -89,18 +86,7 @@ public class Fatigue extends Module {
 		return pvalues.ceilingEntry(fatigueHour).getValue();
 	}
 	
-	// fatigue modulation value at time t
-	double computeFP() {
-		return Math.pow(mpTime(), puTOT);
-	}
-
-	// fatigue parameter which modulates the utility threshold
-	double computeFT() {
-		return Math.pow(mpTime(), utTOT);
-	}
-
-	// Anytime there is a microlapse, the fp-percent and fd-percent are
-	// decremented
+	// Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 	void decrementFPFD() {
 		fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec);
 		fatigueFDPercent = Math.max(.000001, fatigueFDPercent - fatigueFDDec);
@@ -108,14 +94,12 @@ public class Fatigue extends Module {
 
 	// Calculate the number of minutes that have passed
 	double mpTime() {
-		return ((int) ((model.getTime() + startTimeSC) / 60));
+		return ((int) ((model.getTime() - startTimeSC) / 60));
 	}
 
 	@Override
 	void update() {
 		if (fatigueEnabled) {
-			//System.out.println("startTimeSC: " + startTimeSC);
-			//System.out.println("mpTime: " + mpTime());
 			fatigueFP = fatigueFPPercent * (1 - fatigueFPBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueFPMC);
 			if (model.verboseTrace)
 				model.output("fatigue", "fp: " + fatigueFP);
@@ -150,30 +134,30 @@ public class Fatigue extends Module {
 		return fatigueFPOriginal;
 	}
 
-//	public void resetFatigueModule() {
-//
-//		fatigueFP = fatigueStimulus * fatigueFPOriginal;
-//		fatigueUT = model.getProcedural().utilityThreshold;
-//
-//		// fatigue_pending = nil;
-//		// fatigue_last_one_empty = nil;
-//		//
-//		// fatigue_fp_percent = 1;
-//		// fatigue_fp = 1;
-//		// fatigue_fp_dec = 0.01440861;
-//		// fatigue_fd_percent = 1;
-//		// fatigue_fd = 0;
-//		// fatigue_stimulus =1;
-//		// fatigue_fpbmc = 0;
-//		// fatigue_fpmc = 0;
-//		// fatigue_utbmc = 0;
-//		// fatigue_utmc = 0;
-//		// fatigue_ut0 = 2.0643395401332;
-//		// fatigue_fdbmc =-0.02681;
-//		// fatigue_fdc =0.95743;
-//		// fatigue_hour =0;
-//		// fatigue_start_time = 0;
-//		// fatigue_ut= (car (no-output (sgp :ut))))
-//		// fatigue_dat =(car (no-output (sgp :dat))));
-//	}
+	public void resetFatigueModule() {
+
+		fatigueFP = fatigueStimulus * fatigueFPOriginal;
+		fatigueUT = model.getProcedural().utilityThreshold;
+
+		// fatigue_pending = nil;
+		// fatigue_last_one_empty = nil;
+		//
+		// fatigue_fp_percent = 1;
+		// fatigue_fp = 1;
+		// fatigue_fp_dec = 0.01440861;
+		// fatigue_fd_percent = 1;
+		// fatigue_fd = 0;
+		// fatigue_stimulus =1;
+		// fatigue_fpbmc = 0;
+		// fatigue_fpmc = 0;
+		// fatigue_utbmc = 0;
+		// fatigue_utmc = 0;
+		// fatigue_ut0 = 2.0643395401332;
+		// fatigue_fdbmc =-0.02681;
+		// fatigue_fdc =0.95743;
+		// fatigue_hour =0;
+		// fatigue_start_time = 0;
+		// fatigue_ut= (car (no-output (sgp :ut))))
+		// fatigue_dat =(car (no-output (sgp :dat))));
+	}
 }
