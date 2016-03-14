@@ -489,11 +489,15 @@ class Parser {
 		t.advance();
 		if (!Utilities.isNumericPos(t.getToken()))
 			model.recordError(t);
-		model.getFatigue().addWake(Double.valueOf(t.getToken()));
+		double first = Double.valueOf(t.getToken());
+		model.getFatigue().addWake(first);
 		t.advance();
 		if (t.getToken().equals(")") || !Utilities.isNumericPos(t.getToken()))
 			model.recordError(t);
-		model.getFatigue().addSleep(Double.valueOf(t.getToken()));
+		double second = Double.valueOf(t.getToken());
+		if (second < first)
+			model.recordError(t);
+		model.getFatigue().addSleep(second);
 		t.advance();
 		if (!t.getToken().equals(")"))
 			model.recordError(t);
