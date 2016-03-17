@@ -110,6 +110,13 @@ public class Fatigue extends Module {
 			fatigueUT = fatigueUT0 * (1 - fatigueUTBMC * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), fatigueUTMC);
 		}
 	}
+	
+	public double getBioMathModelValueforHour(double hour){
+		if (pvalues.isEmpty())
+			return 0;
+		else
+			return pvalues.ceilingEntry(hour).getValue();
+	}
 
 	// Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
 	public void setFatigueHour(double hour) {

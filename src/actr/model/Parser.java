@@ -84,7 +84,7 @@ class Parser {
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-					model.getFatigue().setSleepSchedule();
+					//model.getFatigue().setSleepSchedule();
 				}
 
 				else if (t.getToken().equals("set-parameter")) {

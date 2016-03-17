@@ -441,6 +441,10 @@ public class Model {
 	 *            <tt>false</tt> to resume from the current state
 	 */
 	public void run(boolean reset) {
+		// getting the values for biomath model before running the model
+		if (fatigue.fatigueEnabled)
+			fatigue.setSleepSchedule();
+		
 		stop = false;
 		taskUpdated = false;
 
