@@ -169,4 +169,11 @@ public class Fatigue extends Module {
 		// fatigue_ut= (car (no-output (sgp :ut))))
 		// fatigue_dat =(car (no-output (sgp :dat))));
 	}
+	public boolean isSleep(double hour){
+		for (int i = 0; i < wake.size(); i++) {
+			if (hour>=wake.get(i) && hour < asleep.get(i))
+				return false;
+		}
+		return true;
+	}
 }
