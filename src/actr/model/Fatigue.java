@@ -16,7 +16,9 @@ public class Fatigue extends Module {
 	boolean runWithMicrolapses = true; 
 	double fatigueStimulus = 1.0;  		/* Signals a reset to fp based on specified scalar.  
 										fp <- stimulus.  Resets decrements */
-	double fatigueFPDec = 0.01440861; 	// Decrease in fp after each microlapse
+	//double fatigueFPDec = 0.01440861; 	// Decrease in fp after each microlapse
+	double fatigueFPDec = 0.99; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
+	
 	double fatigueFPOriginal = 0;
 	double fatigueFP = 1.0;  			// "fatigue parameter" value scales utility calculations
 	double fatigueUT = 0;  				//Utility threshold (from utilty module)
@@ -94,8 +96,10 @@ public class Fatigue extends Module {
 
 	// Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 	void decrementFPFD() {
-		fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec);
-		fatigueFDPercent = Math.max(.000001, fatigueFDPercent - fatigueFDDec);
+		//fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec); //OLD
+		//fatigueFDPercent = Math.max(.000001, fatigueFDPercent - fatigueFDDec); //OLD
+		fatigueFPPercent = fatigueFPPercent * fatigueFPDec;
+        fatigueFDPercent = fatigueFDPercent * fatigueFPDec;
 	}
 
 	// Calculate the number of minutes that have passed
