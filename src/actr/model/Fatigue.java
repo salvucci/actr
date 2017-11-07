@@ -51,6 +51,7 @@ public class Fatigue extends Module {
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
 
+	double accumilativeParameter = 0;
 
 	Fatigue(Model model) {
 		this.model = model;
@@ -94,15 +95,20 @@ public class Fatigue extends Module {
 			return pvalues.ceilingEntry(fatigueHour).getValue();
 	}
 
-	// Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+	/**
+	 *  Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+	 */
 	void decrementFPFD() {
 		//fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec); //OLD
 		//fatigueFDPercent = Math.max(.000001, fatigueFDPercent - fatigueFDDec); //OLD
-		fatigueFPPercent = fatigueFPPercent * fatigueFPDec;
-        fatigueFDPercent = fatigueFDPercent * fatigueFPDec;
+        fatigueFPPercent = Math.max(.000001, fatigueFPPercent * fatigueFPDec); 
+		fatigueFDPercent = Math.max(.000001, fatigueFDPercent * fatigueFDDec);
 	}
 
-	// Calculate the number of minutes that have passed
+
+	/**
+	 * @return the number of minutes that have passed
+	 */
 	double mpTime() {
 		return ((int) ((model.getTime() - startTimeSC) / 60));
 	}
@@ -122,17 +128,36 @@ public class Fatigue extends Module {
 			return pvalues.ceilingEntry(hour).getValue();
 	}
 
-	// Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
+	/**
+	 * @param hour
+	 * Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
+	 */
 	public void setFatigueHour(double hour) {
 		fatigueHour = hour;
 	}
 
-	// When ever there is a new session this function should be called so the startTimeSc is set
+	/**
+	 * When ever there is a new session this function should be called so the startTimeSc is set
+	 */
 	public void startFatigueSession() {  
 		startTimeSC = model.getTime();
 	}
+	
+	public void setAccumilativeParameter(double AP){
+		accumilativeParameter = AP;
+	}
+	
+	
+	/**
+	 * for when you have an accumulative affect on the task that are being consecutively happening.
+	 */
+	public void startAccumilativeFatigueSession(){
+		startTimeSC = Math.min(startTimeSC + accumilativeParameter , model.getTime());
+	}
 
-	// This method is called just after any new task presentation (audio or visual) 
+	/**
+	 *  This method is called just after any new task presentation (audio or visual) 
+	 */
 	public void fatigueResetPercentages(){
 		fatigueFPPercent = fatigueStimulus;
 		fatigueFDPercent = fatigueStimulus;
@@ -141,6 +166,14 @@ public class Fatigue extends Module {
 
 	public void setFatigueFP(double fp) {
 		fatigueFP = fp;
+	}
+	
+	public double getFatigueFP(){
+		return fatigueFP;
+	}
+	
+	public double getFatigueUT(){
+		return fatigueUT;
 	}
 
 	public double getFatigueFPOriginal() {
