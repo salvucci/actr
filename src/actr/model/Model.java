@@ -829,6 +829,19 @@ public class Model {
 		else
 			System.out.println(s);
 	}
+	
+	/**
+	 * Prints a string to the output panel without newline at the end.
+	 * 
+	 * @param s
+	 *            the message string
+	 */
+	public void outputInLine(String s) {
+		if (frame != null)
+			frame.outputInLine(s);
+		else
+			System.out.println(s);
+	}
 
 	/**
 	 * Clears the output panel.
