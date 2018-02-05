@@ -32,7 +32,7 @@ public class Procedural extends Module {
 	double productionCompilationNewUtility = 0;
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
-	
+	double finalInstUtility =0;
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
@@ -106,6 +106,10 @@ public class Procedural extends Module {
 	public double getFatigueUtility() {
 		return initialUtility * model.getFatigue().fatigueFP;
 	}
+	
+	public double getFinalInstUtility() {
+		return finalInstUtility;
+	}
 
 	public double getFatigueUtilityThreshold() {
 		return model.getFatigue().fatigueUT;
@@ -164,7 +168,8 @@ public class Procedural extends Module {
 			}
 
 			final Instantiation finalInst = highestU;
-
+			finalInstUtility = finalInst.getUtility();
+			
 			// System.out.println(model.getTime() + " " +
 			// highestU.getProduction().getName() + " u: " +
 			// highestU.getUtility() + "----" );
