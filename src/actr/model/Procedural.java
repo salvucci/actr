@@ -33,6 +33,7 @@ public class Procedural extends Module {
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
 	double finalInstUtility =0;
+	boolean microLapses = false;
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
@@ -202,6 +203,7 @@ public class Procedural extends Module {
 			
 			if (model.getFatigue().fatigueEnabled && 
 					finalInst.getUtility() < ( model.getFatigue().fatigueUT )) {
+				microLapses = true;
 				if (conflictSetTrace)
 					model.output(String.format("[utility below current threshold of %.3f]",
 							model.getProcedural().utilityThreshold) + "[microlapse]");
@@ -216,6 +218,7 @@ public class Procedural extends Module {
 					}
 				});
 			} else {
+				microLapses = false;
 				if (conflictSetTrace)
 					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
 
