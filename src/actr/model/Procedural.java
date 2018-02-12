@@ -112,6 +112,10 @@ public class Procedural extends Module {
 		return finalInstUtility;
 	}
 
+	public boolean isMicroLapse() {
+		return microLapses;
+	}
+	
 	public double getFatigueUtilityThreshold() {
 		return model.getFatigue().fatigueUT;
 	}
