@@ -105,7 +105,7 @@ public class Procedural extends Module {
 	}
 
 	public double getFatigueUtility() {
-		return initialUtility * model.getFatigue().fatigueFP;
+		return initialUtility * model.getFatigue().getFatigueFP();
 	}
 	
 	public double getFinalInstUtility() {
@@ -117,11 +117,11 @@ public class Procedural extends Module {
 	}
 	
 	public double getFatigueUtilityThreshold() {
-		return model.getFatigue().fatigueUT;
+		return model.getFatigue().getFatigueUT();
 	}
 
 	void findInstantiations(final Buffers buffers) {
-		if (model.getFatigue().fatigueEnabled){
+		if (model.getFatigue().isFatigueEnabled()){
 			model.getFatigue().update(); // update the FP and UT values in case of the fatigue mechanism
 		}
 		// if (model.verboseTrace) model.output ("procedural",
@@ -200,19 +200,16 @@ public class Procedural extends Module {
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (model.getFatigue().fatigueEnabled )  // for debugging fatigue
+			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
 				if (model.verboseTrace)
 					model.output("fatigue", "u:" + finalInst.getUtility() + " fp:"+ 
-							model.getFatigue().fatigueFP +" ut:" + model.getFatigue().fatigueUT);
+							model.getFatigue().getFatigueFP() +" ut:" + model.getFatigue().getFatigueUT());
 			
-			if (model.getFatigue().fatigueEnabled && 
-					finalInst.getUtility() < ( model.getFatigue().fatigueUT )) {
+			if (model.getFatigue().isFatigueEnabled() && 
+					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
 				microLapses = true;
-				if (conflictSetTrace)
-					model.output(String.format("[utility below current threshold of %.3f]",
-							model.getProcedural().utilityThreshold) + "[microlapse]");
 
-				if (model.getFatigue().runWithMicrolapses )
+				if (model.getFatigue().isRunWithMicrolapses() )
 					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				
 				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",

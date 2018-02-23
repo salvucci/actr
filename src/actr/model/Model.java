@@ -442,7 +442,7 @@ public class Model {
 	 */
 	public void run(boolean reset) {
 		// getting the values for biomath model before running the model
-		if (fatigue.fatigueEnabled)
+		if (fatigue.isFatigueEnabled())
 			fatigue.setSleepSchedule();
 		
 		stop = false;
@@ -556,14 +556,14 @@ public class Model {
 
 		else if (parameter.equals(":dat")) {
 			procedural.actionTime = Double.valueOf(value);
-			fatigue.fatigueDAT = Double.valueOf(value);
+			fatigue.setFatigueDAT(Double.valueOf(value));
 		} else if (parameter.equals(":vpft"))
 			procedural.variableProductionFiringTime = !value.equals("nil");
 
 		else if (parameter.equals(":ut")) {
 			procedural.utilityUseThreshold = !value.equals("nil");
 			procedural.utilityThreshold = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-			fatigue.fatigueUT0 = Double.valueOf(value);  // setting up the initial utility
+			fatigue.setFatigueUT0(Double.valueOf(value));  // setting up the initial utility
 		} else if (parameter.equals(":ul"))
 			procedural.utilityLearning = !value.equals("nil");
 		else if (parameter.equals(":egs"))
@@ -693,42 +693,42 @@ public class Model {
 
 		// Fatigue parameters
 		else if (parameter.equals(":fatigue")) {
-			fatigue.fatigueEnabled = (!value.equals("nil"));
+			fatigue.setFatigueEnabled((!value.equals("nil")));
 			procedural.utilityUseThreshold = !value.equals("nil");
 		} else if (parameter.equals(":stimulus"))
-			fatigue.fatigueStimulus = Double.valueOf(value);
+			fatigue.setFatigueStimulus(Double.valueOf(value));
 		else if (parameter.equals(":fp-dec"))
-			fatigue.fatigueFPDec = Double.valueOf(value);
+			fatigue.setFatigueFPDec(Double.valueOf(value));
 		else if (parameter.equals(":fp"))
-			fatigue.fatigueFP = Double.valueOf(value);
+			fatigue.setFatigueFP(Double.valueOf(value));
 		else if (parameter.equals(":fd-dec"))
-			fatigue.fatigueFDDec = Double.valueOf(value);
+			fatigue.setFatigueFDDec(Double.valueOf(value));
 		else if (parameter.equals(":fd"))
-			fatigue.fatigueFD = Double.valueOf(value);
+			fatigue.setFatigueFD(Double.valueOf(value));
 		else if (parameter.equals(":fpbmc"))
-			fatigue.fatigueFPBMC = Double.valueOf(value);
+			fatigue.setFatigueFPBMC(Double.valueOf(value));
 		else if (parameter.equals(":fpmc"))
-			fatigue.fatigueFPMC = Double.valueOf(value);
+			fatigue.setFatigueFPMC(Double.valueOf(value));
 		else if (parameter.equals(":utbmc"))
-			fatigue.fatigueUTBMC = Double.valueOf(value);
+			fatigue.setFatigueUTBMC(Double.valueOf(value));
 		else if (parameter.equals(":utmc"))
-			fatigue.fatigueUTMC = Double.valueOf(value);
+			fatigue.setFatigueUTMC(Double.valueOf(value));
 		else if (parameter.equals(":ut0"))
-			fatigue.fatigueUT0 = Double.valueOf(value);
+			fatigue.setFatigueUT0(Double.valueOf(value));
 		else if (parameter.equals(":fdbmc"))
-			fatigue.fatigueFDBMC = Double.valueOf(value);
+			fatigue.setFatigueFDBMC(Double.valueOf(value));
 		else if (parameter.equals(":fdc"))
-			fatigue.fatigueFDC = Double.valueOf(value);
+			fatigue.setFatigueFDC(Double.valueOf(value));
 		else if (parameter.equals(":hour"))
-			fatigue.fatigueHour = Double.valueOf(value);
+			fatigue.setFatigueHour(Double.valueOf(value));
 		else if (parameter.equals(":fp-percent"))
-			fatigue.fatigueFPPercent = Double.valueOf(value);
+			fatigue.setFatigueFPPercent(Double.valueOf(value));
 		else if (parameter.equals(":fd-percent"))
-			fatigue.fatigueFDPercent = Double.valueOf(value);
+			fatigue.setFatigueFDPercent(Double.valueOf(value));
 		else if (parameter.equals(":hour"))
-			fatigue.fatigueHour = Double.valueOf(value);
+			fatigue.setFatigueHour(Double.valueOf(value));
 		else if (parameter.equals(":microlapses"))
-			fatigue.runWithMicrolapses = (!value.equals("nil"));
+			fatigue.setRunWithMicrolapses((!value.equals("nil")));
 		else if (parameter.equals(":p0"))
 			fatigue.fatigueP0 = Double.valueOf(value);
 		else if (parameter.equals(":u0"))
