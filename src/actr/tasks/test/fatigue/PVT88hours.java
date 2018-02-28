@@ -83,7 +83,7 @@ public class PVT88hours extends Task {
 		addUpdate(1.0);
 
 //		try {
-//			File dataFile = new File("./test/fatigue/pvt_driver/data.txt");
+//			File dataFile = new File("./test/fatigue/pvt_88hour/data.txt");
 //			if (!dataFile.exists())
 //				dataFile.createNewFile();
 //			data = new PrintStream(dataFile);
@@ -103,14 +103,11 @@ public class PVT88hours extends Task {
 			label.setVisible(true);
 			processDisplay();
 			stimulusVisibility = true;
+			if (getModel().isVerbose())
+				getModel().output("!!!!! Stimulus !!!!!");
+			
 			lastTime = getModel().getTime();
-			// setting up the state to wait
-			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),
-					Symbol.get("stimulus"));
-
-			// calling percentage reset after any new task presentation (audio or visual)
-			getModel().getFatigue().fatigueResetPercentages();
-
+			
 			// Handling the sleep attacks -- adding an event in 30 s to see if the current stimulus is still on
 			currentSession.stimulusIndex ++;
 			addEvent(new Event(getModel().getTime() + 30.0, "task", "update") {
@@ -122,10 +119,11 @@ public class PVT88hours extends Task {
 						processDisplay();
 						stimulusVisibility = false;
 						currentSession.sleepAttacks++;
-						currentSession.responses++; // when sleep attack happens we add to the number of responses
-//						System.out.println("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
-//								+ "model time :" + getModel().getTime());
-//						System.out.println(currentSession.stimulusIndex + " " + sleepAttackIndex);
+						// when sleep attack happens we add to the number of responses
+						currentSession.responses++; 
+						System.out.println("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
+								+ "model time :" + getModel().getTime());
+						System.out.println(currentSession.stimulusIndex + " " + sleepAttackIndex);
 						addUpdate(1.0);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
 					}
@@ -151,7 +149,6 @@ public class PVT88hours extends Task {
 						currentSession.startTime = getModel().getTime();
 						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 						getModel().getFatigue().startFatigueSession();
-//						System.out.println(getModel().getFatigue().computeBioMathValueForHour());
 						addUpdate(1.0);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
 					}
@@ -164,6 +161,22 @@ public class PVT88hours extends Task {
 
 
 		}
+	}
+
+	@Override
+	public void eval(Iterator<String> it) {
+		it.next(); // (
+		String cmd = it.next();
+		if (cmd.equals("fatigue-reset-percentage")) {
+			fatigueResetPercentage();
+		}
+	}
+	
+	// calling percentage reset after any new task presentation (audio or visual)
+	void fatigueResetPercentage() {
+		getModel().getFatigue().fatigueResetPercentages();
+		if (getModel().isVerbose())
+			getModel().output("!!!! Fatigue Percentage Reset !!!!");
 	}
 
 	@Override
@@ -197,9 +210,6 @@ public class PVT88hours extends Task {
 			else if (responseTime > .500 && responseTime < 30.0){
 				currentSession.lapses++;
 			}
-			// setting up the state to wait
-			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
-
 		} else {
 			currentSession.responses++;
 			currentSession.falseStarts++;

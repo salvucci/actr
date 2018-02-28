@@ -6,19 +6,20 @@
 )
 
 (sgp 
+    :cst nil
     :v nil
     :fatigue t   
     :iu 2.8
     :ut 2.3
     
     ;;:microlapses nil
-    :fpbmc 0.0120716873738272
-    :fpmc 0
+    :fpbmc .018
+    :fpmc -.005
     
-    :utbmc 0.00991274671415563 
-    :utmc 0
+    :utbmc .012  
+    :utmc -.002
     
-    :fp-dec 0.01440861
+    :fp-dec 0.998
     
     :egs .25
     ;:cst t
@@ -37,26 +38,24 @@
     =goal>
         isa goal
         state                 wait
-        - state                 done
-    ?manual>
-        state                 free
-    ?visual>
-        state                 free
+        - state                 none
     ?visual-location>
         buffer                empty
 ==>
+        ; !eval! (fatigue-reset-percentage)
 )
 ;(spp :u 1)
 
 (p attend-stimulus
     =goal>
         isa goal
-        state                 =state
-        - state                 done                       
-        - state                 look
+        state  wait
     =visual-location>
         isa visual-location
+    ?visual>
+        state free
 ==>
+    !eval! (fatigue-reset-percentage)
     +visual>               
         isa	move-attention
         screen-pos =visual-location
@@ -75,12 +74,13 @@
     ?manual>
         state free 
 ==>
+    !eval! (fatigue-reset-percentage)
     !output! (=val)
     +manual>
         isa press-key
         key space
     =goal>
-        state done
+        state wait
     +visual>
         isa clear
 )
@@ -89,10 +89,11 @@
 (p press-key 
     =goal>
         isa goal
-        ;state wait
+        state wait
     ?manual>
         state free 
 ==>
+    !eval! (fatigue-reset-percentage)
     !output! ("***  press Key - False Start  ***")
     +manual>
         isa press-key
@@ -101,4 +102,5 @@
         state wait
 )
 (spp :u 0)
+
 
