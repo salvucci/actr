@@ -4,8 +4,11 @@ import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+
+import actr.model.Event;
 import actr.model.Symbol;
 import actr.task.*;
+
 
 /**
  * Model of PVT test on time on task
@@ -23,14 +26,18 @@ public class PVT35min extends Task {
 	private String stimulus = "\u2588";
 	private double interStimulusInterval = 0.0;
 	private Boolean stimulusVisibility = false;
-
-	private int trial;
-	private int iteration;
-	// private final int numberOfBlocks = 7;
-	private final int runIterations = 150;
 	private String response = null;
 	private double responseTime = 0;
+	// the following variable are for handling sleep attacks
+	private int sleepAttackIndex = 0;
+	private double PVTduration = 2100.0;
 
+	private double[] timesOfPVT = {
+			24.0 + 12   // setting the time of the PVT at noon in the 2nd day
+	};
+
+	int sessionNumber = 0; // starts from 0
+	private int iteration;
 	private Block currentBlock;
 	private Session currentSession;
 	private Vector<Session> sessions = new Vector<Session>();
@@ -44,20 +51,40 @@ public class PVT35min extends Task {
 	private PrintStream b7Stream;
 	private PrintStream uutStream;
 
+	// 5-min blocks
 	class Block {
-
+		Values reactionTimes = new Values();
 		double startTime;
 		double totalBlockTime;
 		int FalseAlert = 0;
 		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
-											// intervals )
+		// intervals )
 		int lapses = 0;
-		int Bresponces = 0;
+		int numberOfResponses = 0;
+
+		public int getFalseAlertProportion() {
+			return FalseAlert/ reactionTimes.size();
+		}
+		public int getLapsesProportion() {
+			return lapses / reactionTimes.size();
+		}
 	}
 
 	class Session {
 		Vector<Block> blocks = new Vector<Block>();
-		int responses = 0;
+		int blockIndex = 0;
+		Values reactionTimes = new Values();
+		double startTime = 0;
+		int falseStarts = 0;
+		int alertRosponses = 0;
+		// Alert responses (150-500 ms,10 ms intervals )
+		int alertResponseSpread[] = new int[35]; 
+		double totalSessionTime = 0;
+		int lapses = 0;
+		int sleepAttacks = 0;
+		int stimulusIndex = 0;
+		int responses = 0; // number of responses, this can be diff from the
+		// stimulusIndex because of false resonces
 		double responseTotalTime = 0;
 	}
 
@@ -70,16 +97,17 @@ public class PVT35min extends Task {
 
 	@Override
 	public void start() {
-		iteration = 1;
-		trial = 0;
-		lastTime = -10;
-		response = null;
-		responseTime = 0;
+		lastTime = 0;
+
 		currentSession = new Session();
 		currentBlock = new Block();
 		stimulusVisibility = false;
 
 		currentBlock.startTime = 0;
+
+		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+		getModel().getFatigue().startFatigueSession();
+
 		addUpdate(1.0);
 
 		try {
@@ -132,86 +160,90 @@ public class PVT35min extends Task {
 
 	@Override
 	public void update(double time) {
-		if (iteration <= runIterations) {
+		currentSession.totalSessionTime = getModel().getTime() - currentSession.startTime;
 
-			// a session
-			if (trial < 340) {
-				currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
-				// adding a new block
-				if (currentBlock.totalBlockTime > 300 && currentSession.blocks.size() < 6) {
-					currentSession.blocks.add(currentBlock);
-					currentBlock = new Block();
-					currentBlock.startTime = getModel().getTime();
-					trial++;
-					addUpdate(0.5);
+		if (currentSession.totalSessionTime <= PVTduration) {
+			label.setText(stimulus);
+			label.setVisible(true);
+			processDisplay();
+			stimulusVisibility = true;
+			if (getModel().isVerbose())
+				getModel().output("!!!!! Stimulus !!!!!");
+
+			lastTime = getModel().getTime();
+
+			// Handling the sleep attacks -- adding an event in 30 s to see if
+			// the current stimulus is still on
+			currentSession.stimulusIndex++;
+			addEvent(new Event(getModel().getTime() + 30.0, "task", "update") {
+				@Override
+				public void action() {
+					sleepAttackIndex++;
+					if (sleepAttackIndex == currentSession.stimulusIndex && stimulusVisibility == true) {
+						label.setVisible(false);
+						processDisplay();
+						stimulusVisibility = false;
+						currentSession.sleepAttacks++;
+						// when sleep attack happens we add to the number of responses
+						currentSession.responses++; 
+						System.out.println("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
+								+ "model time :" + getModel().getTime());
+						System.out.println(currentSession.stimulusIndex + " " + sleepAttackIndex);
+						addUpdate(1.0);
+						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+					}
+					repaint();
 
 				}
+			});
 
-				else {
-					label.setText(stimulus);
-					label.setVisible(true);
-					stimulusVisibility = true;
-					processDisplay();
-					trial++;
-					lastTime = getModel().getTime();
-					// setting up the state to wait
-					getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),
-							Symbol.get("stimulus"));
-
-				}
-			}
-			// Starting a new Session
-			else {
+			// Handling the 5-min blocks
+			currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
+			// adding a new block
+			if (currentBlock.totalBlockTime >= 300 ) {
 				currentSession.blocks.add(currentBlock);
-
-				// System.out.println(" Block size ==>" +
-				// currentSession.blocks.size());
-				// System.out.println("Session # ==> " + iteration);
-				// System.out.println("Responses ==> " +
-				// currentSession.responses);
-				// System.out.println("Responces Total Time ==> " +
-				// currentSession.responseTotalTime);
-				// System.out.println("---------------------------------------");
-				// for (int i = 0; i < currentSession.blocks.size(); i++) {
-				// System.out.println(" Block # ==>" + (i+1));
-				// System.out.println(" Block Start Time ==>" +
-				// currentSession.blocks.elementAt(i).startTime);
-				// System.out.println(" TotalBlockTime ==>" +
-				// currentSession.blocks.elementAt(i).totalBlockTime);
-				// System.out.println(" Block Responces ==> " +
-				// currentSession.blocks.elementAt(i).Bresponces);
-				// System.out.println(" False Alerts ==> " +
-				// currentSession.blocks.elementAt(i).FalseAlert);
-				// System.out.println(" Lapses ==> " +
-				// currentSession.blocks.elementAt(i).lapses);
-				// System.out.println("
-				// ............................................");
-				//
-				// }
-				sessions.add(currentSession);
-				currentSession = new Session();
-
 				currentBlock = new Block();
-				// System.out.println(getModel().getTime());
-				currentBlock.startTime = getModel().getTime();
-				trial = 0;
-				iteration++;
-				getModel().getFatigue().startFatigueSession();
-				addUpdate(0); // between iteration time
+				currentBlock.startTime = currentSession.startTime + currentSession.blockIndex * 300.0;
+				currentSession.blockIndex++;
 			}
-			// when the number of iterations exceeds the the runIteration, it's
-			// the end of modeling
-		} else {
-			b1Stream.close();
-			b2Stream.close();
-			b3Stream.close();
-			b4Stream.close();
-			b5Stream.close();
-			b6Stream.close();
-			b7Stream.close();
-			uutStream.close();
+		}
 
-			getModel().stop();
+		// Starting a new Session
+		else {
+			currentSession.blocks.add(currentBlock);
+			sessions.add(currentSession);
+			sessionNumber++;
+			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
+			// go to the next session or stop the model
+			if (sessionNumber < timesOfPVT.length) {
+				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
+					@Override
+					public void action() {
+						currentSession = new Session();
+						stimulusVisibility = false;
+						sleepAttackIndex = 0;
+						currentSession.startTime = getModel().getTime();
+						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+						getModel().getFatigue().startFatigueSession();
+						addUpdate(1.0);
+						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+					}
+				});
+
+			} else {
+				currentSession.blocks.add(currentBlock);
+				sessions.add(currentSession);
+
+				b1Stream.close();
+				b2Stream.close();
+				b3Stream.close();
+				b4Stream.close();
+				b5Stream.close();
+				b6Stream.close();
+				b7Stream.close();
+				uutStream.close();
+				getModel().stop();
+			}
 		}
 	}
 
@@ -221,10 +253,13 @@ public class PVT35min extends Task {
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
+			
 			if (response != null) {
 				currentSession.responses++;
+				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
-				currentBlock.Bresponces++;
+				currentSession.reactionTimes.add(responseTime);
+				currentBlock.reactionTimes.add(responseTime);
 			}
 
 			if (currentSession.blocks.size() == 0)
@@ -262,11 +297,7 @@ public class PVT35min extends Task {
 				currentBlock.FalseAlert++;
 			else if (responseTime > .150 && responseTime <= .500)
 				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++; // making
-																					// the
-																					// array
-																					// for
-																					// response
-																					// time
+			// making the array for alert reaction times
 			else if (responseTime > .500)
 				currentBlock.lapses++;
 			else if (responseTime >= 30.0)
@@ -290,11 +321,14 @@ public class PVT35min extends Task {
 				b6Stream.println(0);
 			if (currentSession.blocks.size() == 6)
 				b7Stream.println(0);
+			currentBlock.numberOfResponses++;
 			currentBlock.FalseAlert++;
 			currentSession.responses++;
-			getModel().output(
-					"False alert happened " + "- Trial: " + iteration + " Block:" + (currentSession.blocks.size() + 1)
-							+ "   time of block : " + (getModel().getTime() - currentBlock.startTime));
+			currentSession.falseStarts++;
+
+			if (getModel().isVerbose())
+				getModel().output("False alert happened " + "- Trial: " + iteration + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of block : " + (getModel().getTime() - currentBlock.startTime));
 		}
 
 	}
@@ -313,7 +347,7 @@ public class PVT35min extends Task {
 		for (int i = 0; i < runIterations; i++) {
 			for (int j = 0; j < task.sessions.elementAt(i).blocks.size(); j++) {
 
-				Responses[j] += task.sessions.elementAt(i).blocks.elementAt(j).Bresponces;
+				Responses[j] += task.sessions.elementAt(i).blocks.elementAt(j).numberOfResponses;
 				FalseStarts[j] += task.sessions.elementAt(i).blocks.elementAt(j).FalseAlert;
 				for (int k = 0; k < 35; k++)
 					AlertResponses[j][k] += task.sessions.elementAt(i).blocks.elementAt(j).alertResponse[k];
