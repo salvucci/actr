@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
 
 import actr.model.Event;
 import actr.model.Symbol;
@@ -31,39 +32,39 @@ public class PVT35min extends Task {
 	// the following variable are for handling sleep attacks
 	private int sleepAttackIndex = 0;
 	private double PVTduration = 2100.0;
+	Random random;
 
 	private double[] timesOfPVT = {
 			24.0 + 12   // setting the time of the PVT at noon in the 2nd day
 	};
 
 	int sessionNumber = 0; // starts from 0
-	private int iteration;
 	private Block currentBlock;
 	private Session currentSession;
 	private Vector<Session> sessions = new Vector<Session>();
 
-	private PrintStream b1Stream;
-	private PrintStream b2Stream;
-	private PrintStream b3Stream;
-	private PrintStream b4Stream;
-	private PrintStream b5Stream;
-	private PrintStream b6Stream;
-	private PrintStream b7Stream;
-	private PrintStream uutStream;
+	//	private PrintStream b1Stream;
+	//	private PrintStream b2Stream;
+	//	private PrintStream b3Stream;
+	//	private PrintStream b4Stream;
+	//	private PrintStream b5Stream;
+	//	private PrintStream b6Stream;
+	//	private PrintStream b7Stream;
+	//	private PrintStream uutStream;
 
 	// 5-min blocks
 	class Block {
 		Values reactionTimes = new Values();
 		double startTime;
 		double totalBlockTime;
-		int FalseAlert = 0;
+		int falseAlert = 0;
 		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
 		// intervals )
 		int lapses = 0;
 		int numberOfResponses = 0;
-
+		int sleepAttacks = 0;
 		public int getFalseAlertProportion() {
-			return FalseAlert/ reactionTimes.size();
+			return falseAlert/ reactionTimes.size();
 		}
 		public int getLapsesProportion() {
 			return lapses / reactionTimes.size();
@@ -78,12 +79,12 @@ public class PVT35min extends Task {
 		int falseStarts = 0;
 		int alertRosponses = 0;
 		// Alert responses (150-500 ms,10 ms intervals )
-		int alertResponseSpread[] = new int[35]; 
+		int alertResponse[] = new int[35]; 
 		double totalSessionTime = 0;
 		int lapses = 0;
 		int sleepAttacks = 0;
 		int stimulusIndex = 0;
-		int responses = 0; // number of responses, this can be diff from the
+		int numberOfResponses = 0; // number of responses, this can be diff from the
 		// stimulusIndex because of false resonces
 		double responseTotalTime = 0;
 	}
@@ -97,62 +98,63 @@ public class PVT35min extends Task {
 
 	@Override
 	public void start() {
+		random = new Random();
 		lastTime = 0;
-
 		currentSession = new Session();
 		currentBlock = new Block();
 		stimulusVisibility = false;
-
+		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
 
 		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 		getModel().getFatigue().startFatigueSession();
 
-		addUpdate(1.0);
+		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+		addUpdate(interStimulusInterval);
 
-		try {
-			File block1file = new File("./test/fatigue/pvt_35min/Block1.txt");
-			if (!block1file.exists())
-				block1file.createNewFile();
-			b1Stream = new PrintStream(block1file);
-
-			File block2file = new File("./test/fatigue/pvt_35min/Block2.txt");
-			if (!block2file.exists())
-				block2file.createNewFile();
-			b2Stream = new PrintStream(block2file);
-
-			File block3file = new File("./test/fatigue/pvt_35min/Block3.txt");
-			if (!block3file.exists())
-				block3file.createNewFile();
-			b3Stream = new PrintStream(block3file);
-
-			File block4file = new File("./test/fatigue/pvt_35min/Block4.txt");
-			if (!block4file.exists())
-				block4file.createNewFile();
-			b4Stream = new PrintStream(block4file);
-
-			File block5file = new File("./test/fatigue/pvt_35min/Block5.txt");
-			if (!block5file.exists())
-				block5file.createNewFile();
-			b5Stream = new PrintStream(block5file);
-
-			File block6file = new File("./test/fatigue/pvt_35min/Block6.txt");
-			if (!block6file.exists())
-				block6file.createNewFile();
-			b6Stream = new PrintStream(block6file);
-
-			File block7file = new File("./test/fatigue/pvt_35min/Block7.txt");
-			if (!block7file.exists())
-				block7file.createNewFile();
-			b7Stream = new PrintStream(block7file);
-
-			File uut = new File("./test/fatigue/pvt_35min/UUT.txt");
-			if (!uut.exists())
-				uut.createNewFile();
-			uutStream = new PrintStream(uut);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//		try {
+		//			File block1file = new File("./test/fatigue/pvt_35min/Block1.txt");
+		//			if (!block1file.exists())
+		//				block1file.createNewFile();
+		//			b1Stream = new PrintStream(block1file);
+		//
+		//			File block2file = new File("./test/fatigue/pvt_35min/Block2.txt");
+		//			if (!block2file.exists())
+		//				block2file.createNewFile();
+		//			b2Stream = new PrintStream(block2file);
+		//
+		//			File block3file = new File("./test/fatigue/pvt_35min/Block3.txt");
+		//			if (!block3file.exists())
+		//				block3file.createNewFile();
+		//			b3Stream = new PrintStream(block3file);
+		//
+		//			File block4file = new File("./test/fatigue/pvt_35min/Block4.txt");
+		//			if (!block4file.exists())
+		//				block4file.createNewFile();
+		//			b4Stream = new PrintStream(block4file);
+		//
+		//			File block5file = new File("./test/fatigue/pvt_35min/Block5.txt");
+		//			if (!block5file.exists())
+		//				block5file.createNewFile();
+		//			b5Stream = new PrintStream(block5file);
+		//
+		//			File block6file = new File("./test/fatigue/pvt_35min/Block6.txt");
+		//			if (!block6file.exists())
+		//				block6file.createNewFile();
+		//			b6Stream = new PrintStream(block6file);
+		//
+		//			File block7file = new File("./test/fatigue/pvt_35min/Block7.txt");
+		//			if (!block7file.exists())
+		//				block7file.createNewFile();
+		//			b7Stream = new PrintStream(block7file);
+		//
+		//			File uut = new File("./test/fatigue/pvt_35min/UUT.txt");
+		//			if (!uut.exists())
+		//				uut.createNewFile();
+		//			uutStream = new PrintStream(uut);
+		//		} catch (IOException e) {
+		//			e.printStackTrace();
+		//		}
 
 		// this was for when you want to reset the numbers at each session
 		// getModel().getFatigue().resetFatigueModule();
@@ -161,7 +163,8 @@ public class PVT35min extends Task {
 	@Override
 	public void update(double time) {
 		currentSession.totalSessionTime = getModel().getTime() - currentSession.startTime;
-
+		currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
+		
 		if (currentSession.totalSessionTime <= PVTduration) {
 			label.setText(stimulus);
 			label.setVisible(true);
@@ -170,7 +173,7 @@ public class PVT35min extends Task {
 			if (getModel().isVerbose())
 				getModel().output("!!!!! Stimulus !!!!!");
 
-			lastTime = getModel().getTime();
+			lastTime = getModel().getTime(); // when the stimulus has happened
 
 			// Handling the sleep attacks -- adding an event in 30 s to see if
 			// the current stimulus is still on
@@ -184,12 +187,15 @@ public class PVT35min extends Task {
 						processDisplay();
 						stimulusVisibility = false;
 						currentSession.sleepAttacks++;
+						currentBlock.sleepAttacks++;
 						// when sleep attack happens we add to the number of responses
-						currentSession.responses++; 
-						System.out.println("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
+						currentSession.numberOfResponses++; 
+						getModel().output("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
 								+ "model time :" + getModel().getTime());
-						System.out.println(currentSession.stimulusIndex + " " + sleepAttackIndex);
-						addUpdate(1.0);
+						getModel().output(currentSession.stimulusIndex + " " + sleepAttackIndex);
+						
+						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+						addUpdate(interStimulusInterval);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 					repaint();
@@ -198,7 +204,6 @@ public class PVT35min extends Task {
 			});
 
 			// Handling the 5-min blocks
-			currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
 			// adding a new block
 			if (currentBlock.totalBlockTime >= 300 ) {
 				currentSession.blocks.add(currentBlock);
@@ -225,23 +230,22 @@ public class PVT35min extends Task {
 						currentSession.startTime = getModel().getTime();
 						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 						getModel().getFatigue().startFatigueSession();
-						addUpdate(1.0);
+						
+						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+						addUpdate(interStimulusInterval);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 				});
 
 			} else {
-				currentSession.blocks.add(currentBlock);
-				sessions.add(currentSession);
-
-				b1Stream.close();
-				b2Stream.close();
-				b3Stream.close();
-				b4Stream.close();
-				b5Stream.close();
-				b6Stream.close();
-				b7Stream.close();
-				uutStream.close();
+				//				b1Stream.close();
+				//				b2Stream.close();
+				//				b3Stream.close();
+				//				b4Stream.close();
+				//				b5Stream.close();
+				//				b6Stream.close();
+				//				b7Stream.close();
+				//				uutStream.close();
 				getModel().stop();
 			}
 		}
@@ -253,161 +257,186 @@ public class PVT35min extends Task {
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
-			
+
 			if (response != null) {
-				currentSession.responses++;
+				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
 				currentBlock.reactionTimes.add(responseTime);
 			}
 
-			if (currentSession.blocks.size() == 0)
-				b1Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 1)
-				b2Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 2)
-				b3Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 3)
-				b4Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 4)
-				b5Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 5)
-				b6Stream.println((int) (responseTime * 1000));
-			if (currentSession.blocks.size() == 6)
-				b7Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 0)
+			//				b1Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 1)
+			//				b2Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 2)
+			//				b3Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 3)
+			//				b4Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 4)
+			//				b5Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 5)
+			//				b6Stream.println((int) (responseTime * 1000));
+			//			if (currentSession.blocks.size() == 6)
+			//				b7Stream.println((int) (responseTime * 1000));
 
-			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
-					&& getModel().getProcedural().getFatigueUtilityThreshold() < 4) {
-				uutStream.print((int) getModel().getTime() + "\t");
-				uutStream.print((getModel().getProcedural().getFatigueUtility()) + "\t");
-				uutStream.print((getModel().getProcedural().getFatigueUtilityThreshold()) + "\n");
-				uutStream.flush();
-			}
+			//			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
+			//					&& getModel().getProcedural().getFatigueUtilityThreshold() < 4) {
+			//				uutStream.print((int) getModel().getTime() + "\t");
+			//				uutStream.print((getModel().getProcedural().getFatigueUtility()) + "\t");
+			//				uutStream.print((getModel().getProcedural().getFatigueUtilityThreshold()) + "\n");
+			//				uutStream.flush();
+			//			}
 
 			label.setVisible(false);
 			processDisplay();
 
-			Random random = new Random();
+			
 			interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
 
-			if (responseTime < .150)
-				currentBlock.FalseAlert++;
-			else if (responseTime > .150 && responseTime <= .500)
-				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++; // making
-			// making the array for alert reaction times
-			else if (responseTime > .500)
+			if (responseTime < .150){
+				currentBlock.falseAlert++;
+				currentSession.falseStarts++;
+			}
+			else if (responseTime > .150 && responseTime <= .500){
+				// making the array for alert reaction times
+				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++;
+				currentSession.alertResponse[(int) ((responseTime - .150) * 100)]++;
+			}
+			else if (responseTime > .500){
 				currentBlock.lapses++;
-			else if (responseTime >= 30.0)
-				getModel().output("The Responce Time Was Over 30 Second: " + responseTime);
+				currentSession.lapses++;
+			}
 
 			// setting up the state to wait
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
 
 		} else {
-			if (currentSession.blocks.size() == 0)
-				b1Stream.println(0);
-			if (currentSession.blocks.size() == 1)
-				b2Stream.println(0);
-			if (currentSession.blocks.size() == 2)
-				b3Stream.println(0);
-			if (currentSession.blocks.size() == 3)
-				b4Stream.println(0);
-			if (currentSession.blocks.size() == 4)
-				b5Stream.println(0);
-			if (currentSession.blocks.size() == 5)
-				b6Stream.println(0);
-			if (currentSession.blocks.size() == 6)
-				b7Stream.println(0);
+			//			if (currentSession.blocks.size() == 0)
+			//				b1Stream.println(0);
+			//			if (currentSession.blocks.size() == 1)
+			//				b2Stream.println(0);
+			//			if (currentSession.blocks.size() == 2)
+			//				b3Stream.println(0);
+			//			if (currentSession.blocks.size() == 3)
+			//				b4Stream.println(0);
+			//			if (currentSession.blocks.size() == 4)
+			//				b5Stream.println(0);
+			//			if (currentSession.blocks.size() == 5)
+			//				b6Stream.println(0);
+			//			if (currentSession.blocks.size() == 6)
+			//				b7Stream.println(0);
+			currentSession.reactionTimes.add(0);
+			currentBlock.reactionTimes.add(0);
 			currentBlock.numberOfResponses++;
-			currentBlock.FalseAlert++;
-			currentSession.responses++;
+			currentBlock.falseAlert++;
+			currentSession.numberOfResponses++;
 			currentSession.falseStarts++;
 
 			if (getModel().isVerbose())
-				getModel().output("False alert happened " + "- Trial: " + iteration + " Block:" + (currentSession.blocks.size() + 1)
-						+ "   time of block : " + (getModel().getTime() - currentBlock.startTime));
+				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
 		}
 
 	}
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double[] modelTimes = new double[runIterations];
-		PVT35min task = (PVT35min) tasks[0];
 
-		// int allResponses = 0;
-		double Responses[] = new double[7];
-		double FalseStarts[] = new double[7];
-		double AlertResponses[][] = new double[7][35];
-		double Lapses[] = new double[7];
+		DecimalFormat df = new DecimalFormat("#.00");
 
-		for (int i = 0; i < runIterations; i++) {
-			for (int j = 0; j < task.sessions.elementAt(i).blocks.size(); j++) {
+		for (Task taskcast : tasks){
+			PVT35min task = (PVT35min) taskcast;
 
-				Responses[j] += task.sessions.elementAt(i).blocks.elementAt(j).numberOfResponses;
-				FalseStarts[j] += task.sessions.elementAt(i).blocks.elementAt(j).FalseAlert;
-				for (int k = 0; k < 35; k++)
-					AlertResponses[j][k] += task.sessions.elementAt(i).blocks.elementAt(j).alertResponse[k];
-				Lapses[j] += task.sessions.elementAt(i).blocks.elementAt(j).lapses;
-			}
-			// allResponses += task.sessions.elementAt(i).responses;
-		}
+			for (int i = 0; i < task.sessions.size(); i++) {
 
-		getModel().output("******* Proportion of Responses **********\n");
-		getModel().output("    FS  " + " ---------------------------    Alert Responses    --------------------------- "
-				+ " Alert Responses "
-				+ " ---------------------------    Alert Responses    ---------------------------- " + "L ");
-		for (int i = 0; i < 7; i++) {
-			double[] AlertResponsesProportion = new double[35];
-			for (int j = 0; j < 35; j++)
-				AlertResponsesProportion[j] = AlertResponses[i][j] / Responses[i];
-			getModel().output("B" + (i + 1) + "|" + String.format("%.2f", FalseStarts[i] / Responses[i]) + " "
-					+ Utilities.toString(AlertResponsesProportion) + " "
-					+ String.format("%.2f", Lapses[i] / Responses[i]));
+				getModel().output("******** Session number : " + i);
+				Session s  = task.sessions.get(i);
+				for (int j = 0; j < s.reactionTimes.size(); j++) {
+					getModel().outputInLine(df.format(s.reactionTimes.get(j)) + ",");
+				}
+				getModel().outputInLine("\n");
 
-			getModel().output("\n-------------------------------------------------------\n");
-		}
+				getModel().output("False Start in Session: " + s.falseStarts);
+				getModel().output("Lapses in Session     : " + s.lapses);
+				getModel().output("total Session time    : " + s.totalSessionTime);
 
-		// writing the numbers to file
-		try {
+				getModel().output("");
+				getModel().output("*** Blocks:");
+				for (int j = 0; j < s.blocks.size(); j++) {
+					Block b = s.blocks.get(j);
+					getModel().output("");
+					getModel().output("* Block number : " + j);
+					for (int k = 0; k < b.reactionTimes.size(); k++) {
+						getModel().outputInLine(df.format(b.reactionTimes.get(k)) + ",");
+					}
+					getModel().outputInLine("\n");
 
-			File PVT35min = new File("./test/fatigue/pvt_35min/PVT35min.txt");
-			if (!PVT35min.exists())
-				PVT35min.createNewFile();
-			PrintStream PVTfile = new PrintStream(PVT35min);
-
-			for (int i = 0; i < 7; i++) {
-				PVTfile.print(FalseStarts[i] / Responses[i] + "\t");
-				for (int j = 0; j < 35; j++)
-					PVTfile.print(AlertResponses[i][j] / Responses[i] + "\t");
-				PVTfile.print(Lapses[i] / Responses[i] + "\n");
-			}
-
-			PVTfile.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		for (int i = 0; i < runIterations; i++) {
-			double responses = 0, responseTime = 0;
-			responses = task.sessions.elementAt(i).responses;
-			responseTime = task.sessions.elementAt(i).responseTotalTime;
-			modelTimes[i] = (responses == 0) ? 0 : (responseTime / responses);
-		}
-
-		if (output) {
-			getModel().output("\n=========              Mean Reaction Times            ===========\n");
-
-			for (int i = 0; i < runIterations; i++) {
-				getModel().output("Session " + i + "==>" + modelTimes[i]);
+					getModel().output("False Start in Block  : " + b.falseAlert);
+					getModel().output("Lapses in Block       : " + b.lapses);
+					getModel().output("Total Block time      : " + b.totalBlockTime);
+					
+				}
 			}
 
 		}
 
+
+		//		getModel().output("******* Proportion of Responses **********\n");
+		//		getModel().output("    FS  " + " ---------------------------    Alert Responses    --------------------------- "
+		//				+ " Alert Responses "
+		//				+ " ---------------------------    Alert Responses    ---------------------------- " + "L ");
+		//		for (int i = 0; i < 7; i++) {
+		//			double[] AlertResponsesProportion = new double[35];
+		//			for (int j = 0; j < 35; j++)
+		//				AlertResponsesProportion[j] = AlertResponses[i][j] / Responses[i];
+		//			getModel().output("B" + (i + 1) + "|" + String.format("%.2f", FalseStarts[i] / Responses[i]) + " "
+		//					+ Utilities.toString(AlertResponsesProportion) + " "
+		//					+ String.format("%.2f", Lapses[i] / Responses[i]));
+		//
+		//			getModel().output("\n-------------------------------------------------------\n");
+		//		}
+		//
+		//		// writing the numbers to file
+		//		try {
+		//
+		//			File PVT35min = new File("./test/fatigue/pvt_35min/PVT35min.txt");
+		//			if (!PVT35min.exists())
+		//				PVT35min.createNewFile();
+		//			PrintStream PVTfile = new PrintStream(PVT35min);
+		//
+		//			for (int i = 0; i < 7; i++) {
+		//				PVTfile.print(FalseStarts[i] / Responses[i] + "\t");
+		//				for (int j = 0; j < 35; j++)
+		//					PVTfile.print(AlertResponses[i][j] / Responses[i] + "\t");
+		//				PVTfile.print(Lapses[i] / Responses[i] + "\n");
+		//			}
+		//
+		//			PVTfile.close();
+		//
+		//		} catch (IOException e) {
+		//			e.printStackTrace();
+		//		}
+		//
+		//		for (int i = 0; i < runIterations; i++) {
+		//			double responses = 0, responseTime = 0;
+		//			responses = task.sessions.elementAt(i).responses;
+		//			responseTime = task.sessions.elementAt(i).responseTotalTime;
+		//			modelTimes[i] = (responses == 0) ? 0 : (responseTime / responses);
+		//		}
+		//
+		//		if (output) {
+		//			getModel().output("\n=========              Mean Reaction Times            ===========\n");
+		//
+		//			for (int i = 0; i < runIterations; i++) {
+		//				getModel().output("Session " + i + "==>" + modelTimes[i]);
+		//			}
+		//
+		//		}
+		//
 		Result result = new Result();
 		// result.add ("PVT", modelTimes, humanTimes);
 		return result;
