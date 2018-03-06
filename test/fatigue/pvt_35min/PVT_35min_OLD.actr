@@ -6,29 +6,28 @@
 )
 
 (sgp 
-    :cst nil
     :v nil
     :fatigue t   
     :iu 2.8
     :ut 2.3
     
-    ;;:microlapses nil
-    :fpbmc .018
-    :fpmc -.005
+    :microlapses nil  ;; no affect from the microlapses 
+    :fpbmc 0  ;; not using biomath in this model
+    :fpmc  -0.05
     
-    :utbmc .012  
-    :utmc -.002
+    :utbmc 0 ;; not using biomath in this model
+    :utmc -0.012
     
-    :fp-dec 0.997
     
+    :fp-dec 0
     :egs .25
     ;:cst t
     
-    :dat .05
+    :dat .040
     :randomize-time t
     :vpft t
     
-    :max-prep-time-diff 10.0  
+    :max-prep-time-diff 10.0
 )
 
 (goal-focus goal)

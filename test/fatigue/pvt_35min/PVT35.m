@@ -1,19 +1,28 @@
 
 %% loading the data 
-Block1 = load('Block1.txt');
-Block2 = load('Block2.txt');
-Block3 = load('Block3.txt');
-Block4 =load('Block4.txt');
-Block5 = load ('Block5.txt');
-Block6 = load('Block6.txt');
-Block7 = load('Block7.txt');
+f = fopen('BlockStream.txt');
+line = fgetl(f);
+b1 = str2num(line);
+line = fgetl(f);
+b2 = str2num(line);
+line = fgetl(f);
+b3 = str2num(line);
+line = fgetl(f);
+b4 = str2num(line);
+line = fgetl(f);
+b5 = str2num(line);
+line = fgetl(f);
+b6 = str2num(line);
+line = fgetl(f);
+b7 = str2num(line);
 
 PVT = load('PVT35min.txt');
 
 
 U_UT = load('UUT.txt');
 
-
+BlockLapses = load('BlockLapses.txt');
+BlockMeanRT = load('BlockMeanRT.txt');
 
 
 %% Create figure
@@ -34,7 +43,8 @@ hold(axes1,'on');
 
 % Create multiple lines using matrix input to plot
 plot(PVT','Parent',axes1);
-legend('B1', 'B2','B3','B4','B5','B6','B7');
+% legend('B1', 'B2','B3','B4','B5','B6','B7');
+legend(); 
 
 title('PVT Response Time Distribution');
 xlabel('Response Time (ms)');
@@ -63,16 +73,25 @@ title('Trends in Utility/Threshold');
 xlabel('Time on Task (min)');
 
 
-
+ 
 %%
 figure;
-cdfplot(Block1);
+cdfplot(b1);
 hold on;
 
-cdfplot(Block2);
-cdfplot(Block3);
-cdfplot(Block4);
-cdfplot(Block5);
-cdfplot(Block6);
-cdfplot(Block7);
+cdfplot(b2);
+cdfplot(b3);
+cdfplot(b4);
+cdfplot(b5);
+cdfplot(b6);
+cdfplot(b7);
 legend('B1', 'B2','B3','B4','B5','B6','B7');
+xlim([0 1000]);
+
+%figure for proportion of Lapses in the Blocks
+figure;
+plot(BlockLapses);
+
+%figure for mean Reaction Time in the Blocks
+figure;
+plot (BlockMeanRT);
