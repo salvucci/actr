@@ -153,6 +153,7 @@ public class PVT35min extends Task {
 						
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
+						fatigueResetPercentage(); // reseting the system
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 					repaint();
@@ -275,7 +276,7 @@ public class PVT35min extends Task {
 
 	@Override
 	public int analysisIterations() {
- 		return 150;
+ 		return 100;
 	}
 
 	@Override

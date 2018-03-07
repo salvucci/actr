@@ -37,7 +37,7 @@ axes1 = axes('Parent',figure1,...
 % Uncomment the following line to preserve the X-limits of the axes
  xlim(axes1,[0 38]);
 % Uncomment the following line to preserve the Y-limits of the axes
- ylim(axes1,[-0.005 0.2]);
+ ylim(axes1,[-0.005 0.12]);
 box(axes1,'on');
 hold(axes1,'on');
 
@@ -51,26 +51,26 @@ xlabel('Response Time (ms)');
 ylabel('Proportion of all Responses');
 
 
-%%
-U_UT(:,1) = U_UT(:,1)/60; 
-% Create figure
-figure1 = figure;
-
-% Create axes
-axes1 = axes('Parent',figure1);
-ylim(axes1,[2 3]);
-box(axes1,'on');
-hold(axes1,'on');
-
-% Create multiple lines using matrix input to plot
-plot1 = plot(U_UT(:,1),U_UT(:,[2,3]));
-set(plot1(1),'DisplayName','Utility');
-set(plot1(2),'DisplayName','Utility Threshold');
-% Create legend
-legend1 = legend(axes1,'show');
-set(legend1,'FontSize',9);
-title('Trends in Utility/Threshold');
-xlabel('Time on Task (min)');
+% %%
+% U_UT(:,1) = U_UT(:,1)/60; 
+% % Create figure
+% figure1 = figure;
+% 
+% % Create axes
+% axes1 = axes('Parent',figure1);
+% ylim(axes1,[2 3]);
+% box(axes1,'on');
+% hold(axes1,'on');
+% 
+% % Create multiple lines using matrix input to plot
+% plot1 = plot(U_UT(:,1),U_UT(:,[2,3]));
+% set(plot1(1),'DisplayName','Utility');
+% set(plot1(2),'DisplayName','Utility Threshold');
+% % Create legend
+% legend1 = legend(axes1,'show');
+% set(legend1,'FontSize',9);
+% title('Trends in Utility/Threshold');
+% xlabel('Time on Task (min)');
 
 
  
@@ -91,7 +91,11 @@ xlim([0 1000]);
 %figure for proportion of Lapses in the Blocks
 figure;
 plot(BlockLapses);
+title('Proportion of Lapses in Blocks');
+xlabel('5-min Blocks');
 
 %figure for mean Reaction Time in the Blocks
 figure;
 plot (BlockMeanRT);
+title('Proportion of False starts in Blocks');
+xlabel('5-min Blocks');
