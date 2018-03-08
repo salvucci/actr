@@ -30,36 +30,70 @@ public class PVT88hours extends Task {
 	private double responseTime = 0;
 	// the following two variables are for handling sleep attacks
 	private int sleepAttackIndex = 0;
-
+	private double PVTduration = 2100.0;
+	Random random;
+	
 	private double [] timesOfPVT = {	
-//			20  ,22  ,
-//			32  ,34  ,36  ,38  ,40  ,42 , 44  ,46  ,
-			
+			//			20  ,22  ,
+			//			32  ,34  ,36  ,38  ,40  ,42 , 44  ,46  ,
+
 			// 88 TSD :  44 sessions in total
 			56  ,58  ,60  ,62  ,64  ,66 , 68  ,70  , //base line
 			72  ,74  ,76  ,78  ,80  ,82  ,84  ,86  ,88  ,90  ,92 , 94  , //day 1
 			96  ,98  ,100 ,102 ,104 ,106 ,108, 110 ,112 ,114 ,116 ,118 , //day 2
 			120 ,122 ,124, 126 ,128 ,130 ,132 ,134 ,136 ,138 ,140, 142 , //day 3
 			//End of 88 TSD
-			
-
 	};
+	
 	int sessionNumber = 0;  // starts from 0
+	private Block currentBlock;
 	private Session currentSession;
 	private Vector<Session> sessions = new Vector<Session>();
 
-//	private PrintStream data;
-	
+	// 5-min blocks
+	class Block {
+		Values reactionTimes = new Values();
+		double startTime;
+		double totalBlockTime;
+		int falseStarts = 0;
+		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
+		// intervals )
+		int lapses = 0;
+		int numberOfResponses = 0;
+		int sleepAttacks = 0;
+		public double getFalseAlertProportion() {
+			return (double)falseStarts/ reactionTimes.size();
+		}
+		public double getLapsesProportion() {
+			return (double)lapses / reactionTimes.size();
+		}
+		public double getMeanAlertReactionTimes() {
+			Values Alert = new Values();
+			for (int i = 0; i < reactionTimes.size(); i++) {
+				double r = reactionTimes.get(i);
+				if (r <= .500 && r >= .150)
+					Alert.add(r);
+			}
+			return Alert.average();
+		}
+
+	}
+
 	class Session {
-		double startTime =0;
+		Vector<Block> blocks = new Vector<Block>();
+		int blockIndex = 1;
+		Values reactionTimes = new Values();
+		double startTime = 0;
 		int falseStarts = 0;
 		int alertRosponses = 0;
-		int alertResponseSpread [] = new int[35]; // Alert responses (150-500ms, 10ms intervals )
+		// Alert responses (150-500 ms,10 ms intervals )
+		int alertResponse[] = new int[35]; 
+		double totalSessionTime = 0;
 		int lapses = 0;
 		int sleepAttacks = 0;
 		int stimulusIndex = 0;
-		double totalSessionTime =0 ;
-		int responses = 0 ; //number of responses, this can be diff from the stimulusIndex because of false resonces
+		int numberOfResponses = 0; // number of responses, this can be diff from the
+		// stimulusIndex because of false resonces
 		double responseTotalTime = 0;
 	}
 
@@ -72,94 +106,101 @@ public class PVT88hours extends Task {
 
 	@Override
 	public void start() {
+		random = new Random();
 		lastTime = 0;
-
 		currentSession = new Session();
+		currentBlock = new Block();
 		stimulusVisibility = false;
+		currentSession.startTime = 0;
+		currentBlock.startTime = 0;
 
 		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 		getModel().getFatigue().startFatigueSession();
 
-		addUpdate(1.0);
-
-//		try {
-//			File dataFile = new File("./test/fatigue/pvt_88hour/data.txt");
-//			if (!dataFile.exists())
-//				dataFile.createNewFile();
-//			data = new PrintStream(dataFile);
-//
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-
+		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+		addUpdate(interStimulusInterval);
 	}
 
 	@Override
 	public void update(double time) {
 		currentSession.totalSessionTime = getModel().getTime() - currentSession.startTime;
-
-		if (currentSession.totalSessionTime <= 600.0) {
+		currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
+		
+		if (currentSession.totalSessionTime <= PVTduration) {
 			label.setText(stimulus);
 			label.setVisible(true);
 			processDisplay();
 			stimulusVisibility = true;
 			if (getModel().isVerbose())
 				getModel().output("!!!!! Stimulus !!!!!");
-			
-			lastTime = getModel().getTime();
-			
-			// Handling the sleep attacks -- adding an event in 30 s to see if the current stimulus is still on
-			currentSession.stimulusIndex ++;
+
+			lastTime = getModel().getTime(); // when the stimulus has happened
+
+			// Handling the sleep attacks -- adding an event in 30 s to see if
+			// the current stimulus is still on
+			currentSession.stimulusIndex++;
 			addEvent(new Event(getModel().getTime() + 30.0, "task", "update") {
 				@Override
 				public void action() {
 					sleepAttackIndex++;
-					if (sleepAttackIndex==currentSession.stimulusIndex && stimulusVisibility == true ){
+					if (sleepAttackIndex == currentSession.stimulusIndex && stimulusVisibility == true) {
 						label.setVisible(false);
 						processDisplay();
 						stimulusVisibility = false;
 						currentSession.sleepAttacks++;
-						// when sleep attack happens we add to the number of responses
-						currentSession.responses++; 
-						System.out.println("Sleep attack at time ==>" + (getModel().getTime() - currentSession.startTime)
-								+ "model time :" + getModel().getTime());
-						System.out.println(currentSession.stimulusIndex + " " + sleepAttackIndex);
-						addUpdate(1.0);
-						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
+						currentBlock.sleepAttacks++;
+						// when sleep attack happens we add to the number of responses (NOT DOING IT FOR NOW)
+						// currentSession.numberOfResponses++; 
+						getModel().output("Sleep attack at session time  ==> " + (getModel().getTime() - currentSession.startTime)
+								+ " model time :" + getModel().getTime());
+						getModel().output("Stimulus index in the session ==> " + currentSession.stimulusIndex );
+						
+						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+						addUpdate(interStimulusInterval);
+						fatigueResetPercentage(); // reseting the system
+						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 					repaint();
 
 				}
 			});
+
+			// Handling the 5-min blocks
+			// adding a new block
+			if (currentBlock.totalBlockTime >= 300 ) {
+				currentSession.blocks.add(currentBlock);
+				currentBlock = new Block();
+				currentBlock.startTime = currentSession.startTime + currentSession.blockIndex * 300.0;
+				currentSession.blockIndex++;
+			}
 		}
 
 		// Starting a new Session
 		else {
+			currentSession.blocks.add(currentBlock);
+			sessions.add(currentSession);
 			sessionNumber++;
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
 			// go to the next session or stop the model
-			if (sessionNumber < timesOfPVT.length ){
+			if (sessionNumber < timesOfPVT.length) {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
-						sessions.add(currentSession);
 						currentSession = new Session();
 						stimulusVisibility = false;
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
 						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 						getModel().getFatigue().startFatigueSession();
-						addUpdate(1.0);
-						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("wait"));
+						
+						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
+						addUpdate(interStimulusInterval);
+						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 				});
-				
-			}else{
-				sessions.add(currentSession);
+			} else {
 				getModel().stop();
 			}
-
-
 		}
 	}
 
@@ -171,7 +212,7 @@ public class PVT88hours extends Task {
 			fatigueResetPercentage();
 		}
 	}
-	
+
 	// calling percentage reset after any new task presentation (audio or visual)
 	void fatigueResetPercentage() {
 		getModel().getFatigue().fatigueResetPercentages();
@@ -184,50 +225,75 @@ public class PVT88hours extends Task {
 
 		if (stimulusVisibility == true) {
 			response = c + "";
-			responseTime = getModel().getTime() - lastTime ;
+			responseTime = getModel().getTime() - lastTime;
 
-			if (response != null) // && response.equals("spc"))
-			{
-				currentSession.responses++;
+			if (response != null) {
+				currentSession.numberOfResponses++;
+				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
+				currentSession.reactionTimes.add(responseTime);
+				currentBlock.reactionTimes.add(responseTime);
 			}
+
+			//			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
+			//					&& getModel().getProcedural().getFatigueUtilityThreshold() < 4) {
+			//				uutStream.print((int) getModel().getTime() + "\t");
+			//				uutStream.print((getModel().getProcedural().getFatigueUtility()) + "\t");
+			//				uutStream.print((getModel().getProcedural().getFatigueUtilityThreshold()) + "\n");
+			//				uutStream.flush();
+			//			}
 
 			label.setVisible(false);
 			processDisplay();
 
-			Random random = new Random();
-			interStimulusInterval = random.nextDouble() * 8 + 1; // A random
+			
+			interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
 
 			if (responseTime < .150){
+				currentBlock.falseStarts++;
 				currentSession.falseStarts++;
 			}
 			else if (responseTime > .150 && responseTime <= .500){
-				currentSession.alertResponseSpread[(int) ((responseTime - .150) * 100)]++; // making the array for response time
-				currentSession.alertRosponses++;
+				// making the array for alert reaction times
+				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++;
+				currentSession.alertResponse[(int) ((responseTime - .150) * 100)]++;
 			}
-			else if (responseTime > .500 && responseTime < 30.0){
+			else if (responseTime > .500){
+				currentBlock.lapses++;
 				currentSession.lapses++;
 			}
 		} else {
-			currentSession.responses++;
+			currentSession.reactionTimes.add(0);
+			currentBlock.reactionTimes.add(0);
+			currentBlock.numberOfResponses++;
+			currentBlock.falseStarts++;
+			currentSession.numberOfResponses++;
 			currentSession.falseStarts++;
-		}
 
+			if (getModel().isVerbose())
+				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
+		}
 	}
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-
-		int numberOfSessions = timesOfPVT.length;
+		
+		DecimalFormat df = new DecimalFormat("#.00");
+		// getting the nukbers of sesssions and blocks
+		PVT88hours t = (PVT88hours) tasks[0];
+		int numberOfSessions = t.sessions.size();
+		int numberOfBlocks = t.sessions.get(0).blocks.size();
+		
 		Values[] totallLapsesValues = new Values[numberOfSessions];
 		Values[] totallFalseAlerts = new Values[numberOfSessions]; 
 		Values[] totallSleepAtacks = new Values[numberOfSessions];
 		Values[] totallAlertResponces = new Values[numberOfSessions];
 		Values[][] totallAlertResponcesSpread = new Values[numberOfSessions][35];
 		Values[] totallResponsesNumber  =new Values[numberOfSessions];
-		
+
 		Values[] totallProportionLapses = new Values[numberOfSessions];
 		Values[] totallProportionFalseAlerts = new Values[numberOfSessions]; 
 		Values[] totallProportionSleepAtacks = new Values[numberOfSessions];
@@ -250,7 +316,7 @@ public class PVT88hours extends Task {
 				totallProportionAlertResponcesSpread[i][j] = new Values();
 			}	
 		}
-		
+
 		for (Task taskCast : tasks) {
 			PVT88hours task = (PVT88hours) taskCast;
 			for (int i = 0; i < numberOfSessions; i++) {
@@ -258,25 +324,25 @@ public class PVT88hours extends Task {
 				totallLapsesValues[i].add(task.sessions.get(i).lapses);
 				totallSleepAtacks[i].add(task.sessions.get(i).sleepAttacks);
 				totallAlertResponces[i].add(task.sessions.get(i).alertRosponses);
-				totallResponsesNumber[i].add(task.sessions.get(i).responses);
+				totallResponsesNumber[i].add(task.sessions.get(i).numberOfResponses);
 				for (int j = 0; j < 35; j++) {
-					totallAlertResponcesSpread[i][j].add((double) task.sessions.get(i).alertResponseSpread[j]);
+					totallAlertResponcesSpread[i][j].add((double) task.sessions.get(i).alertResponse[j]);
 				}
-				
-				totallProportionFalseAlerts[i].add((double)task.sessions.get(i).falseStarts/task.sessions.get(i).responses);
-				totallProportionLapses[i].add((double)task.sessions.get(i).lapses/task.sessions.get(i).responses);
-				totallProportionSleepAtacks[i].add((double)task.sessions.get(i).sleepAttacks/task.sessions.get(i).responses);
-				totallProportionAlertRresponces[i].add((double)task.sessions.get(i).alertRosponses/task.sessions.get(i).responses);
+
+				totallProportionFalseAlerts[i].add((double)task.sessions.get(i).falseStarts/task.sessions.get(i).numberOfResponses);
+				totallProportionLapses[i].add((double)task.sessions.get(i).lapses/task.sessions.get(i).numberOfResponses);
+				totallProportionSleepAtacks[i].add((double)task.sessions.get(i).sleepAttacks/task.sessions.get(i).numberOfResponses);
+				totallProportionAlertRresponces[i].add((double)task.sessions.get(i).alertRosponses/task.sessions.get(i).numberOfResponses);
 				for (int j = 0; j < 35; j++) {
 					totallProportionAlertResponcesSpread[i][j].add(
-							(double) task.sessions.get(i).alertResponseSpread[j]/task.sessions.get(i).responses);
+							(double) task.sessions.get(i).alertResponse[j]/task.sessions.get(i).numberOfResponses);
 				}
 			}
 		}
-	
+
 		DecimalFormat df2 = new DecimalFormat("#.00");
 		DecimalFormat df3 = new DecimalFormat("#.000");
-		
+
 		getModel().output("******* Proportion of Responses **********\n");
 		getModel()
 		.output("Day\tFS\t"
@@ -284,7 +350,7 @@ public class PVT88hours extends Task {
 				+ " Alert Responses "
 				+ " ---------------------------    Alert Responses    ----------------------------\t"
 				+ "L\tSA");
-///////////////////////////////////////////////////////////////////////////////////////////////////			
+		///////////////////////////////////////////////////////////////////////////////////////////////////			
 		// -------------------   BASE LINE  ---------------------------
 		Values BaseFA = new Values();
 		Values[] BaseAR = new Values[35];
@@ -292,7 +358,7 @@ public class PVT88hours extends Task {
 		Values BaseSA = new Values();
 		for (int j = 0; j < 35; j++) 
 			BaseAR[j] = new Values();
-				
+
 		for (int s = 0; s < 8; s++) {
 			for (int i = 0; i < 35; i++)
 				BaseAR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
@@ -300,7 +366,7 @@ public class PVT88hours extends Task {
 			BaseL.add(totallProportionLapses[s].mean());
 			BaseSA.add(totallProportionSleepAtacks[s].mean());
 		}
-		
+
 		double[] AlertResponsesProportionBase = new double[35];
 		for (int i = 0; i < 35; i++)
 			AlertResponsesProportionBase[i] = BaseAR[i].mean();
@@ -309,122 +375,157 @@ public class PVT88hours extends Task {
 				+ Utilities.toString(AlertResponsesProportionBase) + " "
 				+ df2.format(BaseL.mean()) + "\t"
 				+ df2.format(BaseSA.mean()));
-		
-		// TO DO : Writing Numbers to the file 
-
 		// ----------------------- END OF BASE LINE --------------------------
-///////////////////////////////////////////////////////////////////////////////////////////////////			
+		///////////////////////////////////////////////////////////////////////////////////////////////////			
 		// ----------------------------   DAY 1  -----------------------------
-				Values Day1FA = new Values();
-				Values[] Day1AR = new Values[35];
-				Values Day1L = new Values();
-				Values Day1SA = new Values();
-				for (int j = 0; j < 35; j++) 
-					Day1AR[j] = new Values();
-						
-				for (int s = 8; s < 20; s++) {
-					for (int i = 0; i < 35; i++)
-						Day1AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
-					Day1FA.add(totallProportionFalseAlerts[s].mean());
-					Day1L.add(totallProportionLapses[s].mean());
-					Day1SA.add(totallProportionSleepAtacks[s].mean());
-				}
-				
-				double[] AlertResponsesProportionDay1 = new double[35];
-				for (int i = 0; i < 35; i++)
-					AlertResponsesProportionDay1[i] = Day1AR[i].mean();
-				getModel().output("Day 1" + "\t"+
-						df2.format( BaseFA.mean()) + "\t"
-						+ Utilities.toString(AlertResponsesProportionDay1) + " "
-						+ df2.format(BaseL.mean()) + "\t"
-						+ df2.format(BaseSA.mean()));
-				
-				// TO DO : Writing Numbers to the file 
+		Values Day1FA = new Values();
+		Values[] Day1AR = new Values[35];
+		Values Day1L = new Values();
+		Values Day1SA = new Values();
+		for (int j = 0; j < 35; j++) 
+			Day1AR[j] = new Values();
 
-				// ----------------------- END OF DAY 1 --------------------------
-///////////////////////////////////////////////////////////////////////////////////////////////////				
-				// ------------------------    DAY 2   ---------------------------
-				Values Day2FA = new Values();
-				Values[] Day2AR = new Values[35];
-				Values Day2L = new Values();
-				Values Day2SA = new Values();
-				for (int j = 0; j < 35; j++) 
-					Day2AR[j] = new Values();
-						
-				for (int s = 20; s < 32; s++) {
-					for (int i = 0; i < 35; i++)
-						Day2AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
-					Day2FA.add(totallProportionFalseAlerts[s].mean());
-					Day2L.add(totallProportionLapses[s].mean());
-					Day2SA.add(totallProportionSleepAtacks[s].mean());
-				}
-				
-				double[] AlertResponsesProportionDay2 = new double[35];
-				for (int i = 0; i < 35; i++)
-					AlertResponsesProportionDay2[i] = Day2AR[i].mean();
-				getModel().output("Day 2" + "\t"+
-						df2.format( Day2FA.mean()) + "\t"
-						+ Utilities.toString(AlertResponsesProportionDay2) + " "
-						+ df2.format(Day2L.mean()) + "\t"
-						+ df2.format(Day2SA.mean()));
-				
-				// TO DO : Writing Numbers to the file 
+		for (int s = 8; s < 20; s++) {
+			for (int i = 0; i < 35; i++)
+				Day1AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+			Day1FA.add(totallProportionFalseAlerts[s].mean());
+			Day1L.add(totallProportionLapses[s].mean());
+			Day1SA.add(totallProportionSleepAtacks[s].mean());
+		}
 
-				// ----------------------- END OF DAY 2 --------------------------
-///////////////////////////////////////////////////////////////////////////////////////////////////					
-				// -----------------------    DAY 3   ---------------------------
-				Values Day3FA = new Values();
-				Values[] Day3AR = new Values[35];
-				Values Day3L = new Values();
-				Values Day3SA = new Values();
-				for (int j = 0; j < 35; j++) 
-					Day3AR[j] = new Values();
-						
-				for (int s = 32; s < 34; s++) {
-					for (int i = 0; i < 35; i++)
-						Day3AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
-					Day3FA.add(totallProportionFalseAlerts[s].mean());
-					Day3L.add(totallProportionLapses[s].mean());
-					Day3SA.add(totallProportionSleepAtacks[s].mean());
-				}
-				
-				double[] AlertResponsesProportionDay3 = new double[35];
-				for (int i = 0; i < 35; i++)
-					AlertResponsesProportionDay3[i] = Day3AR[i].mean();
-				getModel().output("Day 3" + "\t"+
-						df2.format( Day3FA.mean()) + "\t"
-						+ Utilities.toString(AlertResponsesProportionDay3) + " "
-						+ df2.format(Day3L.mean()) + "\t"
-						+ df2.format(Day3SA.mean()));
-				
-				// TO DO : Writing Numbers to the file 
+		double[] AlertResponsesProportionDay1 = new double[35];
+		for (int i = 0; i < 35; i++)
+			AlertResponsesProportionDay1[i] = Day1AR[i].mean();
+		getModel().output("Day 1" + "\t"+
+				df2.format( BaseFA.mean()) + "\t"
+				+ Utilities.toString(AlertResponsesProportionDay1) + " "
+				+ df2.format(BaseL.mean()) + "\t"
+				+ df2.format(BaseSA.mean()));
+		// ----------------------- END OF DAY 1 --------------------------
+		///////////////////////////////////////////////////////////////////////////////////////////////////				
+		// ------------------------    DAY 2   ---------------------------
+		Values Day2FA = new Values();
+		Values[] Day2AR = new Values[35];
+		Values Day2L = new Values();
+		Values Day2SA = new Values();
+		for (int j = 0; j < 35; j++) 
+			Day2AR[j] = new Values();
 
-				// ----------------------- END OF DAY 3 --------------------------
+		for (int s = 20; s < 32; s++) {
+			for (int i = 0; i < 35; i++)
+				Day2AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+			Day2FA.add(totallProportionFalseAlerts[s].mean());
+			Day2L.add(totallProportionLapses[s].mean());
+			Day2SA.add(totallProportionSleepAtacks[s].mean());
+		}
 
-				
-				
+		double[] AlertResponsesProportionDay2 = new double[35];
+		for (int i = 0; i < 35; i++)
+			AlertResponsesProportionDay2[i] = Day2AR[i].mean();
+		getModel().output("Day 2" + "\t"+
+				df2.format( Day2FA.mean()) + "\t"
+				+ Utilities.toString(AlertResponsesProportionDay2) + " "
+				+ df2.format(Day2L.mean()) + "\t"
+				+ df2.format(Day2SA.mean()));
+		// ----------------------- END OF DAY 2 --------------------------
+		///////////////////////////////////////////////////////////////////////////////////////////////////					
+		// -----------------------    DAY 3   ---------------------------
+		Values Day3FA = new Values();
+		Values[] Day3AR = new Values[35];
+		Values Day3L = new Values();
+		Values Day3SA = new Values();
+		for (int j = 0; j < 35; j++) 
+			Day3AR[j] = new Values();
+
+		for (int s = 32; s < 34; s++) {
+			for (int i = 0; i < 35; i++)
+				Day3AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+			Day3FA.add(totallProportionFalseAlerts[s].mean());
+			Day3L.add(totallProportionLapses[s].mean());
+			Day3SA.add(totallProportionSleepAtacks[s].mean());
+		}
+
+		double[] AlertResponsesProportionDay3 = new double[35];
+		for (int i = 0; i < 35; i++)
+			AlertResponsesProportionDay3[i] = Day3AR[i].mean();
+		getModel().output("Day 3" + "\t"+
+				df2.format( Day3FA.mean()) + "\t"
+				+ Utilities.toString(AlertResponsesProportionDay3) + " "
+				+ df2.format(Day3L.mean()) + "\t"
+				+ df2.format(Day3SA.mean()));
+		// ----------------------- END OF DAY 3 --------------------------
 		
-		
-//		getModel().output("******* Average Proportion of Responses **********\n");
-//		getModel().output("#\tFS\t" + "AR\t " + "L\t"+ "SA");
-//		
-////		double[] AlertResponsesProportion = new double[35];
-//		for (int s = 0; s < numberOfSessions; s++) {
-////			for (int i = 0; i < 35; i++)
-////				AlertResponsesProportion[i] = totallProportionAlertResponcesSpread[s][i].mean();
-//
-//			getModel().output(s + "\t"+
-//					df2.format( totallProportionFalseAlerts[s].mean()) + "\t"
-//					//+ Utilities.toString(AlertResponsesProportion) + " "
-//					+ df2.format( totallProportionAlertRresponces[s].mean()) + "\t"
-//					+ df2.format(totallProportionLapses[s].mean()) + "\t"
-//					+ df2.format(totallProportionSleepAtacks[s].mean()));	
-//		}
-//		
-//		getModel().output("\nAverage Number of lapses in the time points \n" );
-//		// TO DO 
-//		
-//		getModel().output("\n*******************************************\n");
+		// TO DO : Writing Numbers to the file
+		try {
+			File dataFile = new File("./test/fatigue/pvt_88hour/data.txt");
+			if (!dataFile.exists())
+				dataFile.createNewFile();
+			PrintStream data = new PrintStream(dataFile);
+			
+			// Base line
+			data.print(BaseFA.mean()+ " ");
+			for (int i = 0; i < AlertResponsesProportionBase.length; i++) 
+				data.print(AlertResponsesProportionBase[i] + " ");
+			data.print(BaseL.mean() + " ");
+			data.print(BaseSA.mean());
+			data.print("\n");
+			data.flush();
+
+			// Day1 line
+			data.print(Day1FA.mean()+ " ");
+			for (int i = 0; i < AlertResponsesProportionDay1.length; i++) 
+				data.print(AlertResponsesProportionDay1[i] + " ");
+			data.print(Day1L.mean() + " ");
+			data.print(Day1SA.mean());
+			data.print("\n");
+			data.flush();
+			
+			// Day2 line
+			data.print(Day2FA.mean()+ " ");
+			for (int i = 0; i < AlertResponsesProportionDay2.length; i++) 
+				data.print(AlertResponsesProportionDay2[i] + " ");
+			data.print(Day2L.mean() + " ");
+			data.print(Day2SA.mean());
+			data.print("\n");
+			data.flush();
+			
+			// Day3 line
+			data.print(Day3FA.mean()+ " ");
+			for (int i = 0; i < AlertResponsesProportionDay3.length; i++) 
+				data.print(AlertResponsesProportionDay3[i] + " ");
+			data.print(Day3L.mean() + " ");
+			data.print(Day3SA.mean());
+			data.print("\n");
+			data.flush();
+			
+			data.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+
+		//		getModel().output("******* Average Proportion of Responses **********\n");
+		//		getModel().output("#\tFS\t" + "AR\t " + "L\t"+ "SA");
+		//		
+		////		double[] AlertResponsesProportion = new double[35];
+		//		for (int s = 0; s < numberOfSessions; s++) {
+		////			for (int i = 0; i < 35; i++)
+		////				AlertResponsesProportion[i] = totallProportionAlertResponcesSpread[s][i].mean();
+		//
+		//			getModel().output(s + "\t"+
+		//					df2.format( totallProportionFalseAlerts[s].mean()) + "\t"
+		//					//+ Utilities.toString(AlertResponsesProportion) + " "
+		//					+ df2.format( totallProportionAlertRresponces[s].mean()) + "\t"
+		//					+ df2.format(totallProportionLapses[s].mean()) + "\t"
+		//					+ df2.format(totallProportionSleepAtacks[s].mean()));	
+		//		}
+		//		
+		//		getModel().output("\nAverage Number of lapses in the time points \n" );
+		//		// TO DO 
+		//		
+		//		getModel().output("\n*******************************************\n");
 
 		Result result = new Result();
 		return result;

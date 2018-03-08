@@ -112,9 +112,6 @@ public class PVT35min extends Task {
 
 		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 		addUpdate(interStimulusInterval);
-
-		// this was for when you want to reset the numbers at each session
-		// getModel().getFatigue().resetFatigueModule();
 	}
 
 	@Override

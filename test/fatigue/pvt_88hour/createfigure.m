@@ -7,10 +7,15 @@ function createfigure()
 
 % Create figure
 X1 = [1:38]-.5;
-Y1 = load('BaseLine.txt');
-Day1 = load('Day1.txt');
-Day2 = load('Day2.txt');
-Day3 = load('Day3.txt');
+f = fopen('data.txt');
+line = fgetl(f);
+Y1 = str2num(line);
+line = fgetl(f);
+Day1 = str2num(line);
+line = fgetl(f);
+Day2 = str2num(line);
+line = fgetl(f);
+Day3 = str2num(line);
 
 figure1 = figure();
 
