@@ -9,7 +9,7 @@ import java.text.DecimalFormat;
 import actr.model.Event;
 import actr.model.Symbol;
 import actr.task.*;
-
+import actr.tasks.test.fatigue.SessionPVT.Block;
 
 /**
  * Model of PVT test on time on task
@@ -40,56 +40,9 @@ public class PVT35min extends Task {
 
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
-	private Session currentSession;
-	private Vector<Session> sessions = new Vector<Session>();
+	private SessionPVT currentSession;
+	private Vector<SessionPVT> sessions = new Vector<SessionPVT>();
 	
-	// 5-min blocks
-	class Block {
-		Values reactionTimes = new Values();
-		double startTime;
-		double totalBlockTime;
-		int falseStarts = 0;
-		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
-		// intervals )
-		int lapses = 0;
-		int numberOfResponses = 0;
-		int sleepAttacks = 0;
-		public double getFalseAlertProportion() {
-			return (double)falseStarts/ reactionTimes.size();
-		}
-		public double getLapsesProportion() {
-			return (double)lapses / reactionTimes.size();
-		}
-		public double getMeanAlertReactionTimes() {
-			Values Alert = new Values();
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double r = reactionTimes.get(i);
-				if (r <= .500 && r >= .150)
-					Alert.add(r);
-			}
-			return Alert.average();
-		}
-		
-	}
-
-	class Session {
-		Vector<Block> blocks = new Vector<Block>();
-		int blockIndex = 1;
-		Values reactionTimes = new Values();
-		double startTime = 0;
-		int falseStarts = 0;
-		int alertRosponses = 0;
-		// Alert responses (150-500 ms,10 ms intervals )
-		int alertResponse[] = new int[35]; 
-		double totalSessionTime = 0;
-		int lapses = 0;
-		int sleepAttacks = 0;
-		int stimulusIndex = 0;
-		int numberOfResponses = 0; // number of responses, this can be diff from the
-		// stimulusIndex because of false resonces
-		double responseTotalTime = 0;
-	}
-
 	public PVT35min() {
 		super();
 		label = new TaskLabel("", 200, 150, 40, 20);
@@ -101,8 +54,8 @@ public class PVT35min extends Task {
 	public void start() {
 		random = new Random();
 		lastTime = 0;
-		currentSession = new Session();
-		currentBlock = new Block();
+		currentSession = new SessionPVT();
+		currentBlock = currentSession.new Block();
 		stimulusVisibility = false;
 		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
@@ -162,7 +115,7 @@ public class PVT35min extends Task {
 			// adding a new block
 			if (currentBlock.totalBlockTime >= 300 ) {
 				currentSession.blocks.add(currentBlock);
-				currentBlock = new Block();
+				currentBlock = currentSession.new Block();
 				currentBlock.startTime = currentSession.startTime + currentSession.blockIndex * 300.0;
 				currentSession.blockIndex++;
 			}
@@ -179,10 +132,12 @@ public class PVT35min extends Task {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
-						currentSession = new Session();
+						currentSession = new SessionPVT();
+						currentBlock = currentSession.new Block();
 						stimulusVisibility = false;
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
+						currentBlock.startTime = getModel().getTime();
 						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 						getModel().getFatigue().startFatigueSession();
 						
@@ -215,7 +170,6 @@ public class PVT35min extends Task {
 
 	@Override
 	public void typeKey(char c) {
-
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
@@ -246,7 +200,6 @@ public class PVT35min extends Task {
 
 			if (responseTime < .150){
 				currentBlock.falseStarts++;
-				currentSession.falseStarts++;
 			}
 			else if (responseTime > .150 && responseTime <= .500){
 				// making the array for alert reaction times
@@ -255,7 +208,6 @@ public class PVT35min extends Task {
 			}
 			else if (responseTime > .500){
 				currentBlock.lapses++;
-				currentSession.lapses++;
 			}
 		} else {
 			currentSession.reactionTimes.add(0);
@@ -263,7 +215,6 @@ public class PVT35min extends Task {
 			currentBlock.numberOfResponses++;
 			currentBlock.falseStarts++;
 			currentSession.numberOfResponses++;
-			currentSession.falseStarts++;
 
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
@@ -308,13 +259,13 @@ public class PVT35min extends Task {
 			PVT35min task = (PVT35min) taskcast;
 			for (int i = 0; i < task.sessions.size(); i++) {
 				getModel().output("******** Session number : " + i);
-				Session s  = task.sessions.get(i);
+				SessionPVT s  = task.sessions.get(i);
 				for (int j = 0; j < s.reactionTimes.size(); j++) {
 					getModel().outputInLine(df.format(s.reactionTimes.get(j)) + ",");
 				}
 				getModel().outputInLine("\n");
-				getModel().output("False Start in Session   : " + s.falseStarts);
-				getModel().output("Lapses in Session        : " + s.lapses);
+				getModel().output("False Start in Session   : " + s.getNumberOfFalseStarts());
+				getModel().output("Lapses in Session        : " + s.getNumberOfLapses());
 				getModel().output("Sleep Attacks in Session : " + s.sleepAttacks);
 				getModel().output("total Session time       : " + s.totalSessionTime);
 				getModel().output("–––––––––––––––––––––––––––––––––––\n");
