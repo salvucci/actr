@@ -21,58 +21,104 @@ public class SessionPVT {
 	
 	public int getNumberOfAlertResponses(){
 		int count = 0;
-		for (int i = 0; i < reactionTimes.size() ; i++) {
-			if (reactionTimes.get(i) > .150 && reactionTimes.get(i) <= .500)
+		for (int i = 0; i < reactionTimes.size() ; i++) 
+			if (reactionTimes.get(i) > 150 && reactionTimes.get(i) <= 500)
 				count++;
-		}
 		return count;
 	}
 	
 	public int getNumberOfLapses(){
 		int count = 0;
-		for (int i = 0; i < reactionTimes.size() ; i++) {
-			if (reactionTimes.get(i) > .500)
+		for (int i = 0; i < reactionTimes.size() ; i++) 
+			if (reactionTimes.get(i) > 500)
 				count++;
-		}
 		return count;
 	}
 	
-	public int getNumberOfFalseStarts(){
+	public int getNumberOfFalseAlerts(){
 		int count = 0;
-		for (int i = 0; i < reactionTimes.size() ; i++) {
+		for (int i = 0; i < reactionTimes.size() ; i++) 
 			if (reactionTimes.get(i) <= 150)
 				count++;
-		}
 		return count;
+	}
+	
+	public int getNumberOfSleepAttacks(){
+		return sleepAttacks;
+	}
+	
+	public double getProportionOfFalseAlert() {
+		return (double)getNumberOfFalseAlerts()/ reactionTimes.size();
+	}
+	public double getProportionOfLapses() {
+		return (double)getNumberOfLapses()/ reactionTimes.size();
+	}
+	public double getProportionOfSleepAttacks() {
+		return (double)getNumberOfSleepAttacks()/ reactionTimes.size();
+	}
+	
+	public double getProportionOfAlertResponses() {
+		return (double) getNumberOfAlertResponses() / reactionTimes.size();
+	}
+	public double getMeanAlertReactionTimes() {
+		Values Alert = new Values();
+		for (int i = 0; i < reactionTimes.size(); i++) {
+			double r = reactionTimes.get(i);
+			if (r <= 500 && r >= 150)
+				Alert.add(r);
+		}
+		return Alert.average();
 	}
 
 	// 5-min blocks
 	class Block {
-		Values reactionTimes = new Values();
+		Values blockReactionTimes = new Values();
 		double startTime;
 		double totalBlockTime;
-		int falseStarts = 0;
 		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
 		// intervals )
-		int lapses = 0;
 		int numberOfResponses = 0;
 		int sleepAttacks = 0;
-		public double getFalseAlertProportion() {
-			return (double)falseStarts/ reactionTimes.size();
+		public int getNumberOfAlertResponses(){
+			int count = 0;
+			for (int i = 0; i < blockReactionTimes.size() ; i++)
+				if (blockReactionTimes.get(i) > 150 && blockReactionTimes.get(i) <= 500)
+					count++;
+			return count;
 		}
-		public double getLapsesProportion() {
-			return (double)lapses / reactionTimes.size();
+		
+		public int getNumberOfLapses(){
+			int count = 0;
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) > 500)
+					count++;
+			return count;
+		}
+		
+		public int getNumberOfFalseAlerts(){
+			int count = 0;
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) <= 150)
+					count++;
+			return count;
+		}
+		public double getProportionOfFalseAlert() {
+			return (double)getNumberOfFalseAlerts()/ blockReactionTimes.size();
+		}
+		public double getProportionOfLapses() {
+			return (double)getNumberOfLapses()/ blockReactionTimes.size();
+		}
+		public double getProportionOfAlertResponses() {
+			return (double) getNumberOfAlertResponses() / blockReactionTimes.size();
 		}
 		public double getMeanAlertReactionTimes() {
 			Values Alert = new Values();
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double r = reactionTimes.get(i);
-				if (r <= .500 && r >= .150)
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double r = blockReactionTimes.get(i);
+				if (r <= 500 && r >= 150)
 					Alert.add(r);
 			}
 			return Alert.average();
 		}
 	}
-
-
 }

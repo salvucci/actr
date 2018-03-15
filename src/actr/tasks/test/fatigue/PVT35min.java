@@ -107,7 +107,6 @@ public class PVT35min extends Task {
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 					repaint();
-
 				}
 			});
 
@@ -173,13 +172,14 @@ public class PVT35min extends Task {
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
-
+			responseTime *= 1000; //Changing the scale to Millisecond
+			
 			if (response != null) {
 				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
-				currentBlock.reactionTimes.add(responseTime);
+				currentBlock.blockReactionTimes.add(responseTime);
 			}
 
 			//			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
@@ -198,22 +198,15 @@ public class PVT35min extends Task {
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
 
-			if (responseTime < .150){
-				currentBlock.falseStarts++;
-			}
-			else if (responseTime > .150 && responseTime <= .500){
+			if (responseTime > 150 && responseTime <= 500){
 				// making the array for alert reaction times
-				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++;
-				currentSession.alertResponse[(int) ((responseTime - .150) * 100)]++;
-			}
-			else if (responseTime > .500){
-				currentBlock.lapses++;
+				currentBlock.alertResponse[(int) ((responseTime - 150) / 10)]++;
+				currentSession.alertResponse[(int) ((responseTime - 150) / 10)]++;
 			}
 		} else {
-			currentSession.reactionTimes.add(0);
-			currentBlock.reactionTimes.add(0);
+			currentSession.reactionTimes.add(1);
+			currentBlock.blockReactionTimes.add(1);
 			currentBlock.numberOfResponses++;
-			currentBlock.falseStarts++;
 			currentSession.numberOfResponses++;
 
 			if (getModel().isVerbose())
@@ -230,7 +223,7 @@ public class PVT35min extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		DecimalFormat df = new DecimalFormat("#.00");
-		// getting the nukbers of sesssions and blocks
+		// getting the numbers of sessions and blocks
 		PVT35min t = (PVT35min) tasks[0];
 		int numberOfSessions = t.sessions.size();
 		int numberOfBlocks = t.sessions.get(0).blocks.size();
@@ -264,7 +257,7 @@ public class PVT35min extends Task {
 					getModel().outputInLine(df.format(s.reactionTimes.get(j)) + ",");
 				}
 				getModel().outputInLine("\n");
-				getModel().output("False Start in Session   : " + s.getNumberOfFalseStarts());
+				getModel().output("False Start in Session   : " + s.getNumberOfFalseAlerts());
 				getModel().output("Lapses in Session        : " + s.getNumberOfLapses());
 				getModel().output("Sleep Attacks in Session : " + s.sleepAttacks);
 				getModel().output("total Session time       : " + s.totalSessionTime);
@@ -273,24 +266,24 @@ public class PVT35min extends Task {
 				for (int j = 0; j < s.blocks.size(); j++) {
 					Block b = s.blocks.get(j);
 					
-					blocksFalseStarts[i][j].add(b.falseStarts);
-					blocksLapses[i][j].add(b.lapses);;
+					blocksFalseStarts[i][j].add(b.getNumberOfFalseAlerts());
+					blocksLapses[i][j].add(b.getNumberOfLapses());
 					blocksMeanAlertResponses[i][j].add(b.getMeanAlertReactionTimes());;
-					blocksFalseStartsProportion[i][j].add(b.getFalseAlertProportion());;
-					blocksLapsesProportion[i][j].add(b.getLapsesProportion());;
+					blocksFalseStartsProportion[i][j].add(b.getProportionOfFalseAlert());;
+					blocksLapsesProportion[i][j].add(b.getProportionOfLapses());;
 					for (int k = 0; k < 35; k++) {
 						blocksAlertProportion[i][j][k].add((double)b.alertResponse[k]/b.numberOfResponses);
 					}
 					
 					getModel().output("");
 					getModel().output("**** Block number : " + j);
-					for (int k = 0; k < b.reactionTimes.size(); k++) {
-						getModel().outputInLine(df.format(b.reactionTimes.get(k)) + ",");
+					for (int k = 0; k < b.blockReactionTimes.size(); k++) {
+						getModel().outputInLine(df.format(b.blockReactionTimes.get(k)) + ",");
 					}
 					getModel().outputInLine("\n");
 
-					getModel().output("False Start in Session   : " + b.falseStarts);
-					getModel().output("Lapses in Session        : " + b.lapses);
+					getModel().output("False Start in Session   : " + b.getNumberOfFalseAlerts());
+					getModel().output("Lapses in Session        : " + b.getNumberOfLapses());
 					getModel().output("Sleep Attacks in Block   : " + b.sleepAttacks);
 					getModel().output("total Session time       : " + b.totalBlockTime);
 					getModel().output("Alert Proportions        : ");
@@ -350,9 +343,9 @@ public class PVT35min extends Task {
 				for (int j = 0; j < numberOfBlocks; j++){
 					for (Task taskcast : tasks){
 						PVT35min task = (PVT35min) taskcast;
-						Values RT = task.sessions.get(i).blocks.elementAt(j).reactionTimes;
+						Values RT = task.sessions.get(i).blocks.elementAt(j).blockReactionTimes;
 						for (int k = 0; k < RT.size(); k++) {
-							blockStream.print((int)(RT.get(k)*1000) + "\t");
+							blockStream.print((int)(RT.get(k)) + "\t");
 						}
 					}
 					blockStream.flush();
