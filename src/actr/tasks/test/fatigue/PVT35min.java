@@ -21,7 +21,14 @@ import actr.tasks.test.fatigue.SessionPVT.Block;
  * @author Ehsan Khosroshahi
  */
 
+
+
 public class PVT35min extends Task {
+	private double PVTduration = 2100.0;
+	private double[] timesOfPVT = {
+			24.0 + 12    // setting the time of the PVT at noon in the 2nd day
+	};
+	
 	private TaskLabel label;
 	private double lastTime = 0;
 	private String stimulus = "\u2588";
@@ -30,12 +37,7 @@ public class PVT35min extends Task {
 	private String response = null;
 	private double responseTime = 0;
 	private int sleepAttackIndex = 0;// the variable for handling sleep attacks
-	private double PVTduration = 2100.0;
 	Random random;
-
-	private double[] timesOfPVT = {
-			24.0 + 12    // setting the time of the PVT at noon in the 2nd day
-	};
 
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;

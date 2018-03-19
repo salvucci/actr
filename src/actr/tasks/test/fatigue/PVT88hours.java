@@ -22,18 +22,7 @@ import actr.tasks.test.fatigue.SessionPVT.Block;
  */
 
 public class PVT88hours extends Task {
-	private TaskLabel label;
-	private double lastTime = 0;
-	private String stimulus = "\u2588";
-	private double interStimulusInterval = 0.0;
-	private Boolean stimulusVisibility = false;
-	private String response = null;
-	private double responseTime = 0;
-	// the following two variables are for handling sleep attacks
-	private int sleepAttackIndex = 0;
 	private double PVTduration = 600.0;
-	Random random;
-	
 	private double [] timesOfPVT = {	
 			//			20  ,22  ,
 			//			32  ,34  ,36  ,38  ,40  ,42 , 44  ,46  ,
@@ -45,6 +34,16 @@ public class PVT88hours extends Task {
 			120 ,122 ,124, 126 ,128 ,130 ,132 ,134 ,136 ,138 ,140, 142 , //day 3
 			//End of 88 TSD
 	};
+	
+	private TaskLabel label;
+	private double lastTime = 0;
+	private String stimulus = "\u2588";
+	private double interStimulusInterval = 0.0;
+	private Boolean stimulusVisibility = false;
+	private String response = null;
+	private double responseTime = 0;
+	private int sleepAttackIndex = 0; // the variable for handling sleep attacks
+	Random random;
 	
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
@@ -213,11 +212,9 @@ public class PVT88hours extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		
-		DecimalFormat df = new DecimalFormat("#.00");
-		// getting the nukbers of sesssions and blocks
-		PVT88hours t = (PVT88hours) tasks[0];
+		DecimalFormat df = new DecimalFormat("#.00");		
+		PVT88hours t = (PVT88hours) tasks[0]; // getting the numbers of sessions and blocks
 		int numberOfSessions = t.sessions.size();
-		int numberOfBlocks = t.sessions.get(0).blocks.size();
 
 		Values[] totallProportionLapses = new Values[numberOfSessions];
 		Values[] totallProportionFalseAlerts = new Values[numberOfSessions]; 
