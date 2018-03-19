@@ -29,8 +29,7 @@ public class PVT35min extends Task {
 	private Boolean stimulusVisibility = false;
 	private String response = null;
 	private double responseTime = 0;
-	// the following variable are for handling sleep attacks
-	private int sleepAttackIndex = 0;
+	private int sleepAttackIndex = 0;// the variable for handling sleep attacks
 	private double PVTduration = 2100.0;
 	Random random;
 
@@ -182,33 +181,15 @@ public class PVT35min extends Task {
 				currentBlock.blockReactionTimes.add(responseTime);
 			}
 
-			//			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
-			//					&& getModel().getProcedural().getFatigueUtilityThreshold() < 4) {
-			//				uutStream.print((int) getModel().getTime() + "\t");
-			//				uutStream.print((getModel().getProcedural().getFatigueUtility()) + "\t");
-			//				uutStream.print((getModel().getProcedural().getFatigueUtilityThreshold()) + "\n");
-			//				uutStream.flush();
-			//			}
-
 			label.setVisible(false);
 			processDisplay();
-
 			
 			interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
-
-			if (responseTime > 150 && responseTime <= 500){
-				// making the array for alert reaction times
-				currentBlock.alertResponse[(int) ((responseTime - 150) / 10)]++;
-				currentSession.alertResponse[(int) ((responseTime - 150) / 10)]++;
-			}
-		} else {
+		} else {   // False start situation
 			currentSession.reactionTimes.add(1);
 			currentBlock.blockReactionTimes.add(1);
-			currentBlock.numberOfResponses++;
-			currentSession.numberOfResponses++;
-
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
 						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
@@ -264,17 +245,16 @@ public class PVT35min extends Task {
 				getModel().output("–––––––––––––––––––––––––––––––––––\n");
 				getModel().output("******** Blocks:");
 				for (int j = 0; j < s.blocks.size(); j++) {
-					Block b = s.blocks.get(j);
-					
+					Block b = s.blocks.get(j);	
 					blocksFalseStarts[i][j].add(b.getNumberOfFalseAlerts());
 					blocksLapses[i][j].add(b.getNumberOfLapses());
-					blocksMeanAlertResponses[i][j].add(b.getMeanAlertReactionTimes());;
-					blocksFalseStartsProportion[i][j].add(b.getProportionOfFalseAlert());;
-					blocksLapsesProportion[i][j].add(b.getProportionOfLapses());;
+					blocksMeanAlertResponses[i][j].add(b.getMeanAlertReactionTimes());
+					blocksFalseStartsProportion[i][j].add(b.getProportionOfFalseAlert());
+					blocksLapsesProportion[i][j].add(b.getProportionOfLapses());
+					double blocksAP[] = b.getProportionAlertResponseDistribution();
 					for (int k = 0; k < 35; k++) {
-						blocksAlertProportion[i][j][k].add((double)b.alertResponse[k]/b.numberOfResponses);
+						blocksAlertProportion[i][j][k].add(blocksAP[k]);
 					}
-					
 					getModel().output("");
 					getModel().output("**** Block number : " + j);
 					for (int k = 0; k < b.blockReactionTimes.size(); k++) {
@@ -288,9 +268,8 @@ public class PVT35min extends Task {
 					getModel().output("total Session time       : " + b.totalBlockTime);
 					getModel().output("Alert Proportions        : ");
 					for (int k = 0; k < 35; k++)
-						getModel().outputInLine(df.format((double)b.alertResponse[k]/b.numberOfResponses) + " ");
+						getModel().outputInLine(df.format(blocksAP[k]) + " ");
 					getModel().outputInLine("\n");
-					
 				}
 				getModel().output("\n**********************************************\n");
 			}
@@ -324,7 +303,6 @@ public class PVT35min extends Task {
 			for (int i = 0; i < numberOfSessions; i++) {
 				for (int j = 0; j < numberOfBlocks; j++) {
 					PVTfile.print(blocksFalseStartsProportion[i][j].average() + "\t");
-					Block b = sessions.get(i).blocks.get(j);
 					for (int k = 0; k < 35; k++)
 						PVTfile.print(blocksAlertProportion[i][j][k].average() + "\t");
 					PVTfile.print(blocksLapsesProportion[i][j].average() + "\n");	

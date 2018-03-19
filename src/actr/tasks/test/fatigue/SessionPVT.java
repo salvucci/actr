@@ -11,7 +11,6 @@ public class SessionPVT {
 	Values timeOfStimuliFromStart;
 	
 	double startTime = 0;
-	int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
 	double totalSessionTime = 0;
 	int sleepAttacks = 0;
 	int stimulusIndex = 0;
@@ -60,6 +59,7 @@ public class SessionPVT {
 	public double getProportionOfAlertResponses() {
 		return (double) getNumberOfAlertResponses() / reactionTimes.size();
 	}
+	
 	public double getMeanAlertReactionTimes() {
 		Values Alert = new Values();
 		for (int i = 0; i < reactionTimes.size(); i++) {
@@ -68,6 +68,27 @@ public class SessionPVT {
 				Alert.add(r);
 		}
 		return Alert.average();
+	}
+	
+	public int[] getAlertResponseDistribution () {
+		int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
+		for (int i = 0; i < reactionTimes.size(); i++) {
+			double responseTime = reactionTimes.get(i);
+			if (responseTime > 150 && responseTime <= 500){
+				// making the array for alert reaction times
+				alertResponse[(int) ((responseTime - 150) / 10)]++;
+			}
+		}
+		return alertResponse;
+	}
+	
+	public double[] getProportionAlertResponseDistribution () {
+		double proportionAlertResponse[] = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
+		int alertResponse[] = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
+		for (int i = 0; i < 35; i++) {
+			proportionAlertResponse[i] = (double)alertResponse[i] / reactionTimes.size();
+		}
+		return proportionAlertResponse;
 	}
 
 	// 5-min blocks
@@ -119,6 +140,26 @@ public class SessionPVT {
 					Alert.add(r);
 			}
 			return Alert.average();
+		}
+		public int[] getAlertResponseDistribution () {
+			int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double responseTime = blockReactionTimes.get(i);
+				if (responseTime > 150 && responseTime <= 500){
+					// making the array for alert reaction times
+					alertResponse[(int) ((responseTime - 150) / 10)]++;
+				}
+			}
+			return alertResponse;
+		}
+		
+		public double[] getProportionAlertResponseDistribution () {
+			double proportionAlertResponse[] = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
+			int alertResponse[] = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
+			for (int i = 0; i < 35; i++) {
+				proportionAlertResponse[i] = (double)alertResponse[i] / blockReactionTimes.size();
+			}
+			return proportionAlertResponse;
 		}
 	}
 }

@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import actr.model.Event;
 import actr.model.Symbol;
 import actr.task.*;
+import actr.tasks.test.fatigue.SessionPVT.Block;
 
 /**
  * Model of PVT test and Fatigue mechanism : PVT on 88 hours of sleep deprivation 
@@ -30,7 +31,7 @@ public class PVT88hours extends Task {
 	private double responseTime = 0;
 	// the following two variables are for handling sleep attacks
 	private int sleepAttackIndex = 0;
-	private double PVTduration = 2100.0;
+	private double PVTduration = 600.0;
 	Random random;
 	
 	private double [] timesOfPVT = {	
@@ -45,57 +46,10 @@ public class PVT88hours extends Task {
 			//End of 88 TSD
 	};
 	
-	int sessionNumber = 0;  // starts from 0
+	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
-	private Session currentSession;
-	private Vector<Session> sessions = new Vector<Session>();
-
-	// 5-min blocks
-	class Block {
-		Values reactionTimes = new Values();
-		double startTime;
-		double totalBlockTime;
-		int falseStarts = 0;
-		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
-		// intervals )
-		int lapses = 0;
-		int numberOfResponses = 0;
-		int sleepAttacks = 0;
-		public double getFalseAlertProportion() {
-			return (double)falseStarts/ reactionTimes.size();
-		}
-		public double getLapsesProportion() {
-			return (double)lapses / reactionTimes.size();
-		}
-		public double getMeanAlertReactionTimes() {
-			Values Alert = new Values();
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double r = reactionTimes.get(i);
-				if (r <= .500 && r >= .150)
-					Alert.add(r);
-			}
-			return Alert.average();
-		}
-
-	}
-
-	class Session {
-		Vector<Block> blocks = new Vector<Block>();
-		int blockIndex = 1;
-		Values reactionTimes = new Values();
-		double startTime = 0;
-		int falseStarts = 0;
-		int alertRosponses = 0;
-		// Alert responses (150-500 ms,10 ms intervals )
-		int alertResponse[] = new int[35]; 
-		double totalSessionTime = 0;
-		int lapses = 0;
-		int sleepAttacks = 0;
-		int stimulusIndex = 0;
-		int numberOfResponses = 0; // number of responses, this can be diff from the
-		// stimulusIndex because of false resonces
-		double responseTotalTime = 0;
-	}
+	private SessionPVT currentSession;
+	private Vector<SessionPVT> sessions = new Vector<SessionPVT>();
 
 	public PVT88hours() {
 		super();
@@ -108,8 +62,8 @@ public class PVT88hours extends Task {
 	public void start() {
 		random = new Random();
 		lastTime = 0;
-		currentSession = new Session();
-		currentBlock = new Block();
+		currentSession = new SessionPVT();
+		currentBlock = currentSession.new Block();
 		stimulusVisibility = false;
 		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
@@ -161,7 +115,6 @@ public class PVT88hours extends Task {
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 					}
 					repaint();
-
 				}
 			});
 
@@ -169,7 +122,7 @@ public class PVT88hours extends Task {
 			// adding a new block
 			if (currentBlock.totalBlockTime >= 300 ) {
 				currentSession.blocks.add(currentBlock);
-				currentBlock = new Block();
+				currentBlock = currentSession.new Block();
 				currentBlock.startTime = currentSession.startTime + currentSession.blockIndex * 300.0;
 				currentSession.blockIndex++;
 			}
@@ -186,10 +139,12 @@ public class PVT88hours extends Task {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
-						currentSession = new Session();
+						currentSession = new SessionPVT();
+						currentBlock = currentSession.new Block();
 						stimulusVisibility = false;
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
+						currentBlock.startTime = getModel().getTime();
 						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
 						getModel().getFatigue().startFatigueSession();
 						
@@ -222,61 +177,38 @@ public class PVT88hours extends Task {
 
 	@Override
 	public void typeKey(char c) {
-
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
-
+			responseTime *= 1000; //Changing the scale to Millisecond
+			
 			if (response != null) {
 				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
-				currentBlock.reactionTimes.add(responseTime);
+				currentBlock.blockReactionTimes.add(responseTime);
 			}
-
-			//			if (iteration == 1 && getModel().getProcedural().getFatigueUtility() < 4
-			//					&& getModel().getProcedural().getFatigueUtilityThreshold() < 4) {
-			//				uutStream.print((int) getModel().getTime() + "\t");
-			//				uutStream.print((getModel().getProcedural().getFatigueUtility()) + "\t");
-			//				uutStream.print((getModel().getProcedural().getFatigueUtilityThreshold()) + "\n");
-			//				uutStream.flush();
-			//			}
 
 			label.setVisible(false);
 			processDisplay();
-
 			
 			interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
-
-			if (responseTime < .150){
-				currentBlock.falseStarts++;
-				currentSession.falseStarts++;
-			}
-			else if (responseTime > .150 && responseTime <= .500){
-				// making the array for alert reaction times
-				currentBlock.alertResponse[(int) ((responseTime - .150) * 100)]++;
-				currentSession.alertResponse[(int) ((responseTime - .150) * 100)]++;
-			}
-			else if (responseTime > .500){
-				currentBlock.lapses++;
-				currentSession.lapses++;
-			}
-		} else {
-			currentSession.reactionTimes.add(0);
-			currentBlock.reactionTimes.add(0);
-			currentBlock.numberOfResponses++;
-			currentBlock.falseStarts++;
-			currentSession.numberOfResponses++;
-			currentSession.falseStarts++;
-
+		} else {   // False start situation
+			currentSession.reactionTimes.add(1);
+			currentBlock.blockReactionTimes.add(1);
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
 						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
 		}
 	}
+	
+//	@Override
+//	public int analysisIterations() {
+// 		return 100;
+//	}
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
@@ -286,56 +218,35 @@ public class PVT88hours extends Task {
 		PVT88hours t = (PVT88hours) tasks[0];
 		int numberOfSessions = t.sessions.size();
 		int numberOfBlocks = t.sessions.get(0).blocks.size();
-		
-		Values[] totallLapsesValues = new Values[numberOfSessions];
-		Values[] totallFalseAlerts = new Values[numberOfSessions]; 
-		Values[] totallSleepAtacks = new Values[numberOfSessions];
-		Values[] totallAlertResponces = new Values[numberOfSessions];
-		Values[][] totallAlertResponcesSpread = new Values[numberOfSessions][35];
-		Values[] totallResponsesNumber  =new Values[numberOfSessions];
 
 		Values[] totallProportionLapses = new Values[numberOfSessions];
 		Values[] totallProportionFalseAlerts = new Values[numberOfSessions]; 
 		Values[] totallProportionSleepAtacks = new Values[numberOfSessions];
 		Values[] totallProportionAlertRresponces = new Values[numberOfSessions];
-		Values[][] totallProportionAlertResponcesSpread = new Values[numberOfSessions][35];
+		Values[][] totallProportionAlertResponcesDis = new Values[numberOfSessions][35];
 
 		// allocating memory to the vectors
 		for (int i = 0; i < numberOfSessions; i++) {
-			totallLapsesValues[i] = new Values();
-			totallFalseAlerts[i] = new Values();
-			totallSleepAtacks[i] = new Values();
-			totallAlertResponces[i] = new Values();
-			totallResponsesNumber[i] = new Values();
 			totallProportionLapses[i] = new Values();
 			totallProportionFalseAlerts[i] = new Values();
 			totallProportionSleepAtacks[i] = new Values();
 			totallProportionAlertRresponces[i] = new Values();
 			for (int j = 0; j < 35; j++) {
-				totallAlertResponcesSpread[i][j] = new Values();
-				totallProportionAlertResponcesSpread[i][j] = new Values();
+				totallProportionAlertResponcesDis[i][j] = new Values();
 			}	
 		}
 
 		for (Task taskCast : tasks) {
 			PVT88hours task = (PVT88hours) taskCast;
 			for (int i = 0; i < numberOfSessions; i++) {
-				totallFalseAlerts[i].add(task.sessions.elementAt(i).falseStarts);
-				totallLapsesValues[i].add(task.sessions.get(i).lapses);
-				totallSleepAtacks[i].add(task.sessions.get(i).sleepAttacks);
-				totallAlertResponces[i].add(task.sessions.get(i).alertRosponses);
-				totallResponsesNumber[i].add(task.sessions.get(i).numberOfResponses);
+				SessionPVT session = task.sessions.get(i);
+				totallProportionFalseAlerts[i].add(session.getProportionOfFalseAlert());
+				totallProportionLapses[i].add(session.getProportionOfLapses());
+				totallProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
+				totallProportionAlertRresponces[i].add(session.getProportionOfAlertResponses());
+				double [] proportionAlertDis = session.getProportionAlertResponseDistribution(); 
 				for (int j = 0; j < 35; j++) {
-					totallAlertResponcesSpread[i][j].add((double) task.sessions.get(i).alertResponse[j]);
-				}
-
-				totallProportionFalseAlerts[i].add((double)task.sessions.get(i).falseStarts/task.sessions.get(i).numberOfResponses);
-				totallProportionLapses[i].add((double)task.sessions.get(i).lapses/task.sessions.get(i).numberOfResponses);
-				totallProportionSleepAtacks[i].add((double)task.sessions.get(i).sleepAttacks/task.sessions.get(i).numberOfResponses);
-				totallProportionAlertRresponces[i].add((double)task.sessions.get(i).alertRosponses/task.sessions.get(i).numberOfResponses);
-				for (int j = 0; j < 35; j++) {
-					totallProportionAlertResponcesSpread[i][j].add(
-							(double) task.sessions.get(i).alertResponse[j]/task.sessions.get(i).numberOfResponses);
+					totallProportionAlertResponcesDis[i][j].add(proportionAlertDis[j]);
 				}
 			}
 		}
@@ -361,7 +272,7 @@ public class PVT88hours extends Task {
 
 		for (int s = 0; s < 8; s++) {
 			for (int i = 0; i < 35; i++)
-				BaseAR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+				BaseAR[i].add(totallProportionAlertResponcesDis[s][i].mean());
 			BaseFA.add(totallProportionFalseAlerts[s].mean());
 			BaseL.add(totallProportionLapses[s].mean());
 			BaseSA.add(totallProportionSleepAtacks[s].mean());
@@ -387,7 +298,7 @@ public class PVT88hours extends Task {
 
 		for (int s = 8; s < 20; s++) {
 			for (int i = 0; i < 35; i++)
-				Day1AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+				Day1AR[i].add(totallProportionAlertResponcesDis[s][i].mean());
 			Day1FA.add(totallProportionFalseAlerts[s].mean());
 			Day1L.add(totallProportionLapses[s].mean());
 			Day1SA.add(totallProportionSleepAtacks[s].mean());
@@ -413,7 +324,7 @@ public class PVT88hours extends Task {
 
 		for (int s = 20; s < 32; s++) {
 			for (int i = 0; i < 35; i++)
-				Day2AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+				Day2AR[i].add(totallProportionAlertResponcesDis[s][i].mean());
 			Day2FA.add(totallProportionFalseAlerts[s].mean());
 			Day2L.add(totallProportionLapses[s].mean());
 			Day2SA.add(totallProportionSleepAtacks[s].mean());
@@ -439,7 +350,7 @@ public class PVT88hours extends Task {
 
 		for (int s = 32; s < 34; s++) {
 			for (int i = 0; i < 35; i++)
-				Day3AR[i].add(totallProportionAlertResponcesSpread[s][i].mean());
+				Day3AR[i].add(totallProportionAlertResponcesDis[s][i].mean());
 			Day3FA.add(totallProportionFalseAlerts[s].mean());
 			Day3L.add(totallProportionLapses[s].mean());
 			Day3SA.add(totallProportionSleepAtacks[s].mean());
