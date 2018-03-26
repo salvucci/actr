@@ -107,7 +107,7 @@ public class Fatigue extends Module {
 
 
 	/**
-	 * @return the number of minutes that have passed
+	 * @return the number of minutes that have passed from the beginning of the task
 	 */
 	double mpTime() {
 		return ((int) ((model.getTime() - startTimeSC) / 60));
@@ -156,7 +156,8 @@ public class Fatigue extends Module {
 	}
 
 	/**
-	 *  This method is called just after any new task presentation (audio or visual) 
+	 *  OLD: This method is called just after any new task presentation (audio or visual)
+	 *  NEW: This method is called at every production except wait. 
 	 */
 	public void fatigueResetPercentages(){
 		setFatigueFPPercent(getFatigueStimulus());
@@ -214,6 +215,15 @@ public class Fatigue extends Module {
 		}
 		return true;
 	}
+	
+	public double getTimeAwake(double hour){
+		double timeAwake=0;
+		for (int i = 0; i < wake.size(); i++) {
+			if (hour>=wake.get(i) && hour < asleep.get(i))
+				timeAwake =  hour - wake.get(i);
+		}
+		return timeAwake;
+	}
 
 	public boolean isFatigueEnabled() {
 		return fatigueEnabled;
@@ -256,7 +266,8 @@ public class Fatigue extends Module {
 	}
 
 	public double getFatigueFPDec() {
-		return fatigueFPDec;
+		return - Math.pow(fatigueFPDec , computeBioMathValueForHour()) + 2;
+		//return fatigueFPDec;
 	}
 
 	public void setFatigueFPDec(double fatigueFPDec) {

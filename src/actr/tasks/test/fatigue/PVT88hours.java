@@ -130,6 +130,8 @@ public class PVT88hours extends Task {
 		// Starting a new Session
 		else {
 			currentSession.blocks.add(currentBlock);
+			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValueforHour(timesOfPVT[sessionNumber]);
+			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT[sessionNumber]);
 			sessions.add(currentSession);
 			sessionNumber++;
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
@@ -363,8 +365,9 @@ public class PVT88hours extends Task {
 				+ df2.format(Day3SA.mean()));
 		// ----------------------- END OF DAY 3 --------------------------
 		
-		// TO DO : Writing Numbers to the file
+		
 		try {
+			// Writing Numbers to the file based on days
 			File dataFile = new File("./test/fatigue/pvt_88hour/data.txt");
 			if (!dataFile.exists())
 				dataFile.createNewFile();
@@ -407,6 +410,51 @@ public class PVT88hours extends Task {
 			data.flush();
 			
 			data.close();
+			
+			// Writing Numbers to the file based on sessions
+			File dataSessionFile = new File("./test/fatigue/pvt_88hour/dataSessions.csv");
+			if (!dataSessionFile.exists())
+				dataSessionFile.createNewFile();
+			PrintStream dataSession = new PrintStream(dataSessionFile);
+			
+			dataSession.print("AwakeTime" + ",");
+			PVT88hours task = (PVT88hours) tasks[0];
+			for (int i = 0; i < numberOfSessions; i++) {
+				SessionPVT session = task.sessions.get(i);
+				dataSession.print(session.timeAwake + ",");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("FalseStarts" + ",");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionFalseAlerts[i].mean() + ",");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("MedianAlertResponces" + ",");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionAlertRresponces[i].mean() + ",");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("Lapses" + ",");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionLapses[i].mean() + ",");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("SleepAttacks" + ",");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionSleepAtacks[i].mean() + ",");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
