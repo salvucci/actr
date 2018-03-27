@@ -64,6 +64,17 @@ public class Values {
 	public double average() {
 		return mean();
 	}
+	
+//  TO DO 
+//	public double median() {
+//		if (v.size() == 0)
+//			return 0;
+//		v.sort
+//		double sum = 0;
+//		for (int i = 0; i < v.size(); i++)
+//			sum += v.elementAt(i);
+//		return sum / (1.0 * v.size());
+//	}
 
 	public double stddev() {
 		if (v.size() < 2)

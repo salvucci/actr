@@ -223,13 +223,15 @@ public class PVT88hours extends Task {
 		Values[] totallProportionSleepAtacks = new Values[numberOfSessions];
 		Values[] totallProportionAlertRresponces = new Values[numberOfSessions];
 		Values[][] totallProportionAlertResponcesDis = new Values[numberOfSessions][35];
-
+		Values[] totallMeanAlertRresponces = new Values[numberOfSessions];
+		
 		// allocating memory to the vectors
 		for (int i = 0; i < numberOfSessions; i++) {
 			totallProportionLapses[i] = new Values();
 			totallProportionFalseAlerts[i] = new Values();
 			totallProportionSleepAtacks[i] = new Values();
 			totallProportionAlertRresponces[i] = new Values();
+			totallMeanAlertRresponces[i] = new Values();
 			for (int j = 0; j < 35; j++) {
 				totallProportionAlertResponcesDis[i][j] = new Values();
 			}	
@@ -243,6 +245,7 @@ public class PVT88hours extends Task {
 				totallProportionLapses[i].add(session.getProportionOfLapses());
 				totallProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
 				totallProportionAlertRresponces[i].add(session.getProportionOfAlertResponses());
+				totallMeanAlertRresponces[i].add(session.getMeanAlertReactionTimes());
 				double [] proportionAlertDis = session.getProportionAlertResponseDistribution(); 
 				for (int j = 0; j < 35; j++) {
 					totallProportionAlertResponcesDis[i][j].add(proportionAlertDis[j]);
@@ -433,9 +436,9 @@ public class PVT88hours extends Task {
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("MedianAlertResponces" + ",");
+			dataSession.print("MeanAlertResponces" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totallProportionAlertRresponces[i].mean() + ",");
+				dataSession.print(totallMeanAlertRresponces[i].mean() + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
