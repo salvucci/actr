@@ -19,7 +19,7 @@
     :utbmc .012  
     :utmc -.012
     
-    :fp-dec 1.0002
+    :fp-dec .999 ;;1.0002
     
     :egs .25
     ;:cst t

@@ -266,8 +266,8 @@ public class Fatigue extends Module {
 	}
 
 	public double getFatigueFPDec() {
-		return - Math.pow(fatigueFPDec , computeBioMathValueForHour()) + 2;
-		//return fatigueFPDec;
+		//return - Math.pow(fatigueFPDec , computeBioMathValueForHour()) + 2;
+		return fatigueFPDec;
 	}
 
 	public void setFatigueFPDec(double fatigueFPDec) {
