@@ -26,7 +26,7 @@ import actr.tasks.test.fatigue.SessionPVT.Block;
 public class PVT35min extends Task {
 	private double PVTduration = 2100.0;
 	private double[] timesOfPVT = {
-			24.0 + 12    // setting the time of the PVT at noon in the 2nd day
+			24.0 + 10    // setting the time of the PVT at noon in the 2nd day
 	};
 	
 	private TaskLabel label;
