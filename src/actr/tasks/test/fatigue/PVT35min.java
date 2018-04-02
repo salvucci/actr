@@ -355,12 +355,26 @@ public class PVT35min extends Task {
 			PrintStream blockMeanRT = new PrintStream(blockFileMeanRT);
 			for (int i = 0; i < numberOfSessions; i++){
 				for (int j = 0; j < numberOfBlocks; j++){
-					blockMeanRT.print(blocksMeanAlertResponses[i][j].average()* 1000 + "\t");
+					blockMeanRT.print(blocksMeanAlertResponses[i][j].average() + "\t");
 					blockMeanRT.flush();
 				}
 				blockMeanRT.print("\n\n");
 			}
 			blockMeanRT.close();
+			
+			File blockFileFalseStarts = new File("./test/fatigue/pvt_35min/BlockFalseStarts.txt");
+			if (!blockFileFalseStarts.exists())
+				blockFileFalseStarts.createNewFile();
+			PrintStream blockFalseStarts = new PrintStream(blockFileFalseStarts);
+			for (int i = 0; i < numberOfSessions; i++){
+				for (int j = 0; j < numberOfBlocks; j++){
+					blockFalseStarts.print(blocksFalseStartsProportion[i][j].average() + "\t");
+					blockFalseStarts.flush();
+				}
+				blockFalseStarts.print("\n\n");
+			}
+			blockFalseStarts.close();
+			
 
 		} catch (IOException e) {
 			e.printStackTrace();
