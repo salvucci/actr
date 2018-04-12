@@ -37,6 +37,22 @@ public class SessionPVT {
 		return count;
 	}
 	
+	/**
+	 * @return Log-transformed Signal-to-Noise Ratio (LSNR) approximation
+	 */
+	public double getSessionLSNR_apx(){
+		// LSNR_apx = B ((1/N) sum_1^N (1 / RT_i))    B = 3855ms
+		int N = 0;
+		int B = 3855;
+		double sum = 0;
+		for (int i = 0; i < reactionTimes.size(); i++) 
+			if ( reactionTimes.get(i) >= 150){
+				sum = sum + 1.0 / reactionTimes.get(i);
+				N++;
+			}
+		return B * ((1.0/N) * sum);
+	}
+	
 	public int getNumberOfFalseAlerts(){
 		int count = 0;
 		for (int i = 0; i < reactionTimes.size() ; i++) 
