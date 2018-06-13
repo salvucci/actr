@@ -51,7 +51,7 @@ public class Fatigue extends Module {
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
 
-	double accumilativeParameter = 0;
+	double cumulativeParameter = 0;
 
 	Fatigue(Model model) {
 		this.model = model;
@@ -110,7 +110,7 @@ public class Fatigue extends Module {
 	 * @return the number of minutes that have passed from the beginning of the task
 	 */
 	double mpTime() {
-		return ((int) ((model.getTime() - startTimeSC) / 60));
+		return ((int) ((model.getTime() - startTimeSC) / 60)) + cumulativeParameter;
 	}
 
 	@Override
@@ -143,17 +143,17 @@ public class Fatigue extends Module {
 		startTimeSC = model.getTime();
 	}
 	
-	public void setAccumilativeParameter(double AP){
-		accumilativeParameter = AP;
+	public void setCumulativeParameter(double AP){
+		cumulativeParameter = AP;
 	}
 	
 	
-	/**
-	 * for when you have an accumulative affect on the task that are being consecutively happening.
-	 */
-	public void startAccumilativeFatigueSession(){
-		startTimeSC = Math.min(startTimeSC + accumilativeParameter , model.getTime());
-	}
+//	/**
+//	 * for when you have an cumulative affect on the task that are being consecutively happening.
+//	 */
+//	public void startCumulativeFatigueSession(){
+//		startTimeSC = Math.min(startTimeSC + cumulativeParameter , model.getTime());
+//	}
 
 	/**
 	 *  OLD: This method is called just after any new task presentation (audio or visual)
