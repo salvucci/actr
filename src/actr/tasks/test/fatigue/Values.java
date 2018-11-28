@@ -1,6 +1,7 @@
 package actr.tasks.test.fatigue;
 
 import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.Vector;
 
 public class Values {
@@ -64,17 +65,6 @@ public class Values {
 	public double average() {
 		return mean();
 	}
-	
-//  TO DO 
-//	public double median() {
-//		if (v.size() == 0)
-//			return 0;
-//		v.sort
-//		double sum = 0;
-//		for (int i = 0; i < v.size(); i++)
-//			sum += v.elementAt(i);
-//		return sum / (1.0 * v.size());
-//	}
 
 	public double stddev() {
 		if (v.size() < 2)
@@ -124,5 +114,29 @@ public class Values {
 	@Override
 	public String toString() {
 		return toString(DEFAULT_FORMAT);
+	}
+	
+	public double median() {
+		if (v.size() == 0)
+			return 0;
+		Vector<Double> vSorted = v;
+		Collections.sort(vSorted);
+		
+		int middle = v.size()/2;
+		if (v.size()%2 == 1) {
+			return v.get(middle);
+		} else {
+			return (v.get(middle-1) + v.get(middle)) / 2.0;
+		}
+	}
+	
+	public static void main(String[] args) {
+		// This is for testing the functions
+		
+		//create Value object
+	    Values v = new Values();
+	   
+	   
+	    
 	}
 }
