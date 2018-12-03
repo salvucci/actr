@@ -130,6 +130,10 @@ public class Values {
 		}
 	}
 	
+	public double CI_95percent() {
+		return 1.96 * (stddev()/ Math.sqrt(1.0 * v.size())); 
+	}
+	
 	public static void main(String[] args) {
 		// This is for testing the functions
 		

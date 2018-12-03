@@ -264,8 +264,8 @@ public class PVT35min extends Task {
 					}
 					getModel().outputInLine("\n");
 
-					getModel().output("False Start in Session   : " + b.getNumberOfFalseAlerts());
-					getModel().output("Lapses in Session        : " + b.getNumberOfLapses());
+					getModel().output("False Start in Block   : " + b.getNumberOfFalseAlerts());
+					getModel().output("Lapses in Block        : " + b.getNumberOfLapses());
 					getModel().output("Sleep Attacks in Block   : " + b.sleepAttacks);
 					getModel().output("total Session time       : " + b.totalBlockTime);
 					getModel().output("Alert Proportions        : ");
@@ -336,18 +336,32 @@ public class PVT35min extends Task {
 			blockStream.close();
 
 			// Writing the block averages
-			File blockFileLapses = new File("./test/fatigue/pvt_35min/BlockLapses.txt");
-			if (!blockFileLapses.exists())
-				blockFileLapses.createNewFile();
-			PrintStream blockLapses = new PrintStream(blockFileLapses);
+			File blockFileLapsesPercent = new File("./test/fatigue/pvt_35min/BlockLapsesPercent.txt");
+			if (!blockFileLapsesPercent.exists())
+				blockFileLapsesPercent.createNewFile();
+			PrintStream blockLapsesPercent = new PrintStream(blockFileLapsesPercent);
 			for (int i = 0; i < numberOfSessions; i++){
 				for (int j = 0; j < numberOfBlocks; j++){
-					blockLapses.print(blocksLapsesProportion[i][j].average() + "\t");
-					blockLapses.flush();
+					blockLapsesPercent.print(blocksLapsesProportion[i][j].average() * 100 + "\n");
+					blockLapsesPercent.flush();
 				}
-				blockLapses.print("\n\n");
+				blockLapsesPercent.print("\n\n");
 			}
-			blockLapses.close();
+			blockLapsesPercent.close();
+			
+			File blockFileLapsesPercentSD = new File("./test/fatigue/pvt_35min/BlockLapsesPercentSD.txt");
+			if (!blockFileLapsesPercentSD.exists())
+				blockFileLapsesPercentSD.createNewFile();
+			PrintStream blockLapsesPercentSD = new PrintStream(blockFileLapsesPercentSD);
+			for (int i = 0; i < numberOfSessions; i++){
+				for (int j = 0; j < numberOfBlocks; j++){
+					blockLapsesPercentSD.print(blocksLapsesProportion[i][j].stddev() * 100 + "\n");
+					blockLapsesPercentSD.flush();
+				}
+				blockLapsesPercentSD.print("\n\n");
+			}
+			blockLapsesPercentSD.close();
+			
 			
 			File blockFileMeanRT = new File("./test/fatigue/pvt_35min/BlockMeanRT.txt");
 			if (!blockFileMeanRT.exists())
@@ -355,26 +369,38 @@ public class PVT35min extends Task {
 			PrintStream blockMeanRT = new PrintStream(blockFileMeanRT);
 			for (int i = 0; i < numberOfSessions; i++){
 				for (int j = 0; j < numberOfBlocks; j++){
-					blockMeanRT.print(blocksMeanAlertResponses[i][j].average() + "\t");
+					blockMeanRT.print(blocksMeanAlertResponses[i][j].average() + "\n");
 					blockMeanRT.flush();
 				}
 				blockMeanRT.print("\n\n");
 			}
 			blockMeanRT.close();
 			
-			File blockFileFalseStarts = new File("./test/fatigue/pvt_35min/BlockFalseStarts.txt");
-			if (!blockFileFalseStarts.exists())
-				blockFileFalseStarts.createNewFile();
-			PrintStream blockFalseStarts = new PrintStream(blockFileFalseStarts);
+			File blockFileFalseStartsPercent = new File("./test/fatigue/pvt_35min/BlockFalseStartsPercent.txt");
+			if (!blockFileFalseStartsPercent.exists())
+				blockFileFalseStartsPercent.createNewFile();
+			PrintStream blockFalseStartsPercent = new PrintStream(blockFileFalseStartsPercent);
 			for (int i = 0; i < numberOfSessions; i++){
 				for (int j = 0; j < numberOfBlocks; j++){
-					blockFalseStarts.print(blocksFalseStartsProportion[i][j].average() + "\t");
-					blockFalseStarts.flush();
+					blockFalseStartsPercent.print(blocksFalseStartsProportion[i][j].average() * 100 + "\n");
+					blockFalseStartsPercent.flush();
 				}
-				blockFalseStarts.print("\n\n");
+				blockFalseStartsPercent.print("\n\n");
 			}
-			blockFalseStarts.close();
+			blockFalseStartsPercent.close();
 			
+			File blockFileFalseStartsPercentSD = new File("./test/fatigue/pvt_35min/BlockFalseStartsPercentSD.txt");
+			if (!blockFileFalseStartsPercentSD.exists())
+				blockFileFalseStartsPercentSD.createNewFile();
+			PrintStream blockFalseStartsPercentSD = new PrintStream(blockFileFalseStartsPercentSD);
+			for (int i = 0; i < numberOfSessions; i++){
+				for (int j = 0; j < numberOfBlocks; j++){
+					blockFalseStartsPercentSD.print(blocksFalseStartsProportion[i][j].stddev() * 100 + "\n");
+					blockFalseStartsPercentSD.flush();
+				}
+				blockFalseStartsPercentSD.print("\n\n");
+			}
+			blockFalseStartsPercentSD.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();

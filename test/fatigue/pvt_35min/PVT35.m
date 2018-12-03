@@ -21,9 +21,9 @@ PVT = load('PVT35min.txt');
 
 U_UT = load('UUT.txt');
 
-BlockLapses = load('BlockLapses.txt');
+BlockLapses = load('BlockLapsesPercent.txt');
 BlockMeanRT = load('BlockMeanRT.txt');
-BlockFalseStarts = load('BlockFalseStarts.txt');
+BlockFalseStarts = load('BlockFalseStartsPercent.txt');
 
 %% Create figure
 figure;
