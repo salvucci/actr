@@ -122,11 +122,11 @@ public class Values {
 		Vector<Double> vSorted = v;
 		Collections.sort(vSorted);
 		
-		int middle = v.size()/2;
-		if (v.size()%2 == 1) {
-			return v.get(middle);
+		int middle = vSorted.size()/2;
+		if (vSorted.size()%2 == 1) {
+			return vSorted.get(middle);
 		} else {
-			return (v.get(middle-1) + v.get(middle)) / 2.0;
+			return (vSorted.get(middle-1) + vSorted.get(middle)) / 2.0;
 		}
 	}
 	

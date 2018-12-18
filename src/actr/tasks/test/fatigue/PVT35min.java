@@ -214,6 +214,7 @@ public class PVT35min extends Task {
 		Values [][] blocksFalseStarts = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksLapses = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksMeanAlertResponses = new Values[numberOfSessions][numberOfBlocks];
+		Values [][] blocksMedianAlertResponses = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksFalseStartsProportion = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksLapsesProportion = new Values[numberOfSessions][numberOfBlocks];
 		Values [][][] blocksAlertProportion = new Values[numberOfSessions][numberOfBlocks][35];
@@ -223,6 +224,7 @@ public class PVT35min extends Task {
 				blocksFalseStarts[i][j] = new Values();
 				blocksLapses[i][j] = new Values();
 				blocksMeanAlertResponses[i][j] = new Values();
+				blocksMedianAlertResponses[i][j] = new Values();
 				blocksFalseStartsProportion[i][j] = new Values();
 				blocksLapsesProportion[i][j] = new Values();
 				for (int k = 0; k < 35; k++) {
@@ -251,6 +253,7 @@ public class PVT35min extends Task {
 					blocksFalseStarts[i][j].add(b.getNumberOfFalseAlerts());
 					blocksLapses[i][j].add(b.getNumberOfLapses());
 					blocksMeanAlertResponses[i][j].add(b.getMeanAlertReactionTimes());
+					blocksMedianAlertResponses[i][j].add(b.getMedianAlertReactionTimes());
 					blocksFalseStartsProportion[i][j].add(b.getProportionOfFalseAlert());
 					blocksLapsesProportion[i][j].add(b.getProportionOfLapses());
 					double blocksAP[] = b.getProportionAlertResponseDistribution();
@@ -401,7 +404,30 @@ public class PVT35min extends Task {
 				blockFalseStartsPercentSD.print("\n\n");
 			}
 			blockFalseStartsPercentSD.close();
-
+			
+			// the output file for all the data: RTMedian / % Lapses Mean and SD/ % FalseStarts Mean and SD
+			File blockFileTotalPercent = new File("./test/fatigue/pvt_35min/BlockTotalPercent.txt");
+			if (!blockFileTotalPercent.exists())
+				blockFileTotalPercent.createNewFile();
+			PrintStream blockPercent = new PrintStream(blockFileTotalPercent);
+			for (int i = 0; i < numberOfSessions; i++){
+				for (int j = 0; j < numberOfBlocks; j++){
+					blockPercent.print(j+1 
+							+ "\t" + blocksMedianAlertResponses[i][j].mean()
+							+ "\t" + blocksLapsesProportion[i][j].mean() * 100
+							+ "\t" + blocksLapsesProportion[i][j].stddev() * 100
+							+ "\t" + blocksLapsesProportion[i][j].CI_95percent() * 100
+							+ "\t" + blocksFalseStartsProportion[i][j].mean() * 100 
+							+ "\t" + blocksFalseStartsProportion[i][j].stddev() * 100
+							+ "\t" + blocksFalseStartsProportion[i][j].CI_95percent() * 100
+							+ "\n");
+					blockPercent.flush();
+				}
+				blockPercent.print("\n\n");
+			}
+			blockPercent.close();
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

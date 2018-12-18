@@ -224,6 +224,7 @@ public class PVT88hours extends Task {
 		Values[] totallProportionAlertRresponces = new Values[numberOfSessions];
 		Values[][] totallProportionAlertResponcesDis = new Values[numberOfSessions][35];
 		Values[] totallMeanAlertRresponces = new Values[numberOfSessions];
+		Values[] totallMedianAlertRresponces = new Values[numberOfSessions];
 		
 		// allocating memory to the vectors
 		for (int i = 0; i < numberOfSessions; i++) {
@@ -232,6 +233,7 @@ public class PVT88hours extends Task {
 			totallProportionSleepAtacks[i] = new Values();
 			totallProportionAlertRresponces[i] = new Values();
 			totallMeanAlertRresponces[i] = new Values();
+			totallMedianAlertRresponces[i] = new Values();
 			for (int j = 0; j < 35; j++) {
 				totallProportionAlertResponcesDis[i][j] = new Values();
 			}	
@@ -246,6 +248,7 @@ public class PVT88hours extends Task {
 				totallProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
 				totallProportionAlertRresponces[i].add(session.getProportionOfAlertResponses());
 				totallMeanAlertRresponces[i].add(session.getMeanAlertReactionTimes());
+				totallMedianAlertRresponces[i].add(session.getMedianAlertReactionTimes());
 				double [] proportionAlertDis = session.getProportionAlertResponseDistribution(); 
 				for (int j = 0; j < 35; j++) {
 					totallProportionAlertResponcesDis[i][j].add(proportionAlertDis[j]);
@@ -415,44 +418,73 @@ public class PVT88hours extends Task {
 			data.close();
 			
 			// Writing Numbers to the file based on sessions
-			File dataSessionFile = new File("./test/fatigue/pvt_88hour/dataSessions.csv");
+			File dataSessionFile = new File("./test/fatigue/pvt_88hour/dataSessions.txt");
 			if (!dataSessionFile.exists())
 				dataSessionFile.createNewFile();
 			PrintStream dataSession = new PrintStream(dataSessionFile);
 			
-			dataSession.print("AwakeTime" + ",");
+			dataSession.print("Time Awake" + "\t");
 			PVT88hours task = (PVT88hours) tasks[0];
 			for (int i = 0; i < numberOfSessions; i++) {
 				SessionPVT session = task.sessions.get(i);
-				dataSession.print(session.timeAwake + ",");
+				dataSession.print(session.timeAwake + "\t");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("FalseStarts" + ",");
+			dataSession.print("Lapses (P)" + "\t");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totallProportionFalseAlerts[i].mean() + ",");
+				dataSession.print(totallProportionLapses[i].mean() * 100 + "\t");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("MeanAlertResponces" + ",");
+			dataSession.print("Lapses (P) CI" + "\t");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totallMeanAlertRresponces[i].mean() + ",");
+				dataSession.print(totallProportionLapses[i].CI_95percent() * 100 + "\t");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("Lapses" + ",");
+			dataSession.print("FalseStarts (P)" + "\t");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totallProportionLapses[i].mean() + ",");
+				dataSession.print(totallProportionFalseAlerts[i].mean() * 100 + "\t");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("SleepAttacks" + ",");
+			dataSession.print("FalseStarts (P) CI" + "\t");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totallProportionSleepAtacks[i].mean() + ",");
+				dataSession.print(totallProportionFalseAlerts[i].CI_95percent() * 100 + "\t");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			
+			dataSession.print("Median RT" + "\t");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallMedianAlertRresponces[i].mean() + "\t");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("Median RT CI" + "\t");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallMedianAlertRresponces[i].CI_95percent() + "\t");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("SleepAttacks (P)" + "\t");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionSleepAtacks[i].mean() * 100 + "\t");
+			}
+			dataSession.print("\n");
+			dataSession.flush();
+			
+			dataSession.print("SleepAttacks (P) CI" + "\t");
+			for (int i = 0; i < numberOfSessions; i++) {
+				dataSession.print(totallProportionSleepAtacks[i].CI_95percent() * 100 + "\t");
 			}
 			dataSession.print("\n");
 			dataSession.flush();

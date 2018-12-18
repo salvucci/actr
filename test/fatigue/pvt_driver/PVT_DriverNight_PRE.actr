@@ -1,5 +1,12 @@
-(set-task "actr.tasks.test.fatigue.PVTdriver")
-(set-schedule (8.0 22.0)(32.0 39.0)(44.0 58.0)(68.0 82.0)(92.0 106.0)(116.0 130.0)(140.0 154.0))
+;;
+;; Driver PVT model : Night A
+;; 
+(set-task "actr.tasks.test.fatigue.PVTdriver_NightPRE")
+
+(set-schedule 
+    (8.0 22.0)(32.0 39.0)(44.0 58.0)(68.0 82.0)(92.0 106.0)(116.0 130.0)(140.0 154.0)
+    (159.0 166.0)(176.0 183.0)(188.0 202.0)(212.0 226.0)(236.0 250.0)(260.0 274.0)(284.0 298.0)
+)
 
 (add-dm
     (goal isa goal state wait)

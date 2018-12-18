@@ -89,6 +89,16 @@ public class SessionPVT {
 		return Alert.average();
 	}
 	
+	public double getMedianAlertReactionTimes() {
+		Values Alert = new Values();
+		for (int i = 0; i < reactionTimes.size(); i++) {
+			double r = reactionTimes.get(i);
+			if (r <= 500 && r >= 150)
+				Alert.add(r);
+		}
+		return Alert.median();
+	}
+	
 	public int[] getAlertResponseDistribution () {
 		int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
 		for (int i = 0; i < reactionTimes.size(); i++) {
@@ -160,6 +170,17 @@ public class SessionPVT {
 			}
 			return Alert.average();
 		}
+		
+		public double getMedianAlertReactionTimes() {
+			Values Alert = new Values();
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double r = blockReactionTimes.get(i);
+				if (r <= 500 && r >= 150)
+					Alert.add(r);
+			}
+			return Alert.median();
+		}
+		
 		public int[] getAlertResponseDistribution () {
 			int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
 			for (int i = 0; i < blockReactionTimes.size(); i++) {
