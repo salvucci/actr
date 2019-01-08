@@ -23,24 +23,9 @@ import actr.tasks.test.fatigue.SessionPVT.Block;
 
 
 public class PVTdriver_NightPRE extends Task {
-	private double PVTduration = 600.0;
-	private double [] timesOfPVT = {
-			//
-			45.0, 48.0, 51.0, 54.0, // day2
-			69.0, 72.0, 75.0, 78.0, // day3
-			93.0, 96.0, 99.0, 102.0, // day4
-			117.0, 120.0, 123.0, 126.0, // day5
-			141.0, 144.0, 147.0, 150.0, // day6
+	private double PVTduration = 0;
+	private ArrayList<Double> timesOfPVT;
 
-			189.0, 192.0, 195.0, 198.0, // day9
-			213.0, 216.0, 219.0, 222.0, // day10
-			237.0, 240.0, 243.0, 246.0, // day11
-			261.0, 264.0, 267.0, 270.0, // day12
-			285.0, 288.0, 291.0, 294.0 // day13
-	};
-	
-	
-	
 	private TaskLabel label;
 	private double lastTime = 0;
 	private String stimulus = "\u2588";
@@ -50,7 +35,7 @@ public class PVTdriver_NightPRE extends Task {
 	private double responseTime = 0;
 	private int sleepAttackIndex = 0; // the variable for handling sleep attacks
 	Random random;
-	
+
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
 	private SessionPVT currentSession;
@@ -73,8 +58,12 @@ public class PVTdriver_NightPRE extends Task {
 		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
 
-		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+		PVTduration = getModel().getFatigue().getTaskDuration();
+		timesOfPVT = getModel().getFatigue().getTaskSchdule();
+
+		getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
 		getModel().getFatigue().startFatigueSession();
+
 
 		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 		addUpdate(interStimulusInterval);
@@ -84,7 +73,7 @@ public class PVTdriver_NightPRE extends Task {
 	public void update(double time) {
 		currentSession.totalSessionTime = getModel().getTime() - currentSession.startTime;
 		currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
-		
+
 		if (currentSession.totalSessionTime <= PVTduration) {
 			label.setText(stimulus);
 			label.setVisible(true);
@@ -106,14 +95,16 @@ public class PVTdriver_NightPRE extends Task {
 						label.setVisible(false);
 						processDisplay();
 						stimulusVisibility = false;
-						currentSession.sleepAttacks++;
-						currentBlock.sleepAttacks++;
+						currentSession.reactionTimes.add(30000);
+						currentSession.timeOfReactionsFromStart.add(currentSession.totalSessionTime);
+						currentBlock.reactionTimes.add(30000);
+						currentBlock.timeOfReactionsFromStart.add(currentBlock.totalBlockTime);
 						// when sleep attack happens we add to the number of responses (NOT DOING IT FOR NOW)
 						// currentSession.numberOfResponses++; 
 						getModel().output("Sleep attack at session time  ==> " + (getModel().getTime() - currentSession.startTime)
 								+ " model time :" + getModel().getTime());
 						getModel().output("Stimulus index in the session ==> " + currentSession.stimulusIndex );
-						
+
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
 						fatigueResetPercentage(); // reseting the system
@@ -136,13 +127,13 @@ public class PVTdriver_NightPRE extends Task {
 		// Starting a new Session
 		else {
 			currentSession.blocks.add(currentBlock);
-			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValueforHour(timesOfPVT[sessionNumber]);
-			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT[sessionNumber]);
+			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValueforHour(timesOfPVT.get(sessionNumber));
+			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT.get(sessionNumber));
 			sessions.add(currentSession);
 			sessionNumber++;
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
 			// go to the next session or stop the model
-			if (sessionNumber < timesOfPVT.length) {
+			if (sessionNumber < timesOfPVT.size()) {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
@@ -152,9 +143,9 @@ public class PVTdriver_NightPRE extends Task {
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
 						currentBlock.startTime = getModel().getTime();
-						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+						getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
 						getModel().getFatigue().startFatigueSession();
-						
+
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
@@ -184,38 +175,44 @@ public class PVTdriver_NightPRE extends Task {
 
 	@Override
 	public void typeKey(char c) {
+		double currentSessionTime = getModel().getTime() - currentSession.startTime;
+		double currentBlockTime = getModel().getTime() - currentBlock.startTime;
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
-			
+
 			if (response != null) {
 				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
-				currentBlock.blockReactionTimes.add(responseTime);
+				currentSession.timeOfReactionsFromStart.add(currentSessionTime);
+				currentBlock.reactionTimes.add(responseTime);
+				currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
 			}
 
 			label.setVisible(false);
 			processDisplay();
-			
+
 			interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 			addUpdate(interStimulusInterval);
 			stimulusVisibility = false;
 		} else {   // False start situation
 			currentSession.reactionTimes.add(1);
-			currentBlock.blockReactionTimes.add(1);
+			currentSession.timeOfReactionsFromStart.add(currentSessionTime);
+			currentBlock.reactionTimes.add(1);
+			currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
 						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
 		}
 	}
-	
-//	@Override
-//	public int analysisIterations() {
-// 		return 100;
-//	}
+
+		@Override
+		public int analysisIterations() {
+	 		return 13;
+		}
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
@@ -259,7 +256,7 @@ public class PVTdriver_NightPRE extends Task {
 				totalProportionAlertRresponces[i].add(session.getProportionOfAlertResponses());
 				totalMeanAlertRresponces[i].add(session.getMeanAlertReactionTimes());
 				totalMedianAlertRresponces[i].add(session.getMedianAlertReactionTimes());
-				totalLSNRapx[i].add(session.getSessionLSNR_apx());
+				totalLSNRapx[i].add(session.getLSNR_apx());
 				double [] proportionAlertDis = session.getProportionAlertResponseDistribution(); 
 				for (int j = 0; j < 35; j++) {
 					totalProportionAlertResponcesDis[i][j].add(proportionAlertDis[j]);
@@ -297,8 +294,8 @@ public class PVTdriver_NightPRE extends Task {
 		getModel().output("\nAverage proportion of lapses in the time points \n" );
 		getModel().output("Day\t21:00\t00:00\t03:00\t06:00 " );
 		for (int i = 0; i < 5; i++) {	
-			getModel().output((i+1)+"\t"+totalProportionLapses[i*4].mean()+"\t"+totalProportionLapses[i*4+1].mean()+"\t"
-					+totalProportionLapses[i*4+2].mean()+"\t"+totalProportionLapses[i*4+3].mean());
+			getModel().output((i+1)+"\t"+df3.format(totalProportionLapses[i*4].mean())+"\t"+df3.format(totalProportionLapses[i*4+1].mean())+"\t"
+					+df3.format(totalProportionLapses[i*4+2].mean())+"\t"+df3.format(totalProportionLapses[i*4+3].mean()));
 		}	
 		getModel().output("\n*******************************************\n");
 
@@ -307,74 +304,74 @@ public class PVTdriver_NightPRE extends Task {
 		try {
 			
 			// Writing Numbers to the file based on sessions
-			File dataSessionFile = new File("./test/fatigue/pvt_driver/dataSessions.txt");
+			File dataSessionFile = new File("./test/fatigue/pvt_driver/DataSessions.csv");
 			if (!dataSessionFile.exists())
 				dataSessionFile.createNewFile();
 			PrintStream dataSession = new PrintStream(dataSessionFile);
 			
-			dataSession.print("Time Awake" + "\t");
+			dataSession.print("Time Awake" + ",");
 			PVTdriver_NightPRE task = (PVTdriver_NightPRE) tasks[0];
 			for (int i = 0; i < numberOfSessions; i++) {
 				SessionPVT session = task.sessions.get(i);
-				dataSession.print(session.timeAwake + "\t");
+				dataSession.print(session.timeAwake + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("Lapses (P)" + "\t");
+			dataSession.print("Lapses (P)" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalProportionLapses[i].mean() * 100 + "\t");
+				dataSession.print(totalProportionLapses[i].mean() * 100 + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("FalseStarts (P)" + "\t");
+			dataSession.print("FalseStarts (P)" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalProportionFalseAlerts[i].mean() * 100 + "\t");
+				dataSession.print(totalProportionFalseAlerts[i].mean() * 100 + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("Median Alert RT" + "\t");
+			dataSession.print("Median Alert RT" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalMedianAlertRresponces[i].mean() + "\t");
+				dataSession.print(totalMedianAlertRresponces[i].mean() + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("LSNR_apx" + "\t");
+			dataSession.print("LSNR_apx" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalLSNRapx[i].mean() + "\t");
+				dataSession.print(totalLSNRapx[i].mean() + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
 			dataSession.print("\n");
 			
-			dataSession.print("Lapses (P) SD" + "\t");
+			dataSession.print("Lapses (P) SD" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalProportionLapses[i].stddev() * 100 + "\t");
+				dataSession.print(totalProportionLapses[i].stddev() * 100 + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("FalseStarts (P) SD" + "\t");
+			dataSession.print("FalseStarts (P) SD" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalProportionFalseAlerts[i].stddev() * 100 + "\t");
+				dataSession.print(totalProportionFalseAlerts[i].stddev() * 100 + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("Median RT SD" + "\t");
+			dataSession.print("Median RT SD" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalMedianAlertRresponces[i].stddev() + "\t");
+				dataSession.print(totalMedianAlertRresponces[i].stddev() + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
 			
-			dataSession.print("LSNR_apx SD" + "\t");
+			dataSession.print("LSNR_apx SD" + ",");
 			for (int i = 0; i < numberOfSessions; i++) {
-				dataSession.print(totalLSNRapx[i].stddev() + "\t");
+				dataSession.print(totalLSNRapx[i].stddev() + ",");
 			}
 			dataSession.print("\n");
 			dataSession.flush();
@@ -383,6 +380,29 @@ public class PVTdriver_NightPRE extends Task {
 			
 			dataSession.close();
 			
+
+			// saving the raw times of lapses
+			File rawLapsesFile = new File("./test/fatigue/pvt_driver/RawLapsesNightPRE.csv");
+			if (!rawLapsesFile.exists())
+				rawLapsesFile.createNewFile();
+			PrintStream rawLapses = new PrintStream(rawLapsesFile);
+
+			rawLapses.println("session#,TimeInSession,RT");
+			
+			for (Task taskCast : tasks) {
+				PVTdriver_NightPRE taskLapses = (PVTdriver_NightPRE) taskCast;
+				for (int i = 0; i < numberOfSessions; i++) {
+					SessionPVT session = taskLapses.sessions.get(i);
+					for (int j = 0; j < session.reactionTimes.size(); j++) {
+						if (session.reactionTimes.get(j) > 500 && session.reactionTimes.get(j) < 30000){
+							rawLapses.println(i + "," + session.timeOfReactionsFromStart.get(j) + "," + session.reactionTimes.get(j));
+							rawLapses.flush();
+						}		
+					}
+				}
+			}
+			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

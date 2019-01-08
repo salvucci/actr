@@ -14,10 +14,8 @@ public class Fatigue extends Module {
 
 	private boolean fatigueEnabled = false; 	// Turns fatigue module off / on
 	private boolean runWithMicrolapses = true; 
-	private double fatigueStimulus = 1.0;  		/* Signals a reset to fp based on specified scalar.  
-										fp <- stimulus.  Resets decrements */
-	//double fatigueFPDec = 0.01440861; 	// Decrease in fp after each microlapse
-	private double fatigueFPDec = 0.99; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
+	
+	private double fatigueFPDec = 1; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
 	
 	private double fatigueFPOriginal = 0;
 	private double fatigueFP = 1.0;  			// "fatigue parameter" value scales utility calculations
@@ -25,7 +23,7 @@ public class Fatigue extends Module {
 	private double fatigueDAT = 0;
 
 	private double fatigueFDDec = 0.0;
-	private double fatigueFD = 0;
+	private double fatigueFD = 0;				// ??
 
 	private double fatigueFPBMC = 0; 			//Coefficient relating biomath value to fp
 	private double fatigueFPMC = 0; 			// Coefficient relating minute within session to fp
@@ -34,22 +32,25 @@ public class Fatigue extends Module {
 	private double fatigueUT0 = 2.0643395401332;//Constant ut offset
 	private double fatigueFDBMC = -0.02681;  	//Coefficient relating biomath value to fd
 	private double fatigueFDC = 0.95743;  		// Constant fd offset
-	private double fatigueFPPercent = 1; 		// The current percentage of fp after microlapses
-	private double fatigueFDPercent = 1;
 	private double fatigueHour = 0;   			/* Initiates a new session by providing the number of hours 
-										since the beginning of the sleep schedule */
-	double startTimeSC = 0;  			/* Records the time in second at the start of a session, 
-									    so proper within-session offsets can be calculated */
+													since the beginning of the sleep schedule */
+	private int numberOfConsecutiveMicroLapses = 1;
+	double startTimeSC = 0;  					/* Records the time in second at the start of a session, 
+									    			so proper within-session offsets can be calculated */
 
-	double fatigueP0 = 3.841432;  // the initial values of bioMath model
-	double fatigueU0 = 38.509212; // the initial values of bioMath model
-	double fatigueK0 = 0.019455;  // the initial values of bioMath model
+	double fatigueP0 = 3.841432;  				// the initial values of bioMath model
+	double fatigueU0 = 38.509212; 				// the initial values of bioMath model
+	double fatigueK0 = 0.019455;  				// the initial values of bioMath model
 
 	private ArrayList<Double> wake = new ArrayList<Double>();
 	private ArrayList<Double> asleep = new ArrayList<Double>();
 	private ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
 	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
 
+
+	private ArrayList<Double> TaskSchedule = new ArrayList<Double>();
+	private double TaskDuration = 0 ;
+	private String outputDIR = null ;
 
 	double cumulativeParameter = 0;
 
@@ -65,6 +66,16 @@ public class Fatigue extends Module {
 	void addSleep(double time) {
 		asleep.add(time);
 	}
+	
+	void addTaskSchedule(double time) {
+		TaskSchedule.add(time);
+	}
+	
+	public ArrayList<Double> getTaskSchdule(){
+		return TaskSchedule;
+	}
+	
+	
 
 	void setSleepSchedule() {
 		if (!wake.isEmpty() && !asleep.isEmpty())  // check if the the model has setup the set-schedule function
@@ -99,13 +110,15 @@ public class Fatigue extends Module {
 	 *  Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 	 */
 	void decrementFPFD() {
-		//fatigueFPPercent = Math.max(.000001, fatigueFPPercent - fatigueFPDec); //OLD
-		//fatigueFDPercent = Math.max(.000001, fatigueFDPercent - fatigueFDDec); //OLD
-        setFatigueFPPercent(Math.max(.000001, getFatigueFPPercent() * getFatigueFPDec())); 
-		setFatigueFDPercent(Math.max(.000001, getFatigueFDPercent() * getFatigueFDDec()));
+//      setFatigueFPPercent(Math.max(.000001, getFatigueFPPercent() * getFatigueFPDec())); 
+//		setFatigueFDPercent(Math.max(.000001, getFatigueFDPercent() * getFatigueFDDec()));
+	
+//		setFatigueFPPercent(Math.max(.000001, getFatigueFPPercent() * Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses)) ); 
+//		setFatigueFDPercent(Math.max(.000001, getFatigueFDPercent() * Math.pow(getFatigueFDDec() , numberOfConsecutiveMicroLapses)) );
+	
+		numberOfConsecutiveMicroLapses++;  // adding one to the number of consecutive Microlapses
 	}
-
-
+	
 	/**
 	 * @return the number of minutes that have passed from the beginning of the task
 	 */
@@ -121,6 +134,14 @@ public class Fatigue extends Module {
 		}
 	}
 	
+	
+	public double getFatigueFPPercent() {
+		return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 and 2
+		//System.out.println(numberOfConsecutiveMicroLapses + " " +Math.max(.000001, (-2 / (1+Math.pow(Math.E,-fatigueFPDec *numberOfConsecutiveMicroLapses))) + 2 ));
+		//return Math.max(.000001,  (-2 / (1+Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses))) + 2 ) ;  // model 3 Sigmoid Function
+		
+	}
+
 	public double getBioMathModelValueforHour(double hour){
 		if (pvalues.isEmpty())
 			return 0;
@@ -160,35 +181,9 @@ public class Fatigue extends Module {
 	 *  NEW: This method is called at every production except wait. 
 	 */
 	public void fatigueResetPercentages(){
-		setFatigueFPPercent(getFatigueStimulus());
-		setFatigueFDPercent(getFatigueStimulus());
-	}
-
-	public void resetFatigueModule() {
-
-		fatigueFP = getFatigueStimulus() * fatigueFPOriginal;
-		fatigueUT = model.getProcedural().utilityThreshold;
-
-		// fatigue_pending = nil;
-		// fatigue_last_one_empty = nil;
-		//
-		// fatigue_fp_percent = 1;
-		// fatigue_fp = 1;
-		// fatigue_fp_dec = 0.01440861;
-		// fatigue_fd_percent = 1;
-		// fatigue_fd = 0;
-		// fatigue_stimulus =1;
-		// fatigue_fpbmc = 0;
-		// fatigue_fpmc = 0;
-		// fatigue_utbmc = 0;
-		// fatigue_utmc = 0;
-		// fatigue_ut0 = 2.0643395401332;
-		// fatigue_fdbmc =-0.02681;
-		// fatigue_fdc =0.95743;
-		// fatigue_hour =0;
-		// fatigue_start_time = 0;
-		// fatigue_ut= (car (no-output (sgp :ut))))
-		// fatigue_dat =(car (no-output (sgp :dat))));
+		numberOfConsecutiveMicroLapses = 1 ; // reseting the number of consecutive Microlapses back to 1
+//		setFatigueFPPercent(1.0);
+//		setFatigueFDPercent(1.0);
 	}
 
 	public void setFatigueFP(double fp) {
@@ -225,6 +220,37 @@ public class Fatigue extends Module {
 		return timeAwake;
 	}
 
+	public double getFatigueFDPercent() {
+		return Math.max(.000001, Math.pow(getFatigueFDDec() , numberOfConsecutiveMicroLapses) );  
+	}
+
+	public void resetFatigueModule() {
+
+		fatigueFP =  fatigueFPOriginal;
+		fatigueUT = model.getProcedural().utilityThreshold;
+
+		// fatigue_pending = nil;
+		// fatigue_last_one_empty = nil;
+		//
+		// fatigue_fp_percent = 1;
+		// fatigue_fp = 1;
+		// fatigue_fp_dec = 0.01440861;
+		// fatigue_fd_percent = 1;
+		// fatigue_fd = 0;
+		// fatigue_stimulus =1;
+		// fatigue_fpbmc = 0;
+		// fatigue_fpmc = 0;
+		// fatigue_utbmc = 0;
+		// fatigue_utmc = 0;
+		// fatigue_ut0 = 2.0643395401332;
+		// fatigue_fdbmc =-0.02681;
+		// fatigue_fdc =0.95743;
+		// fatigue_hour =0;
+		// fatigue_start_time = 0;
+		// fatigue_ut= (car (no-output (sgp :ut))))
+		// fatigue_dat =(car (no-output (sgp :dat))));
+	}
+	
 	public boolean isFatigueEnabled() {
 		return fatigueEnabled;
 	}
@@ -257,14 +283,7 @@ public class Fatigue extends Module {
 		this.fatigueUT0 = fatigueUT0;
 	}
 
-	public double getFatigueStimulus() {
-		return fatigueStimulus;
-	}
-
-	public void setFatigueStimulus(double fatigueStimulus) {
-		this.fatigueStimulus = fatigueStimulus;
-	}
-
+	
 	public double getFatigueFPDec() {
 		//return - Math.pow(fatigueFPDec , computeBioMathValueForHour()) + 2;
 		return fatigueFPDec;
@@ -338,19 +357,19 @@ public class Fatigue extends Module {
 		this.fatigueFDC = fatigueFDC;
 	}
 
-	public double getFatigueFPPercent() {
-		return fatigueFPPercent;
+	public double getTaskDuration() {
+		return TaskDuration;
 	}
 
-	public void setFatigueFPPercent(double fatigueFPPercent) {
-		this.fatigueFPPercent = fatigueFPPercent;
+	public void setTaskDuration(double task_Duration) {
+		TaskDuration = task_Duration;
+	}
+	public String getOutputDIR() {
+		return outputDIR;
 	}
 
-	public double getFatigueFDPercent() {
-		return fatigueFDPercent;
+	public void setOutputDIR(String outputDIR) {
+		this.outputDIR = outputDIR;
 	}
-
-	public void setFatigueFDPercent(double fatigueFDPercent) {
-		this.fatigueFDPercent = fatigueFDPercent;
-	}
+	
 }

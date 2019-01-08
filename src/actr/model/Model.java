@@ -695,8 +695,7 @@ public class Model {
 		else if (parameter.equals(":fatigue")) {
 			fatigue.setFatigueEnabled((!value.equals("nil")));
 			procedural.utilityUseThreshold = !value.equals("nil");
-		} else if (parameter.equals(":stimulus"))
-			fatigue.setFatigueStimulus(Double.valueOf(value));
+		}
 		else if (parameter.equals(":fp-dec"))
 			fatigue.setFatigueFPDec(Double.valueOf(value));
 		else if (parameter.equals(":fp"))
@@ -721,10 +720,6 @@ public class Model {
 			fatigue.setFatigueFDC(Double.valueOf(value));
 		else if (parameter.equals(":hour"))
 			fatigue.setFatigueHour(Double.valueOf(value));
-		else if (parameter.equals(":fp-percent"))
-			fatigue.setFatigueFPPercent(Double.valueOf(value));
-		else if (parameter.equals(":fd-percent"))
-			fatigue.setFatigueFDPercent(Double.valueOf(value));
 		else if (parameter.equals(":hour"))
 			fatigue.setFatigueHour(Double.valueOf(value));
 		else if (parameter.equals(":microlapses"))
@@ -851,7 +846,7 @@ public class Model {
 			frame.clearOutput();
 	}
 
-	void outputError(String s) {
+	public void outputError(String s) {
 		output("Error: " + s);
 	}
 

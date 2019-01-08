@@ -21,13 +21,9 @@ import actr.tasks.test.fatigue.SessionPVT.Block;
  * @author Ehsan Khosroshahi
  */
 
-
-
 public class PVT35min extends Task {
-	private double PVTduration = 2100.0;
-	private double[] timesOfPVT = {
-			24.0 + 10    // setting the time of the PVT at noon in the 2nd day
-	};
+	private double PVTduration = 0;
+	private ArrayList<Double> timesOfPVT;
 	
 	private TaskLabel label;
 	private double lastTime = 0;
@@ -36,14 +32,14 @@ public class PVT35min extends Task {
 	private Boolean stimulusVisibility = false;
 	private String response = null;
 	private double responseTime = 0;
-	private int sleepAttackIndex = 0;// the variable for handling sleep attacks
+	private int sleepAttackIndex = 0; // the variable for handling sleep attacks
 	Random random;
-
+	
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
 	private SessionPVT currentSession;
 	private Vector<SessionPVT> sessions = new Vector<SessionPVT>();
-	
+
 	public PVT35min() {
 		super();
 		label = new TaskLabel("", 200, 150, 40, 20);
@@ -60,10 +56,14 @@ public class PVT35min extends Task {
 		stimulusVisibility = false;
 		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
-
-		getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+		
+		PVTduration = getModel().getFatigue().getTaskDuration();
+		timesOfPVT = getModel().getFatigue().getTaskSchdule();
+		
+		getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
 		getModel().getFatigue().startFatigueSession();
-
+		
+		
 		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 		addUpdate(interStimulusInterval);
 	}
@@ -94,8 +94,10 @@ public class PVT35min extends Task {
 						label.setVisible(false);
 						processDisplay();
 						stimulusVisibility = false;
-						currentSession.sleepAttacks++;
-						currentBlock.sleepAttacks++;
+						currentSession.reactionTimes.add(30000);
+						currentSession.timeOfReactionsFromStart.add(currentSession.totalSessionTime);
+						currentBlock.reactionTimes.add(30000);
+						currentBlock.timeOfReactionsFromStart.add(currentBlock.totalBlockTime);
 						// when sleep attack happens we add to the number of responses (NOT DOING IT FOR NOW)
 						// currentSession.numberOfResponses++; 
 						getModel().output("Sleep attack at session time  ==> " + (getModel().getTime() - currentSession.startTime)
@@ -124,11 +126,13 @@ public class PVT35min extends Task {
 		// Starting a new Session
 		else {
 			currentSession.blocks.add(currentBlock);
+			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValueforHour(timesOfPVT.get(sessionNumber));
+			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT.get(sessionNumber));
 			sessions.add(currentSession);
 			sessionNumber++;
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
 			// go to the next session or stop the model
-			if (sessionNumber < timesOfPVT.length) {
+			if (sessionNumber < timesOfPVT.size()) {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
@@ -138,7 +142,7 @@ public class PVT35min extends Task {
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
 						currentBlock.startTime = getModel().getTime();
-						getModel().getFatigue().setFatigueHour(timesOfPVT[sessionNumber]);
+						getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
 						getModel().getFatigue().startFatigueSession();
 						
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
@@ -170,6 +174,8 @@ public class PVT35min extends Task {
 
 	@Override
 	public void typeKey(char c) {
+		double currentSessionTime = getModel().getTime() - currentSession.startTime;
+		double currentBlockTime = getModel().getTime() - currentBlock.startTime;
 		if (stimulusVisibility == true) {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
@@ -180,7 +186,9 @@ public class PVT35min extends Task {
 				currentBlock.numberOfResponses++;
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
-				currentBlock.blockReactionTimes.add(responseTime);
+				currentSession.timeOfReactionsFromStart.add(currentSessionTime);
+				currentBlock.reactionTimes.add(responseTime);
+				currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
 			}
 
 			label.setVisible(false);
@@ -191,17 +199,19 @@ public class PVT35min extends Task {
 			stimulusVisibility = false;
 		} else {   // False start situation
 			currentSession.reactionTimes.add(1);
-			currentBlock.blockReactionTimes.add(1);
+			currentSession.timeOfReactionsFromStart.add(currentSessionTime);
+			currentBlock.reactionTimes.add(1);
+			currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
 						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
 		}
 	}
-
-	@Override
-	public int analysisIterations() {
- 		return 100;
-	}
+	
+//	@Override
+//	public int analysisIterations() {
+// 		return 100;
+//	}
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
@@ -217,7 +227,7 @@ public class PVT35min extends Task {
 		Values [][] blocksMedianAlertResponses = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksFalseStartsProportion = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksLapsesProportion = new Values[numberOfSessions][numberOfBlocks];
-		Values [][][] blocksAlertProportion = new Values[numberOfSessions][numberOfBlocks][35];
+		Values [][][] blocksAlertDistributionProportion = new Values[numberOfSessions][numberOfBlocks][35];
 		
 		for (int i = 0; i < numberOfSessions; i++) {
 			for (int j = 0; j < numberOfBlocks; j++) {
@@ -228,7 +238,7 @@ public class PVT35min extends Task {
 				blocksFalseStartsProportion[i][j] = new Values();
 				blocksLapsesProportion[i][j] = new Values();
 				for (int k = 0; k < 35; k++) {
-					blocksAlertProportion[i][j][k] = new Values();
+					blocksAlertDistributionProportion[i][j][k] = new Values();
 				}
 			}
 		}
@@ -244,7 +254,7 @@ public class PVT35min extends Task {
 				getModel().outputInLine("\n");
 				getModel().output("False Start in Session   : " + s.getNumberOfFalseAlerts());
 				getModel().output("Lapses in Session        : " + s.getNumberOfLapses());
-				getModel().output("Sleep Attacks in Session : " + s.sleepAttacks);
+				getModel().output("Sleep Attacks in Session : " + s.getNumberOfSleepAttacks());
 				getModel().output("total Session time       : " + s.totalSessionTime);
 				getModel().output("–––––––––––––––––––––––––––––––––––\n");
 				getModel().output("******** Blocks:");
@@ -258,65 +268,93 @@ public class PVT35min extends Task {
 					blocksLapsesProportion[i][j].add(b.getProportionOfLapses());
 					double blocksAP[] = b.getProportionAlertResponseDistribution();
 					for (int k = 0; k < 35; k++) {
-						blocksAlertProportion[i][j][k].add(blocksAP[k]);
+						blocksAlertDistributionProportion[i][j][k].add(blocksAP[k]);
 					}
 					getModel().output("");
 					getModel().output("**** Block number : " + j);
-					for (int k = 0; k < b.blockReactionTimes.size(); k++) {
-						getModel().outputInLine(df.format(b.blockReactionTimes.get(k)) + ",");
+					for (int k = 0; k < b.reactionTimes.size(); k++) {
+						getModel().outputInLine(df.format(b.reactionTimes.get(k)) + ",");
 					}
 					getModel().outputInLine("\n");
 
 					getModel().output("False Start in Block   : " + b.getNumberOfFalseAlerts());
 					getModel().output("Lapses in Block        : " + b.getNumberOfLapses());
-					getModel().output("Sleep Attacks in Block   : " + b.sleepAttacks);
+					getModel().output("Sleep Attacks in Block   : " + b.getNumberOfSleepAttacks());
 					getModel().output("total Session time       : " + b.totalBlockTime);
 					getModel().output("Alert Proportions        : ");
 					for (int k = 0; k < 35; k++)
 						getModel().outputInLine(df.format(blocksAP[k]) + " ");
 					getModel().outputInLine("\n");
 				}
-				getModel().output("\n**********************************************\n");
+								getModel().output("\n**********************************************\n");
 			}
-			getModel().output("\n################################################\n");
+						getModel().output("\n################################################\n");
 		}
 
 
-		//		getModel().output("******* Proportion of Responses **********\n");
-		//		getModel().output("    FS  " + " ---------------------------    Alert Responses    --------------------------- "
-		//				+ " Alert Responses "
-		//				+ " ---------------------------    Alert Responses    ---------------------------- " + "L ");
-		//		for (int i = 0; i < 7; i++) {
-		//			double[] AlertResponsesProportion = new double[35];
-		//			for (int j = 0; j < 35; j++)
-		//				AlertResponsesProportion[j] = AlertResponses[i][j] / Responses[i];
-		//			getModel().output("B" + (i + 1) + "|" + String.format("%.2f", FalseStarts[i] / Responses[i]) + " "
-		//					+ Utilities.toString(AlertResponsesProportion) + " "
-		//					+ String.format("%.2f", Lapses[i] / Responses[i]));
-		//
-		//			getModel().output("\n-------------------------------------------------------\n");
-		//		}
-		//
-		
+
+		for (int i = 0; i < numberOfSessions; i++){
+			getModel().output("******* Distribution of Response proportions **********\n");
+			getModel().output("    FS  " + " ---------------------------    Alert Responses    --------------------------- "
+					+ " Alert Responses "
+					+ " ---------------------------    Alert Responses    ---------------------------- " + "L ");
+			for (int j = 0; j < numberOfBlocks; j++) {
+				double[] AlertResponsesProportion = new double[35];
+				for (int k = 0; k < 35; k++)
+					AlertResponsesProportion[k] = blocksAlertDistributionProportion[i][j][k].mean();
+				
+				getModel().output("B" + (j + 1) + "|" + String.format("%.2f", blocksFalseStartsProportion[i][j].mean()) + " "
+						+ Utilities.toString(AlertResponsesProportion) + " "
+						+ String.format("%.2f", blocksLapsesProportion[i][j].mean()));
+			}
+			getModel().output("\n-------------------------------------------------------\n");
+		}
+
 		// writing the numbers to file
 		try {
 
-			File PVT35min = new File("./test/fatigue/pvt_35min/PVT35min.txt");
-			if (!PVT35min.exists())
-				PVT35min.createNewFile();
-			PrintStream PVTfile = new PrintStream(PVT35min);
+			File PVT35minDitribution = new File("./test/fatigue/pvt_35min/PVT35minDistribution.csv");
+			if (!PVT35minDitribution.exists())
+				PVT35minDitribution.createNewFile();
+			PrintStream PVTfile = new PrintStream(PVT35minDitribution);
 			for (int i = 0; i < numberOfSessions; i++) {
+				PVTfile.println("Block#,FA,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,"
+						+ "310,320,330,340,350,360,370,380,390,400,410,420,430,440,450,460,470,480,490,Lapses,SA");
 				for (int j = 0; j < numberOfBlocks; j++) {
-					PVTfile.print(blocksFalseStartsProportion[i][j].average() + "\t");
+					PVTfile.print("Block" + (j+1) + "," + blocksFalseStartsProportion[i][j].average() + ",");
 					for (int k = 0; k < 35; k++)
-						PVTfile.print(blocksAlertProportion[i][j][k].average() + "\t");
-					PVTfile.print(blocksLapsesProportion[i][j].average() + "\n");	
+						PVTfile.print(blocksAlertDistributionProportion[i][j][k].average() + ",");
+					PVTfile.print(blocksLapsesProportion[i][j].average() + "\n");
+					
 				}
 				PVTfile.print("\n\n");	
 			}
 			PVTfile.close();
-			
-			
+
+			// the output file for all the data: RTMedian / % Lapses Mean and SD/ % FalseStarts Mean and SD
+			File blockFileTotalPercent = new File("./test/fatigue/pvt_35min/BlockPercent.csv");
+			if (!blockFileTotalPercent.exists())
+				blockFileTotalPercent.createNewFile();
+			PrintStream blockPercent = new PrintStream(blockFileTotalPercent);
+			for (int i = 0; i < numberOfSessions; i++){
+				blockPercent.println("Block#,Alert RT Medain,% L Mean,% L SD,95% CI, % FS Mean,% FS SD,% FS 95% CI");
+				for (int j = 0; j < numberOfBlocks; j++){
+					blockPercent.println("Block" + (j+1) 
+							+ "," + blocksMedianAlertResponses[i][j].mean()
+							+ "," + blocksLapsesProportion[i][j].mean() * 100
+							+ "," + blocksLapsesProportion[i][j].stddev() * 100
+							+ "," + blocksLapsesProportion[i][j].CI_95percent() * 100
+							+ "," + blocksFalseStartsProportion[i][j].mean() * 100 
+							+ "," + blocksFalseStartsProportion[i][j].stddev() * 100
+							+ "," + blocksFalseStartsProportion[i][j].CI_95percent() * 100
+							);
+					blockPercent.flush();
+				}
+				blockPercent.print("\n\n");
+			}
+			blockPercent.close();
+
+
 			// Writing the stream of reaction times to a text file for getting CDF
 			File blockFile = new File("./test/fatigue/pvt_35min/BlockStream.txt");
 			if (!blockFile.exists())
@@ -326,7 +364,7 @@ public class PVT35min extends Task {
 				for (int j = 0; j < numberOfBlocks; j++){
 					for (Task taskcast : tasks){
 						PVT35min task = (PVT35min) taskcast;
-						Values RT = task.sessions.get(i).blocks.elementAt(j).blockReactionTimes;
+						Values RT = task.sessions.get(i).blocks.elementAt(j).reactionTimes;
 						for (int k = 0; k < RT.size(); k++) {
 							blockStream.print((int)(RT.get(k)) + "\t");
 						}
@@ -405,48 +443,12 @@ public class PVT35min extends Task {
 			}
 			blockFalseStartsPercentSD.close();
 			
-			// the output file for all the data: RTMedian / % Lapses Mean and SD/ % FalseStarts Mean and SD
-			File blockFileTotalPercent = new File("./test/fatigue/pvt_35min/BlockTotalPercent.txt");
-			if (!blockFileTotalPercent.exists())
-				blockFileTotalPercent.createNewFile();
-			PrintStream blockPercent = new PrintStream(blockFileTotalPercent);
-			for (int i = 0; i < numberOfSessions; i++){
-				for (int j = 0; j < numberOfBlocks; j++){
-					blockPercent.print(j+1 
-							+ "\t" + blocksMedianAlertResponses[i][j].mean()
-							+ "\t" + blocksLapsesProportion[i][j].mean() * 100
-							+ "\t" + blocksLapsesProportion[i][j].stddev() * 100
-							+ "\t" + blocksLapsesProportion[i][j].CI_95percent() * 100
-							+ "\t" + blocksFalseStartsProportion[i][j].mean() * 100 
-							+ "\t" + blocksFalseStartsProportion[i][j].stddev() * 100
-							+ "\t" + blocksFalseStartsProportion[i][j].CI_95percent() * 100
-							+ "\n");
-					blockPercent.flush();
-				}
-				blockPercent.print("\n\n");
-			}
-			blockPercent.close();
+			
 			
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		//		for (int i = 0; i < runIterations; i++) {
-//			double responses = 0, responseTime = 0;
-//			responses = task.sessions.elementAt(i).responses;
-//			responseTime = task.sessions.elementAt(i).responseTotalTime;
-//			modelTimes[i] = (responses == 0) ? 0 : (responseTime / responses);
-//		}
-//
-//		if (output) {
-//			getModel().output("\n=========              Mean Reaction Times            ===========\n");
-//
-//			for (int i = 0; i < runIterations; i++) {
-//				getModel().output("Session " + i + "==>" + modelTimes[i]);
-//			}
-//
-//		}		
 		
 		Result result = new Result();
 		// result.add ("PVT", modelTimes, humanTimes);

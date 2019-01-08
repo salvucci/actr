@@ -1,5 +1,24 @@
-(set-task "actr.tasks.test.fatigue.PVT88hours")
-(set-schedule (7.5 23.5)(31.5 47.5)(55.5 143.5)(151.5 167.5))
+;;;;;
+;;Model of PVT test on time on task
+;;
+;;Paper: Functional Equivalence of sleep loss and time on task effects in sustained attention
+;;
+;;Bella Z. Vaksler, Glenn Gunzelmann, Air force research lab
+;;
+;;@author Ehsan Khosroshahi
+;;;;;
+
+(set-task "actr.tasks.test.fatigue.PVT")
+(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 71.5)(79.5 94.5))
+
+(set-task-schedule 
+    ;; 1 sessions in total at 12pm
+    36  ;; 24 +12
+)
+
+(set-task-duration 2100.0)
+
+(set-output-dir "./test/fatigue/pvt_35min")
 
 (add-dm
     (goal isa goal state wait)
@@ -19,7 +38,7 @@
     :utbmc .012  
     :utmc -.012
     
-    :fp-dec .999 ;;1.0002
+    :fp-dec 0.99
     
     :egs .25
     ;:cst t
@@ -28,7 +47,7 @@
     :randomize-time t
     :vpft t
     
-    :max-prep-time-diff 10.0
+    :max-prep-time-diff 10.0  
 )
 
 (goal-focus goal)
@@ -42,7 +61,7 @@
     ?visual-location>
         buffer                empty
 ==>
-        ; !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-reset-percentage)
 )
 ;(spp :u 1)
 
@@ -102,5 +121,4 @@
         state wait
 )
 (spp :u 0)
-
 

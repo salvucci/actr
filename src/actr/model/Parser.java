@@ -75,8 +75,18 @@ class Parser {
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-					// For the sleep schedule in Fatigue model
-				} else if (t.getToken().equals("set-schedule")) {
+				}else if (t.getToken().equals("set-output-dir")) {
+					t.advance();
+					String output = t.getToken();
+					output = output.substring(1, output.length() - 1);
+					if (!new File(output).exists()) // checking to see if the output directory exists 
+						model.recordError(t);
+					model.getFatigue().setOutputDIR(output);
+					t.advance();
+					if (!t.getToken().equals(")"))
+						model.recordError(t);
+					t.advance(); 
+				}else if (t.getToken().equals("set-sleep-schedule")) { // For the sleep schedule in Fatigue model
 					t.advance();
 					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
 						parseSleepSchedule(model);
@@ -84,8 +94,28 @@ class Parser {
 					if (!t.getToken().equals(")"))
 						model.recordError(t);
 					t.advance();
-					//model.getFatigue().setSleepSchedule();
+				} else if (t.getToken().equals("set-task-schedule")) { // For the PVT schedule in Fatigue model
+					t.advance();
+					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+						parseTaskSchedule(model);
+					}
+					if (!t.getToken().equals(")"))
+						model.recordError(t);
+					t.advance();
+				}else if (t.getToken().equals("set-task-duration")) { // For the PVT duration in Fatigue model
+					t.advance();
+					if (t.hasMoreTokens() && !t.getToken().equals(")")) {
+						if (!Utilities.isNumericPos(t.getToken()))
+							model.recordError(t);
+						double TaskDuration = Double.valueOf(t.getToken());
+						model.getFatigue().setTaskDuration(TaskDuration);
+						t.advance();
+					}
+					if (!t.getToken().equals(")"))
+						model.recordError(t);
+					t.advance();
 				}
+				
 
 				else if (t.getToken().equals("set-parameter")) {
 					t.advance();
@@ -503,6 +533,14 @@ class Parser {
 			model.recordError(t);
 		t.advance();
 
+	}
+	
+	void parseTaskSchedule(Model model) throws Exception {
+		if (!Utilities.isNumericPos(t.getToken()))
+			model.recordError(t);
+		double PVTtime = Double.valueOf(t.getToken());
+		model.getFatigue().addTaskSchedule(PVTtime);
+		t.advance();
 	}
 
 	static Chunk parseNewChunk(Model model, Symbol name, String slots) {
