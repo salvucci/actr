@@ -698,6 +698,8 @@ public class Model {
 		}
 		else if (parameter.equals(":fp-dec"))
 			fatigue.setFatigueFPDec(Double.valueOf(value));
+		else if (parameter.equals(":fp-dec-c"))
+			fatigue.setFatigueFPDecC(Double.valueOf(value));
 		else if (parameter.equals(":fp"))
 			fatigue.setFatigueFP(Double.valueOf(value));
 		else if (parameter.equals(":fd-dec"))

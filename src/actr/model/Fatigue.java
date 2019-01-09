@@ -16,7 +16,8 @@ public class Fatigue extends Module {
 	private boolean runWithMicrolapses = true; 
 	
 	private double fatigueFPDec = 1; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
-	
+	private double fatigueFPDecC = 1; 	// FPDec constant
+
 	private double fatigueFPOriginal = 0;
 	private double fatigueFP = 1.0;  			// "fatigue parameter" value scales utility calculations
 	private double fatigueUT = 0;  				//Utility threshold (from utilty module)
@@ -136,10 +137,10 @@ public class Fatigue extends Module {
 	
 	
 	public double getFatigueFPPercent() {
-		return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 and 2
+		//return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 and 2
 		//System.out.println(numberOfConsecutiveMicroLapses + " " +Math.max(.000001, (-2 / (1+Math.pow(Math.E,-fatigueFPDec *numberOfConsecutiveMicroLapses))) + 2 ));
-		//return Math.max(.000001,  (-2 / (1+Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses))) + 2 ) ;  // model 3 Sigmoid Function
-		
+		//return Math.max(.000001,  (-1 / ( 1 + Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses + fatigueFPDecC) ) ) + 1 ) ;  // model 3 Sigmoid Function
+		return Math.max(.000001,  Math.pow (1 + numberOfConsecutiveMicroLapses , fatigueFPDec ) ) ;  // model 4 :reverse exponential function
 	}
 
 	public double getBioMathModelValueforHour(double hour){
@@ -370,6 +371,10 @@ public class Fatigue extends Module {
 
 	public void setOutputDIR(String outputDIR) {
 		this.outputDIR = outputDIR;
+	}
+	
+	public void setFatigueFPDecC(double fatigueFPDecC) {
+		this.fatigueFPDecC = fatigueFPDecC;
 	}
 	
 }

@@ -52,7 +52,8 @@
     :utbmc .012  
     :utmc -.012
     
-    :fp-dec 0.03
+    :fp-dec 0.2
+    :fp-dec-c 5
     
     :egs .25
     ;:cst t
