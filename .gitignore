@@ -1,5 +1,5 @@
 /bin/
-test/fatigue/pvt/*.txt
-test/fatigue/pvt/*.csv
+test/fatigue/*/*.txt
+test/fatigue/*/*.csv
 test/fatigue/pvt/*/*.txt
 test/fatigue/pvt/*/*.csv
