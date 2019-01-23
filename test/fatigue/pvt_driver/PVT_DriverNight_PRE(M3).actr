@@ -47,13 +47,13 @@
     
     ;;:microlapses nil
     :fpbmc .02
-    :fpmc -.06
+    :fpmc -.065
     
     :utbmc .012  
     :utmc -.01
     
-    :fp-dec 0.99
-    :fp-dec-c 0.02
+    ;; :fp-dec 0.99
+    :fp-dec-c 0.0007
     
     :egs .25
     ;:cst t

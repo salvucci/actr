@@ -107,6 +107,7 @@ public class PVT extends Task {
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 						//getModel().getBuffers().get(Symbol.get("visual-location")).set(Symbol.get("buffer"),Symbol.get("empty"));
 						//getModel().getBuffers().get(Symbol.get("visual")).set(Symbol.get("buffer"),Symbol.get("empty"));
+						getModel().stop();
 					}
 					repaint();
 				}
@@ -147,6 +148,12 @@ public class PVT extends Task {
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+//						getModel().getBuffers().get(Symbol.get("visloc-state")).set(Symbol.get("state"),Symbol.get("fr"));
+//						getModel().getBuffers().get(Symbol.get("visloc-state")).set(Symbol.get("buffer"),Symbol.get("empty"));
+//						getModel().getBuffers().get(Symbol.get("visloc-state")).set(Symbol.get("isa"),Symbol.get("buffer-state"));
+//						getModel().getBuffers().clear(Symbol.visual); // clearing the buffer
+						getModel().stop();
+						//getModel().getBuffers().clear(Symbol.get("visual-location"));
 					}
 				});
 			} else {
@@ -221,6 +228,7 @@ public class PVT extends Task {
 
 		Values[] ProportionLapses = new Values[numberOfSessions];
 		Values[] ProportionFalseStarts = new Values[numberOfSessions];
+		Values[] ProportionAlertRT = new Values[numberOfSessions];
 		Values[] MedianAlertResponses = new Values[numberOfSessions];
 		Values[] LSNRapx = new Values[numberOfSessions];
 		Values[] ProportionSleepAtacks = new Values[numberOfSessions];
@@ -230,6 +238,7 @@ public class PVT extends Task {
 		for (int i = 0; i < numberOfSessions; i++) {
 			ProportionLapses[i] = new Values();
 			ProportionFalseStarts[i] = new Values();
+			ProportionAlertRT[i] = new Values();
 			MedianAlertResponses[i] = new Values();
 			ProportionSleepAtacks[i] = new Values();
 			LSNRapx[i] = new Values();
@@ -266,6 +275,7 @@ public class PVT extends Task {
 				SessionPVT session = task.sessions.get(i);
 				ProportionLapses[i].add(session.getProportionOfLapses());
 				ProportionFalseStarts[i].add(session.getProportionOfFalseAlert());
+				ProportionAlertRT[i].add(session.getProportionOfAlertResponses());
 				MedianAlertResponses[i].add(session.getMedianAlertReactionTimes());
 				LSNRapx[i].add(session.getLSNR_apx());
 				ProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
@@ -317,7 +327,19 @@ public class PVT extends Task {
 			getModel().outputInLine(df2.format(ProportionFalseStarts[i].mean() * 100) + "\t");
 		}
 		getModel().outputInLine("\n");
+		
+		getModel().outputInLine("Alert RT %      " + "\t");
+		for (int i = 0; i < numberOfSessions; i++) {
+			getModel().outputInLine(df2.format(ProportionAlertRT[i].mean() * 100) + "\t");
+		}
+		getModel().outputInLine("\n");
 
+		getModel().outputInLine("Sleep Attacks % " + "\t");
+		for (int i = 0; i < numberOfSessions; i++) {
+			getModel().outputInLine(df2.format(ProportionSleepAtacks[i].mean() * 100) + "\t");
+		}
+		getModel().outputInLine("\n");
+		
 		getModel().outputInLine("Median Alert RT " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
 			getModel().outputInLine(df2.format(MedianAlertResponses[i].mean()) + "\t");
@@ -327,12 +349,6 @@ public class PVT extends Task {
 		getModel().outputInLine("LSNR_apx        " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
 			getModel().outputInLine(df2.format(LSNRapx[i].mean()) + "\t");
-		}
-		getModel().outputInLine("\n");
-
-		getModel().outputInLine("Sleep Attacks % " + "\t");
-		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(ProportionSleepAtacks[i].mean() * 100) + "\t");
 		}
 		getModel().outputInLine("\n\n");
 		

@@ -31,20 +31,20 @@
 
 (sgp 
     :cst nil
-    :v nil
+    :v t
     :fatigue t   
     :iu 2.9
     :ut 2.3
     
     ;;:microlapses nil
     :fpbmc .02
-    :fpmc -.06
+    :fpmc -.065
     
     :utbmc .012  
     :utmc -.01
     
     ;; :fp-dec 0.99
-    :fp-dec-c 0.0005
+    :fp-dec-c 0.0007
     
     :egs .25
     ;:cst t
