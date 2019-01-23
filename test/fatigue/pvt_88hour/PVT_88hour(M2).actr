@@ -9,7 +9,7 @@
 ;;@author Ehsan Khosroshahi
 ;;;;;
 
-(set-task "actr.tasks.test.fatigue.PVT88hours")
+(set-task "actr.tasks.test.fatigue.PVT")
 (set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 143.5)(151.5 167.5))
 
 (set-task-schedule 
@@ -33,22 +33,23 @@
     :cst nil
     :v nil
     :fatigue t   
-    :iu 3
+    :iu 2.9
     :ut 2.3
     
     ;;:microlapses nil
-    :fpbmc .025
-    :fpmc -.05
+    :fpbmc .02
+    :fpmc -.06
     
     :utbmc .012  
-    :utmc -.012
+    :utmc -.01
     
-    :fp-dec .999 ;;1.0002
+    :fp-dec 0.99
+    :fp-dec-c 0.02
     
     :egs .25
     ;:cst t
     
-    :dat .05
+    :dat .038
     :randomize-time t
     :vpft t
     
@@ -66,7 +67,7 @@
     ?visual-location>
         buffer                empty
 ==>
-        ; !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-reset-percentage)
 )
 ;(spp :u 1)
 

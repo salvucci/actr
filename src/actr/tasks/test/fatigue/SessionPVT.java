@@ -46,7 +46,7 @@ public class SessionPVT {
 		int B = 3855;
 		double sum = 0;
 		for (int i = 0; i < reactionTimes.size(); i++) 
-			if ( reactionTimes.get(i) >= 150){
+			if ( reactionTimes.get(i) >= 150 && reactionTimes.get(i) < 30000){
 				sum = sum + 1.0 / reactionTimes.get(i);
 				N++;
 			}

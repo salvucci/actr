@@ -7,7 +7,8 @@
 ;;
 ;;@author Ehsan Khosroshahi
 ;;;;;
-(set-task "actr.tasks.test.fatigue.PVTdriver_NightPRE")
+
+(set-task "actr.tasks.test.fatigue.PVT")
 
 (set-sleep-schedule 
     (8.0 22.0)(32.0 39.0)(44.0 58.0)(68.0 82.0)(92.0 106.0)(116.0 130.0)(140.0 154.0)
@@ -31,7 +32,7 @@
 
 (set-task-duration 600.0)
 
-;;(set-output-dir "./test/fatigue/pvt_88hour")
+(set-output-dir "./test/fatigue/pvt_driver")
 
 (add-dm
     (goal isa goal state wait)
@@ -41,22 +42,23 @@
     :cst nil
     :v nil
     :fatigue t   
-    :iu 3
+    :iu 2.9
     :ut 2.3
     
     ;;:microlapses nil
-    :fpbmc .025
-    :fpmc -.05
+    :fpbmc .02
+    :fpmc -.06
     
     :utbmc .012  
-    :utmc -.012
+    :utmc -.01
     
-    :fp-dec 0.998
+    :fp-dec 0.99
+    :fp-dec-c 0.02
     
     :egs .25
     ;:cst t
     
-    :dat .05
+    :dat .038
     :randomize-time t
     :vpft t
     
@@ -74,7 +76,7 @@
     ?visual-location>
         buffer                empty
 ==>
-        ; !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-reset-percentage)
 )
 ;(spp :u 1)
 

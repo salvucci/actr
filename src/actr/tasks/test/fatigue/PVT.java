@@ -90,6 +90,7 @@ public class PVT extends Task {
 						label.setVisible(false);
 						processDisplay();
 						stimulusVisibility = false;
+						
 						currentSession.reactionTimes.add(30000);
 						currentSession.timeOfReactionsFromStart.add(currentSession.totalSessionTime);
 						currentBlock.reactionTimes.add(30000);
@@ -104,6 +105,8 @@ public class PVT extends Task {
 						addUpdate(interStimulusInterval);
 						fatigueResetPercentage(); // reseting the system
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+						//getModel().getBuffers().get(Symbol.get("visual-location")).set(Symbol.get("buffer"),Symbol.get("empty"));
+						//getModel().getBuffers().get(Symbol.get("visual")).set(Symbol.get("buffer"),Symbol.get("empty"));
 					}
 					repaint();
 				}
@@ -176,7 +179,7 @@ public class PVT extends Task {
 			response = c + "";
 			responseTime = getModel().getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
-
+			
 			if (response != null) {
 				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;
@@ -358,11 +361,11 @@ public class PVT extends Task {
 
 		if (DIR == null)
 			return result;
-
+	
 		try {
 			///////////////////////////////////////////////////////////////////////////////////////////////////					
 			// Writing Numbers to the file based on sessions
-			File dataSessionFile = new File(DIR+ "/SessionsData.csv");
+			File dataSessionFile = new File(DIR + "/"  + "SessionsData.csv");
 			if (!dataSessionFile.exists())
 				dataSessionFile.createNewFile();
 			PrintStream dataSession = new PrintStream(dataSessionFile);

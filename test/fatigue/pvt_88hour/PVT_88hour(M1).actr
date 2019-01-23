@@ -37,18 +37,18 @@
     :ut 2.3
     
     ;;:microlapses nil
-    :fpbmc .025
-    :fpmc -.05
+    :fpbmc .02
+    :fpmc -.06
     
     :utbmc .012  
-    :utmc -.012
+    :utmc -.01
     
     :fp-dec .99 ;;1.0002
     
     :egs .25
     ;:cst t
     
-    :dat .05
+    :dat .038
     :randomize-time t
     :vpft t
     

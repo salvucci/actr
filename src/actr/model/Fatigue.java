@@ -132,15 +132,19 @@ public class Fatigue extends Module {
 		if (isFatigueEnabled()) {
 			fatigueFP = getFatigueFPPercent() * (1 - getFatigueFPBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueFPMC());
 			fatigueUT = getFatigueUT0() * (1 - getFatigueUTBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueUTMC());
+			//System.out.println(numberOfConsecutiveMicroLapses + " " + getFatigueFPPercent());
 		}
 	}
 	
 	
 	public double getFatigueFPPercent() {
-		//return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 and 2
-		//System.out.println(numberOfConsecutiveMicroLapses + " " +Math.max(.000001, (-2 / (1+Math.pow(Math.E,-fatigueFPDec *numberOfConsecutiveMicroLapses))) + 2 ));
+		//return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1
+		//return Math.max(.000001, Math.pow(getFatigueFPDec() , ((1 + fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) ); // model 2
+		return Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) + 2  ); // model 3
+		
 		//return Math.max(.000001,  (-1 / ( 1 + Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses + fatigueFPDecC) ) ) + 1 ) ;  // model 3 Sigmoid Function
-		return Math.max(.000001,  Math.pow (1 + numberOfConsecutiveMicroLapses , fatigueFPDec ) ) ;  // model 4 :reverse exponential function
+		//return Math.max(.000001,  Math.pow (1 + numberOfConsecutiveMicroLapses , fatigueFPDec * computeBioMathValueForHour() ) ) ;  // model 4 :reverse exponential function
+		//return Math.max(.000001, Math.pow(getFatigueFPDec() , (computeBioMathValueForHour()/fatigueFPDecC) * numberOfConsecutiveMicroLapses) ); // model 5
 	}
 
 	public double getBioMathModelValueforHour(double hour){

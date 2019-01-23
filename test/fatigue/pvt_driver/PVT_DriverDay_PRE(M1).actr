@@ -1,24 +1,39 @@
 ;;;;;
-;;Model of PVT test on time on task
+;;Model of PVT test and Fatigue mechanism
 ;;
-;;Paper: Functional Equivalence of sleep loss and time on task effects in sustained attention
+;;Paper: Efficient driver drowsiness detection at moderate levels of drowsiness
 ;;
-;;Bella Z. Vaksler, Glenn Gunzelmann, Air force research lab
+;;Pia M. Forsmana, Bryan J. Vilaa,b, Robert A. Short c, Christopher G. Mott d, Hans P.A. Van Dongena,
 ;;
 ;;@author Ehsan Khosroshahi
 ;;;;;
 
 (set-task "actr.tasks.test.fatigue.PVT")
-(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 71.5)(79.5 94.5))
 
-(set-task-schedule 
-    ;; 1 sessions in total at 12pm
-    36  ;; 24 +12
+(set-sleep-schedule 
+    (8.0 22.0)(32.0 46.0)(56.0 70.0)(80.0 94.0)(104.0 118.0)(128.0 142.0)(152.0 166.0)
+    (176.0 190.0)(200.0 214.0)(224.0 238.0)(248.0 262.0)(272.0 286.0)(296.0 310.0)(320.0 334.0)
 )
 
-(set-task-duration 2100.0)
+(set-task-schedule 
+    ;;;;
+    57.0    60.0    63.0    66.0      ;; day2
+    81.0    84.0    87.0    90.0      ;; day3
+    105.0  108.0  111.0  114.0    ;; day4
+    129.0  132.0  135.0  138.0    ;; day5
+    153.0  156.0  159.0  162.0    ;; day6
+    ;;;;
+    201.0  204.0  207.0  210.0    ;; day9
+    225.0  228.0  231.0  234.0    ;; day10
+    249.0  252.0  255.0  258.0    ;; day11
+    273.0  276.0  279.0  282.0    ;; day12
+    297.0  300.0  303.0  306.0    ;; day13   
+    ;;;;
+)
 
-(set-output-dir "./test/fatigue/pvt_35min")
+(set-task-duration 600.0)
+
+(set-output-dir "./test/fatigue/pvt_driver")
 
 (add-dm
     (goal isa goal state wait)
@@ -35,7 +50,7 @@
     :fpbmc .02
     :fpmc -.06
     
-    :utbmc .012
+    :utbmc .012  
     :utmc -.01
     
     :fp-dec 0.99
