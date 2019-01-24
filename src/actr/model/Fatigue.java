@@ -138,9 +138,9 @@ public class Fatigue extends Module {
 	
 	
 	public double getFatigueFPPercent() {
-		return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 Original
+		//return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 Original
 		//return Math.max(.000001, Math.pow(getFatigueFPDec() , ((1 + fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) ); // model 2
-		//return Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) + 2  ); // model 3
+		return Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) + 2  ); // model 3
 		
 		//return Math.max(.000001,  (-1 / ( 1 + Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses + fatigueFPDecC) ) ) + 1 ) ;  // model 3 Sigmoid Function
 		//return Math.max(.000001,  Math.pow (1 + numberOfConsecutiveMicroLapses , fatigueFPDec * computeBioMathValueForHour() ) ) ;  // model 4 :reverse exponential function
