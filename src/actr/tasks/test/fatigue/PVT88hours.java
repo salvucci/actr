@@ -267,7 +267,7 @@ public class PVT88hours extends Task {
 			for (int i = 0; i < numberOfSessions; i++) {
 				SessionPVT session = task.sessions.get(i);
 				AveProportionLapses[i].add(session.getProportionOfLapses());
-				AveProportionFalseAlerts[i].add(session.getProportionOfFalseAlert());
+				AveProportionFalseAlerts[i].add(session.getProportionOfFalseStarts());
 				AveMedianAlertResponses[i].add(session.getMedianAlertReactionTimes());
 				AveLSNRapx[i].add(session.getLSNR_apx());
 				AveProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
@@ -280,7 +280,7 @@ public class PVT88hours extends Task {
 				for (int j = 0; j < session.blocks.size(); j++) {
 					Block b = session.blocks.get(j);
 					blocksAveProportionLapses[i][j].add(b.getNumberOfLapses());
-					blocksAveProportionFalseAlerts[i][j].add(b.getNumberOfFalseAlerts());
+					blocksAveProportionFalseAlerts[i][j].add(b.getNumberOfFalseStarts());
 					blocksAveMedianAlertResponses[i][j].add(b.getMedianAlertReactionTimes());
 					blocksAveLSNRapx[i][j].add(b.getLSNR_apx());
 					blocksAveProportionSleepAtacks[i][j].add(b.getProportionOfSleepAttacks());

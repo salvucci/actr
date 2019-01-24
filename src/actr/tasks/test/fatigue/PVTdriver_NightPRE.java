@@ -250,7 +250,7 @@ public class PVTdriver_NightPRE extends Task {
 			PVTdriver_NightPRE task = (PVTdriver_NightPRE) taskCast;
 			for (int i = 0; i < numberOfSessions; i++) {
 				SessionPVT session = task.sessions.get(i);
-				totalProportionFalseAlerts[i].add(session.getProportionOfFalseAlert());
+				totalProportionFalseAlerts[i].add(session.getProportionOfFalseStarts());
 				totalProportionLapses[i].add(session.getProportionOfLapses());
 				totalProportionSleepAtacks[i].add(session.getProportionOfSleepAttacks());
 				totalProportionAlertRresponces[i].add(session.getProportionOfAlertResponses());

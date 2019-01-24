@@ -252,7 +252,7 @@ public class PVT35min extends Task {
 					getModel().outputInLine(df.format(s.reactionTimes.get(j)) + ",");
 				}
 				getModel().outputInLine("\n");
-				getModel().output("False Start in Session   : " + s.getNumberOfFalseAlerts());
+				getModel().output("False Start in Session   : " + s.getNumberOfFalseStarts());
 				getModel().output("Lapses in Session        : " + s.getNumberOfLapses());
 				getModel().output("Sleep Attacks in Session : " + s.getNumberOfSleepAttacks());
 				getModel().output("total Session time       : " + s.totalSessionTime);
@@ -260,7 +260,7 @@ public class PVT35min extends Task {
 				getModel().output("******** Blocks:");
 				for (int j = 0; j < s.blocks.size(); j++) {
 					Block b = s.blocks.get(j);	
-					blocksFalseStarts[i][j].add(b.getNumberOfFalseAlerts());
+					blocksFalseStarts[i][j].add(b.getNumberOfFalseStarts());
 					blocksLapses[i][j].add(b.getNumberOfLapses());
 					blocksMeanAlertResponses[i][j].add(b.getMeanAlertReactionTimes());
 					blocksMedianAlertResponses[i][j].add(b.getMedianAlertReactionTimes());
@@ -277,7 +277,7 @@ public class PVT35min extends Task {
 					}
 					getModel().outputInLine("\n");
 
-					getModel().output("False Start in Block   : " + b.getNumberOfFalseAlerts());
+					getModel().output("False Start in Block   : " + b.getNumberOfFalseStarts());
 					getModel().output("Lapses in Block        : " + b.getNumberOfLapses());
 					getModel().output("Sleep Attacks in Block   : " + b.getNumberOfSleepAttacks());
 					getModel().output("total Session time       : " + b.totalBlockTime);

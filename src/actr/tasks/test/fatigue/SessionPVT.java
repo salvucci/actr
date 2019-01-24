@@ -53,7 +53,7 @@ public class SessionPVT {
 		return B * ((1.0/N) * sum);
 	}
 	
-	public int getNumberOfFalseAlerts(){
+	public int getNumberOfFalseStarts(){
 		int count = 0;
 		for (int i = 0; i < reactionTimes.size() ; i++) 
 			if (reactionTimes.get(i) <= 150)
@@ -69,8 +69,8 @@ public class SessionPVT {
 		return count;
 	}
 	
-	public double getProportionOfFalseAlert() {
-		return (double)getNumberOfFalseAlerts()/ reactionTimes.size();
+	public double getProportionOfFalseStarts() {
+		return (double)getNumberOfFalseStarts()/ reactionTimes.size();
 	}
 	
 	public double getProportionOfLapses() {
@@ -168,7 +168,7 @@ public class SessionPVT {
 			return B * ((1.0/N) * sum);
 		}
 		
-		public int getNumberOfFalseAlerts(){
+		public int getNumberOfFalseStarts(){
 			int count = 0;
 			for (int i = 0; i < reactionTimes.size() ; i++) 
 				if (reactionTimes.get(i) <= 150)
@@ -185,7 +185,7 @@ public class SessionPVT {
 		}
 		
 		public double getProportionOfFalseAlert() {
-			return (double)getNumberOfFalseAlerts()/ reactionTimes.size();
+			return (double)getNumberOfFalseStarts()/ reactionTimes.size();
 		}
 		
 		public double getProportionOfLapses() {

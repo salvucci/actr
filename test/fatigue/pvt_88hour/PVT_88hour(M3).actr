@@ -31,7 +31,7 @@
 
 (sgp 
     :cst nil
-    :v t
+    :v nil
     :fatigue t   
     :iu 2.9
     :ut 2.3
@@ -49,7 +49,7 @@
     :egs .25
     ;:cst t
     
-    :dat .038
+    :dat .05
     :randomize-time t
     :vpft t
     
