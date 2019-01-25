@@ -13,7 +13,7 @@
 
 (set-task-schedule 
     ;; 1 sessions in total at 12pm
-    34  ;; 24 +10
+    36  ;; 24 +12
 )
 
 (set-task-duration 2100.0)
@@ -39,7 +39,7 @@
     :utmc -.02
     
     ;; :fp-dec 0.99
-    :fp-dec-c 0.0005
+    :fp-dec-c 0.0007
     
     :egs .25
     ;:cst t
@@ -121,5 +121,5 @@
     =goal>
         state wait
 )
-(spp :u 0)
+(spp :u -0.1)
 

@@ -34,16 +34,16 @@
     :v nil
     :fatigue t   
     :iu 3
-    :ut 2.3
+    :ut 2.4
     
     ;;:microlapses nil
-    :fpbmc .02
-    :fpmc -.055
+    :fpbmc .018
+    :fpmc -.05
     
     :utbmc .012  
-    :utmc -.02
+    :utmc -.01
     
-    :fp-dec .985 ;;1.0002
+    :fp-dec .982 ;;1.0002
     
     :egs .25
     ;:cst t
@@ -125,6 +125,6 @@
     =goal>
         state wait
 )
-(spp :u -0.1)
+(spp :u 0)
 
 
