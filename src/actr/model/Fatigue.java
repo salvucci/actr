@@ -140,7 +140,6 @@ public class Fatigue extends Module {
 			// additiion factor
 			//fatigueFP = getFatigueFPPercent() * ( Math.pow(1 + mpTime(), getFatigueFPMC()) - (1 - getFatigueFPBMC() * computeBioMathValueForHour()) ) ;
 			fatigueUT =  Math.pow(1 + mpTime(), getFatigueUTMC()) + getFatigueUT0() - (getFatigueUTBMC() * computeBioMathValueForHour()) ;
-			
 		}
 	}
 	
