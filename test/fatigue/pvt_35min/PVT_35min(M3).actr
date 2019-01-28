@@ -28,18 +28,20 @@
     :cst nil
     :v nil
     :fatigue t   
-    :iu 3
-    :ut 2.3
-    
+    :iu 1.84
+    :ut 1.26
+    ;; u 1.73  ;;best value for adjustment with BioMath 4.55
+    ;; ut 1.27 ;;best value for adjustment with BioMath 4.55
     ;;:microlapses nil
-    :fpbmc .02
-    :fpmc -.065
+    :fpbmc .029
+    :fpmc -.14
     
-    :utbmc .012
+    :utbmc .01
     :utmc -.02
     
-    ;; :fp-dec 0.99
-    :fp-dec-c 0.0007
+    :fp-dec 0.99
+    :fp-dec-sleep1 0.0001
+    :fp-dec-sleep2 10000
     
     :egs .25
     ;:cst t
@@ -50,6 +52,7 @@
     
     :max-prep-time-diff 10.0  
 )
+
 
 (goal-focus goal)
 
@@ -121,5 +124,5 @@
     =goal>
         state wait
 )
-(spp :u -0.1)
+(spp :u 0)
 

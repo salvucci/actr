@@ -330,8 +330,15 @@ public class PVT extends Task {
 			SessionPVT session = task.sessions.get(i);
 			getModel().outputInLine(session.timeAwake + "\t");
 		}
+		getModel().outputInLine("\n");
+		getModel().outputInLine("BioMath Value   " + "\t");
+		for (int i = 0; i < numberOfSessions; i++) {
+			SessionPVT session = task.sessions.get(i);
+			getModel().outputInLine(df2.format(session.bioMathValue) + "\t");
+		}
 		getModel().output("\n");
 
+		
 		getModel().outputInLine("Lapses %        " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
 			getModel().outputInLine(df2.format(ProportionLapses[i].mean() * 100) + "\t");

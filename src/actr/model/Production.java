@@ -321,10 +321,19 @@ public class Production {
 		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
 		 */
 		double instU;
-		if (model.getFatigue().isFatigueEnabled() && !constantUtility)
+		if (model.getFatigue().isFatigueEnabled() && !constantUtility){
 			//old version: just the affect of time on task 
-			//instU  = u * model.getFatigue().computeFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
-			instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS);
+			//instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original  
+			
+			// New model with the additive factor
+			instU  = model.getFatigue().getFatigueFPPercent() * ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC())		
+					+  u  -  (model.getFatigue().getFatigueFPBMC() * model.getFatigue().computeBioMathValueForHour()) 
+			+  Utilities.getNoise(model.getProcedural().utilityNoiseS)); 
+			
+//					* ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC()) -1		
+//							+ u *  model.getFatigue().getFatigueFPBMC() * model.getFatigue().computeBioMathValueForHour()) 
+//					+  Utilities.getNoise(model.getProcedural().utilityNoiseS));
+		}
 		else
 			instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		//System.out.println("u  ::: " + instU + "----" + name);
