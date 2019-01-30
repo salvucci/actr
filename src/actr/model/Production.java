@@ -332,7 +332,7 @@ public class Production {
 			double FPBMC = model.getFatigue().getFatigueFPBMC();
 			
 			instU  = model.getFatigue().getFatigueFPPercent() * ( 
-					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC0 + FPMC*BioMath) ) + u  -  (FPBMC * BioMath)  
+					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  
 					+  Utilities.getNoise(model.getProcedural().utilityNoiseS)) ; 
 			
 //					* ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC()) -1		
