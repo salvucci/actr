@@ -326,9 +326,14 @@ public class Production {
 			//instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original  
 			
 			// New model with the additive factor
-			instU  = model.getFatigue().getFatigueFPPercent() * ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC())		
-					+  u  -  (model.getFatigue().getFatigueFPBMC() * model.getFatigue().computeBioMathValueForHour()) 
-			+  Utilities.getNoise(model.getProcedural().utilityNoiseS)); 
+			double BioMath = model.getFatigue().computeBioMathValueForHour();
+			double FPMC0 = model.getFatigue().getFatigueFPMC0();
+			double FPMC = model.getFatigue().getFatigueFPMC();
+			double FPBMC = model.getFatigue().getFatigueFPBMC();
+			
+			instU  = model.getFatigue().getFatigueFPPercent() * ( 
+					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC0 + FPMC*BioMath) ) + u  -  (FPBMC * BioMath)  
+					+  Utilities.getNoise(model.getProcedural().utilityNoiseS)) ; 
 			
 //					* ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC()) -1		
 //							+ u *  model.getFatigue().getFatigueFPBMC() * model.getFatigue().computeBioMathValueForHour()) 

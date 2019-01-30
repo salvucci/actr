@@ -710,12 +710,16 @@ public class Model {
 			fatigue.setFatigueFD(Double.valueOf(value));
 		else if (parameter.equals(":fpbmc"))
 			fatigue.setFatigueFPBMC(Double.valueOf(value));
+		else if (parameter.equals(":fpmc0"))
+			fatigue.setFatigueFPMC0(Double.valueOf(value));
 		else if (parameter.equals(":fpmc"))
 			fatigue.setFatigueFPMC(Double.valueOf(value));
 		else if (parameter.equals(":utbmc"))
 			fatigue.setFatigueUTBMC(Double.valueOf(value));
 		else if (parameter.equals(":utmc"))
 			fatigue.setFatigueUTMC(Double.valueOf(value));
+		else if (parameter.equals(":utmc0"))
+			fatigue.setFatigueUTMC0(Double.valueOf(value));
 		else if (parameter.equals(":ut0"))
 			fatigue.setFatigueUT0(Double.valueOf(value));
 		else if (parameter.equals(":fdbmc"))

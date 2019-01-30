@@ -13,7 +13,7 @@
 
 (set-task-schedule 
     ;; 1 sessions in total at 12pm
-    36  ;; 24 +12
+    32  ;; 24 +12
 )
 
 (set-task-duration 2100.0)
@@ -28,16 +28,21 @@
     :cst nil
     :v nil
     :fatigue t   
-    :iu 1.84
-    :ut 1.26
-    ;; u 1.73  ;;best value for adjustment with BioMath 4.55
-    ;; ut 1.27 ;;best value for adjustment with BioMath 4.55
-    ;;:microlapses nil
-    :fpbmc .029
-    :fpmc -.14
+    :iu 2.11
+    :ut 1.35
+    ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = 0.446
+    ;; BioMath(utbmc-fpbmc) + IU - UT0 =
+    ;;best value for adjustment with BioMath 4.26 (10am)
+    ;; IU = BM * ( fpbmc - utbmc ) + 0.446 + UT0
     
-    :utbmc .01
-    :utmc -.02
+    ;;:microlapses nil
+    :fpbmc .027
+    :fpmc0 0.52 ;;.13
+    :fpmc .001
+    
+    :utbmc .011
+    :utmc0  0.1 ;;.02
+    :utmc 0
     
     :fp-dec 0.99
     :fp-dec-sleep1 0.0001
@@ -46,7 +51,7 @@
     :egs .25
     ;:cst t
     
-    :dat .05
+    :dat .04
     :randomize-time t
     :vpft t
     

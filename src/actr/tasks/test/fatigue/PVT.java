@@ -93,8 +93,8 @@ public class PVT extends Task {
 						
 						currentSession.reactionTimes.add(30000);
 						currentSession.timeOfReactionsFromStart.add(currentSession.totalSessionTime);
-						currentBlock.reactionTimes.add(30000);
-						currentBlock.timeOfReactionsFromStart.add(currentBlock.totalBlockTime);
+						currentBlock.blockReactionTimes.add(30000);
+						currentBlock.blockTimeOfReactionsFromStart.add(currentBlock.totalBlockTime);
 						// when sleep attack happens we add to the number of responses (NOT DOING IT FOR NOW)
 						// currentSession.numberOfResponses++; 
 						getModel().output("Sleep attack at session time  ==> " + (getModel().getTime() - currentSession.startTime)
@@ -186,8 +186,8 @@ public class PVT extends Task {
 				currentSession.responseTotalTime += responseTime;
 				currentSession.reactionTimes.add(responseTime);
 				currentSession.timeOfReactionsFromStart.add(currentSessionTime);
-				currentBlock.reactionTimes.add(responseTime);
-				currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
+				currentBlock.blockReactionTimes.add(responseTime);
+				currentBlock.blockTimeOfReactionsFromStart.add(currentBlockTime);
 			}
 
 			label.setVisible(false);
@@ -199,8 +199,8 @@ public class PVT extends Task {
 		} else {   // False start situation
 			currentSession.reactionTimes.add(1);
 			currentSession.timeOfReactionsFromStart.add(currentSessionTime);
-			currentBlock.reactionTimes.add(1);
-			currentBlock.timeOfReactionsFromStart.add(currentBlockTime);
+			currentBlock.blockReactionTimes.add(1);
+			currentBlock.blockTimeOfReactionsFromStart.add(currentBlockTime);
 			if (getModel().isVerbose())
 				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
 						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
@@ -257,6 +257,7 @@ public class PVT extends Task {
 
 		// data for the blocks
 		Values [][] blocksProportionLapses = new Values[numberOfSessions][numberOfBlocks];
+		Values [][] blocksNumberLapses = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksProportionFalseStarts = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksMedianAlertResponses = new Values[numberOfSessions][numberOfBlocks];
 		Values [][] blocksLSNRapx = new Values[numberOfSessions][numberOfBlocks];
@@ -266,6 +267,7 @@ public class PVT extends Task {
 		for (int i = 0; i < numberOfSessions; i++) {
 			for (int j = 0; j < numberOfBlocks; j++) {
 				blocksProportionLapses[i][j] = new Values();
+				blocksNumberLapses[i][j] = new Values();
 				blocksProportionFalseStarts[i][j] = new Values();
 				blocksMedianAlertResponses[i][j] = new Values();
 				blocksLSNRapx[i][j] = new Values();
@@ -303,6 +305,7 @@ public class PVT extends Task {
 				for (int j = 0; j < session.blocks.size(); j++) {
 					Block b = session.blocks.get(j);
 					blocksProportionLapses[i][j].add(b.getProportionOfLapses());
+					blocksNumberLapses[i][j].add(b.getNumberOfLapses());
 					blocksProportionFalseStarts[i][j].add(b.getProportionOfFalseAlert());
 					blocksMedianAlertResponses[i][j].add(b.getMedianAlertReactionTimes());
 					blocksLSNRapx[i][j].add(b.getLSNR_apx());
@@ -404,7 +407,7 @@ public class PVT extends Task {
 		////////////////////////////////////////////////////////////
 		for (int i = 0; i < numberOfSessions; i++){
 			getModel().output("Session" + (i+1) + "\t" + "Block# \tAlert RT Medain\t%L Mean\t%L SD \t%L 95CI\t%FS Mean"
-					+ "%FS SD\t%FS 95CI");
+					+ "\t%FS SD\t%FS 95CI\t#L Mean");
 			for (int j = 0; j < numberOfBlocks; j++){
 				getModel().output("\t\tBlock" + (j+1)
 						+ "\t" + df2.format(blocksMedianAlertResponses[i][j].mean())
@@ -412,8 +415,9 @@ public class PVT extends Task {
 						+ "\t" + df2.format(blocksProportionLapses[i][j].stddev() * 100)
 						+ "\t" + df2.format(blocksProportionLapses[i][j].CI_95percent() * 100)
 						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].mean() * 100) 
-						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].stddev() * 100)
+						+ "\t\t" + df2.format(blocksProportionFalseStarts[i][j].stddev() * 100)
 						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].CI_95percent() * 100)
+						+ "\t\t" + df2.format(blocksNumberLapses[i][j].mean())
 						);
 			}
 			getModel().outputInLine("\n\n");

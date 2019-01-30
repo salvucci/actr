@@ -128,8 +128,8 @@ public class SessionPVT {
 
 	// 5-min blocks
 	class Block {
-		Values reactionTimes = new Values();
-		Values timeOfReactionsFromStart = new Values();
+		Values blockReactionTimes = new Values();
+		Values blockTimeOfReactionsFromStart = new Values();
 		double startTime;
 		double totalBlockTime;
 		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
@@ -138,16 +138,16 @@ public class SessionPVT {
 		
 		public int getNumberOfAlertResponses(){
 			int count = 0;
-			for (int i = 0; i < reactionTimes.size() ; i++) 
-				if (reactionTimes.get(i) > 150 && reactionTimes.get(i) <= 500)
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) > 150 && blockReactionTimes.get(i) <= 500)
 					count++;
 			return count;
 		}
 		
 		public int getNumberOfLapses(){
 			int count = 0;
-			for (int i = 0; i < reactionTimes.size() ; i++) 
-				if (reactionTimes.get(i) > 500 && reactionTimes.get(i) < 30000)
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) > 500 && blockReactionTimes.get(i) < 30000)
 					count++;
 			return count;
 		}
@@ -160,9 +160,9 @@ public class SessionPVT {
 			int N = 0;
 			int B = 3855;
 			double sum = 0;
-			for (int i = 0; i < reactionTimes.size(); i++) 
-				if ( reactionTimes.get(i) >= 150){
-					sum = sum + 1.0 / reactionTimes.get(i);
+			for (int i = 0; i < blockReactionTimes.size(); i++) 
+				if ( blockReactionTimes.get(i) >= 150){
+					sum = sum + 1.0 / blockReactionTimes.get(i);
 					N++;
 				}
 			return B * ((1.0/N) * sum);
@@ -170,40 +170,40 @@ public class SessionPVT {
 		
 		public int getNumberOfFalseStarts(){
 			int count = 0;
-			for (int i = 0; i < reactionTimes.size() ; i++) 
-				if (reactionTimes.get(i) <= 150)
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) <= 150)
 					count++;
 			return count;
 		}
 		
 		public int getNumberOfSleepAttacks(){
 			int count = 0;
-			for (int i = 0; i < reactionTimes.size() ; i++) 
-				if (reactionTimes.get(i) == 30000)
+			for (int i = 0; i < blockReactionTimes.size() ; i++) 
+				if (blockReactionTimes.get(i) == 30000)
 					count++;
 			return count;
 		}
 		
 		public double getProportionOfFalseAlert() {
-			return (double)getNumberOfFalseStarts()/ reactionTimes.size();
+			return (double)getNumberOfFalseStarts()/ blockReactionTimes.size();
 		}
 		
 		public double getProportionOfLapses() {
-			return (double)getNumberOfLapses()/ reactionTimes.size();
+			return (double)getNumberOfLapses()/ blockReactionTimes.size();
 		}
 		
 		public double getProportionOfSleepAttacks() {
-			return (double)getNumberOfSleepAttacks()/ reactionTimes.size();
+			return (double)getNumberOfSleepAttacks()/ blockReactionTimes.size();
 		}
 		
 		public double getProportionOfAlertResponses() {
-			return (double) getNumberOfAlertResponses() / reactionTimes.size();
+			return (double) getNumberOfAlertResponses() / blockReactionTimes.size();
 		}
 		
 		public double getMeanAlertReactionTimes() {
 			Values Alert = new Values();
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double r = reactionTimes.get(i);
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double r = blockReactionTimes.get(i);
 				if (r <= 500 && r >= 150)
 					Alert.add(r);
 			}
@@ -212,8 +212,8 @@ public class SessionPVT {
 		
 		public double getMedianAlertReactionTimes() {
 			Values Alert = new Values();
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double r = reactionTimes.get(i);
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double r = blockReactionTimes.get(i);
 				if (r <= 500 && r >= 150)
 					Alert.add(r);
 			}
@@ -222,8 +222,8 @@ public class SessionPVT {
 		
 		public int[] getAlertResponseDistribution () {
 			int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
-			for (int i = 0; i < reactionTimes.size(); i++) {
-				double responseTime = reactionTimes.get(i);
+			for (int i = 0; i < blockReactionTimes.size(); i++) {
+				double responseTime = blockReactionTimes.get(i);
 				if (responseTime > 150 && responseTime <= 500){
 					// making the array for alert reaction times
 					alertResponse[(int) ((responseTime - 150) / 10)]++;
@@ -236,7 +236,7 @@ public class SessionPVT {
 			double proportionAlertResponse[] = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
 			int alertResponse[] = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
 			for (int i = 0; i < 35; i++) {
-				proportionAlertResponse[i] = (double)alertResponse[i] / reactionTimes.size();
+				proportionAlertResponse[i] = (double)alertResponse[i] / blockReactionTimes.size();
 			}
 			return proportionAlertResponse;
 		}

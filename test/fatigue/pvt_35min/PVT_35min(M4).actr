@@ -30,34 +30,36 @@
     :fatigue t   
     :iu 1.59
     :ut 1.05
-        ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath) = 0.453  ;;best value for adjustment with BioMath 4.26 (10am)
-        ;; IU = BM * ( fpbmc - utbmc ) + 0.453 + UT0
-        ;;:microlapses nil
-        :fpbmc .03
-        :fpmc -.15
-        
-        :utbmc .01
-        :utmc -.02
-        
-        :fp-dec 1
-        :fp-dec-sleep1 0.008
-        :fp-dec-sleep2 0
-        
-        :egs .25
-        ;:cst t
-        
-        :dat .05
-        :randomize-time t
-        :vpft t
-        
-        :max-prep-time-diff 10.0  
-    )
+    ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = 0.453
+    ;;best value for adjustment with BioMath 4.26 (10am)
+    ;; IU = BM * ( fpbmc - utbmc ) + 0.453 + UT0
     
+    ;;:microlapses nil
+    :fpbmc .03
+    :fpmc -.15
     
+    :utbmc .01
+    :utmc -.02
     
-    (goal-focus goal)
+    :fp-dec 1
+    :fp-dec-sleep1 0.008
+    :fp-dec-sleep2 0
     
+    :egs .25
+    ;:cst t
     
+    :dat .05
+    :randomize-time t
+    :vpft t
+    
+    :max-prep-time-diff 10.0  
+)
+
+
+
+(goal-focus goal)
+
+
 (p wait 
     =goal>
         isa goal
@@ -68,8 +70,8 @@
 ==>
     !eval! (fatigue-reset-percentage)
 )
-        ;(spp :u 1)
-        
+;(spp :u 1)
+
 (p attend-stimulus
     =goal>
         isa goal
@@ -86,8 +88,8 @@
     =goal>
         state attending-stimulus
 )
-        ;(spp :u 1)
-        
+;(spp :u 1)
+
 (p see-stimulus*respond
     =goal>
         isa goal
@@ -108,8 +110,8 @@
     +visual>
         isa clear
 )
-        ;(spp :u 1)
-        
+;(spp :u 1)
+
 (p press-key 
     =goal>
         isa goal
@@ -125,5 +127,5 @@
     =goal>
         state wait
 )
-        (spp :u 0)
-        
+(spp :u 0)
+

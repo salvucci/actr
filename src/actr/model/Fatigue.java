@@ -29,8 +29,10 @@ public class Fatigue extends Module {
 
 	private double fatigueFPBMC = 0; 			//Coefficient relating biomath value to fp
 	private double fatigueFPMC = 0; 			// Coefficient relating minute within session to fp
+	private double fatigueFPMC0 = 0;
 	private double fatigueUTBMC = 0; 			//Coefficient relating biomath value to ut
 	private double fatigueUTMC = 0;  			//oefficient relating minute within session to ut
+	private double fatigueUTMC0 = 0;  			
 	private double fatigueUT0 = 0;				//Constant ut offset
 	private double fatigueUtility0 = 0;         //Constant utility offset
 	private double fatigueFDBMC = -0.02681;  	//Coefficient relating biomath value to fd
@@ -139,7 +141,8 @@ public class Fatigue extends Module {
 			
 			// additiion factor
 			//fatigueFP = getFatigueFPPercent() * ( Math.pow(1 + mpTime(), getFatigueFPMC()) - (1 - getFatigueFPBMC() * computeBioMathValueForHour()) ) ;
-			fatigueUT =  Math.pow(1 + mpTime(), getFatigueUTMC()) + getFatigueUT0() - (getFatigueUTBMC() * computeBioMathValueForHour()) ;
+			fatigueUT =  Math.pow(1 + mpTime(), -(getFatigueUTMC0() + getFatigueUTMC()*computeBioMathValueForHour())) 
+					+ getFatigueUT0() - (getFatigueUTBMC() * computeBioMathValueForHour()) ;
 		}
 	}
 	
@@ -399,6 +402,22 @@ public class Fatigue extends Module {
 	}
 	public void setFatigueFPDecSleep2(double fatigueFPDecSleep2) {
 		this.fatigueFPDecSleep2 = fatigueFPDecSleep2;
+	}
+
+	public double getFatigueFPMC0() {
+		return fatigueFPMC0;
+	}
+
+	public void setFatigueFPMC0(double fatigueFPMC0) {
+		this.fatigueFPMC0 = fatigueFPMC0;
+	}
+
+	public double getFatigueUTMC0() {
+		return fatigueUTMC0;
+	}
+
+	public void setFatigueUTMC0(double fatigueUTMC0) {
+		this.fatigueUTMC0 = fatigueUTMC0;
 	}
 	
 }
