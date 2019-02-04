@@ -87,20 +87,12 @@ public class Fatigue extends Module {
 		{
 			// values : p , u , k , times
 			values = BioMathModel.sleepsched(wake, asleep, fatigueP0 , fatigueU0, fatigueK0);
-			// for (int i = 0; i < values.size(); i++) {
-			// System.out.print(Utilities.toString(values.get(i)));
-			// System.out.println();
-			// }
-
 			// given a schedule of sleep/wake hours in the form of '((awake1 sleep1)
 			// (awake2 sleep2)....)
 			// returns a hashtable with all performance values where keys are the
 			// time
 			for (int i = 0; i < values.size(); i++)
 				pvalues.put(values.get(i).get(3), values.get(i).get(0));
-
-			//System.out.println(pvalues.ceilingEntry(70.00).getValue());
-			//System.out.println(Pvalues);
 		}
 	}
 
@@ -118,9 +110,6 @@ public class Fatigue extends Module {
 //      setFatigueFPPercent(Math.max(.000001, getFatigueFPPercent() * getFatigueFPDec())); 
 //		setFatigueFDPercent(Math.max(.000001, getFatigueFDPercent() * getFatigueFDDec()));
 	
-//		setFatigueFPPercent(Math.max(.000001, getFatigueFPPercent() * Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses)) ); 
-//		setFatigueFDPercent(Math.max(.000001, getFatigueFDPercent() * Math.pow(getFatigueFDDec() , numberOfConsecutiveMicroLapses)) );
-	
 		numberOfConsecutiveMicroLapses++;  // adding one to the number of consecutive Microlapses
 	}
 	
@@ -136,15 +125,13 @@ public class Fatigue extends Module {
 		if (isFatigueEnabled()) {
 //			fatigueFP = getFatigueFPPercent() * (1 - getFatigueFPBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueFPMC());
 //			fatigueUT = getFatigueUT0() * (1 - getFatigueUTBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueUTMC());
-//			//System.out.println(numberOfConsecutiveMicroLapses + " " + getFatigueFPPercent());
-			
-			
-			// additiion factor
+
+			// NEW MODEL addition factor. The utility is being changed in the production class 
 			double BioMath = computeBioMathValueForHour();
 			double UTMC0 = getFatigueUTMC0();
 			double UTMC = getFatigueUTMC();
 			double UTBMC = getFatigueUTBMC();
-			//fatigueFP = getFatigueFPPercent() * ( Math.pow(1 + mpTime(), getFatigueFPMC()) - (1 - getFatigueFPBMC() * computeBioMathValueForHour()) ) ;
+			//fatigueFP = getFatigueFPPercent() * ( Math.pow(1 + mpTime(), getFatigueFPMC()) - (1 - getFatigueFPBMC() * computeBioMathValueForHour()) ) ; 
 			fatigueUT =  Math.pow(1 + mpTime(), -(UTMC + UTMC0 * BioMath)) + getFatigueUT0() - (UTBMC * BioMath) ;
 		}
 	}
@@ -152,22 +139,12 @@ public class Fatigue extends Module {
 	
 	public double getFatigueFPPercent() {
 //		return Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ); // model 1 Original
-
+		return Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDec)) * (numberOfConsecutiveMicroLapses)) + 2  ); //NEW MODEL
 		
-		
-		
-		//return Math.max(.000001, Math.pow(getFatigueFPDec() , ((1 + fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) ); // model 2
-		return Math.min(
-				Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ) , 
-				Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDecSleep1)) * (numberOfConsecutiveMicroLapses-fatigueFPDecSleep2)) + 2  )
-				); // model 3
-		
-		//return Math.max(.000001,  (-1 / ( 1 + Math.pow(Math.E,-fatigueFPDec * (numberOfConsecutiveMicroLapses)+ fatigueFPDecC) ) ) + 1 ) ;  // model 3 Sigmoid Function
-		
-		//return Math.max(.000001, Math.pow(getFatigueFPDec() , ((1 + fatigueFPDecC*computeBioMathValueForHour())) * numberOfConsecutiveMicroLapses) ); // model 2
-		//return Math.max(.000001,  (-1 / ( 1 + Math.pow(Math.E,-fatigueFPDec * numberOfConsecutiveMicroLapses + fatigueFPDecC) ) ) + 1 ) ;  // model 3 Sigmoid Function
-		//return Math.max(.000001,  Math.pow (1 + numberOfConsecutiveMicroLapses , fatigueFPDec * computeBioMathValueForHour() ) ) ;  // model 4 :reverse exponential function
-		//return Math.max(.000001, Math.pow(getFatigueFPDec() , (computeBioMathValueForHour()/fatigueFPDecC) * numberOfConsecutiveMicroLapses) ); // model 5
+//		return Math.min(
+//				Math.max(.000001, Math.pow(getFatigueFPDec() , numberOfConsecutiveMicroLapses) ) , 
+//				Math.max(.000001, - Math.pow(Math.E , ((fatigueFPDecSleep1)) * (numberOfConsecutiveMicroLapses-fatigueFPDecSleep2)) + 2  )
+//				); // model 3
 	}
 
 	public double getBioMathModelValueforHour(double hour){
@@ -209,7 +186,7 @@ public class Fatigue extends Module {
 	 *  NEW: This method is called at every production except wait. 
 	 */
 	public void fatigueResetPercentages(){
-		numberOfConsecutiveMicroLapses = 1 ; // reseting the number of consecutive Microlapses back to 1
+		numberOfConsecutiveMicroLapses = 1 ; // NEW MODEL reseting the number of consecutive microlapses back to 1
 //		setFatigueFPPercent(1.0);
 //		setFatigueFDPercent(1.0);
 	}
@@ -256,27 +233,6 @@ public class Fatigue extends Module {
 
 		fatigueFP =  fatigueFPOriginal;
 		fatigueUT = model.getProcedural().utilityThreshold;
-
-		// fatigue_pending = nil;
-		// fatigue_last_one_empty = nil;
-		//
-		// fatigue_fp_percent = 1;
-		// fatigue_fp = 1;
-		// fatigue_fp_dec = 0.01440861;
-		// fatigue_fd_percent = 1;
-		// fatigue_fd = 0;
-		// fatigue_stimulus =1;
-		// fatigue_fpbmc = 0;
-		// fatigue_fpmc = 0;
-		// fatigue_utbmc = 0;
-		// fatigue_utmc = 0;
-		// fatigue_ut0 = 2.0643395401332;
-		// fatigue_fdbmc =-0.02681;
-		// fatigue_fdc =0.95743;
-		// fatigue_hour =0;
-		// fatigue_start_time = 0;
-		// fatigue_ut= (car (no-output (sgp :ut))))
-		// fatigue_dat =(car (no-output (sgp :dat))));
 	}
 	
 	public boolean isFatigueEnabled() {

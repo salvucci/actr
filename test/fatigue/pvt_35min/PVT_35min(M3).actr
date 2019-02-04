@@ -38,20 +38,18 @@
     ;;:microlapses nil
     :fpbmc .029
     :fpmc .077 ;;.13
-    :fpmc0 0.003
+    :fpmc0 0.001
     
     :utbmc 0.015
     :utmc  .01 ;;.02
     :utmc0 0
     
-    :fp-dec 0.995
-    :fp-dec-sleep1 0.0001
-    :fp-dec-sleep2 10000
+    :fp-dec 0.006
     
     :egs .25
     ;:cst t
     
-    :dat .04
+    :dat .043
     :randomize-time t
     :vpft t
     
