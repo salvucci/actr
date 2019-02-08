@@ -202,7 +202,7 @@ public class Procedural extends Module {
 
 			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
 				if (model.verboseTrace)
-					model.output("fatigue", "u:" + finalInst.getUtility()+ " ut:" + model.getFatigue().getFatigueUT());
+					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
 			
 			if (model.getFatigue().isFatigueEnabled() && 
 					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {

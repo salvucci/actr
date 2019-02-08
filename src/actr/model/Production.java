@@ -321,26 +321,32 @@ public class Production {
 		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
 		 */
 		double instU;
+		double noise = Utilities.getNoise(model.getProcedural().utilityNoiseS);
 		if (model.getFatigue().isFatigueEnabled() && !constantUtility){
-			//old version: just the affect of time on task 
-			//instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original  
+			//Fatigue old version: just the affect of time on task 
+//			instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original  
 			
-			// New model with the additive factor
+			// Fatigue new model with the additive factor
 			double BioMath = model.getFatigue().computeBioMathValueForHour();
 			double FPMC0 = model.getFatigue().getFatigueFPMC0();
 			double FPMC = model.getFatigue().getFatigueFPMC();
-			double FPBMC = model.getFatigue().getFatigueFPBMC();
-			
+			double FPBMC = model.getFatigue().getFatigueFPBMC();			
 			instU  = model.getFatigue().getFatigueFPPercent() * ( 
-					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  
-					+  Utilities.getNoise(model.getProcedural().utilityNoiseS)) ; 
+					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  +  noise) ;
+			model.output(name.toString() + " U:" + (Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)) 
+					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
 			
-//					* ( Math.pow(1 + model.getFatigue().mpTime(), model.getFatigue().getFatigueFPMC()) -1		
-//							+ u *  model.getFatigue().getFatigueFPBMC() * model.getFatigue().computeBioMathValueForHour()) 
-//					+  Utilities.getNoise(model.getProcedural().utilityNoiseS));
 		}
-		else
-			instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
+		else if (model.getFatigue().isFatigueEnabled() && constantUtility){
+			instU = model.getFatigue().getFatigueFPPercent() *(u + noise);
+			model.output(name.toString() + " U:" + u
+					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+		}
+		else{
+			instU = u + noise;
+			model.output(name.toString() + " U:" + u
+					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+		}
 		//System.out.println("u  ::: " + instU + "----" + name);
 
 		Instantiation inst = new Instantiation (this, model.getTime(), instU);

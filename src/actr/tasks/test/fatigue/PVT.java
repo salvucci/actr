@@ -180,6 +180,13 @@ public class PVT extends Task {
 			responseTime = getModel().getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
 			
+			if (responseTime > 5000){
+				getModel().output(getModel().getProcedural().getLastProductionFired().toString());
+				getModel().output("" + responseTime);
+				getModel().stop();
+				
+			}
+			
 			if (response != null) {
 				currentSession.numberOfResponses++;
 				currentBlock.numberOfResponses++;

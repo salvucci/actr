@@ -1,24 +1,29 @@
 ;;;;;
-;;Model of PVT test on time on task
+;;Model of PVT test and Fatigue mechanism : PVT on 88 hours of sleep deprivation 
 ;;
-;;Paper: Functional Equivalence of sleep loss and time on task effects in sustained attention
+;;Paper: Sleep Deprivation and Sustained Attention Performance:
+;;Integrating Mathematical and Cognitive Modeling
 ;;
-;;Bella Z. Vaksler, Glenn Gunzelmann, Air force research lab
+;;Glenn Gunzlemann, Joshua B.Gross, Kevin A. Gluck, David F. Dinges 
 ;;
 ;;@author Ehsan Khosroshahi
 ;;;;;
 
 (set-task "actr.tasks.test.fatigue.PVT")
-(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 71.5)(79.5 94.5))
+(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 143.5)(151.5 167.5))
 
 (set-task-schedule 
-    ;; 1 sessions in total at 12pm
-    36  ;; 24 +12
+    ;; 88 TSD :  44 sessions in total
+    56  58  60  62  64  66  68  70  ;; //base line
+    72  74  76  78  80  82  84  86  88  90  92  94  ;; //day 1
+    96  98  100 102 104 106 108 110 112 114 116 118 ;; //day 2
+    120 122 124 126 128 130 132 134 136 138 140 142 ;; //day 3
+    ;; // End of 88 TSD    
 )
 
-(set-task-duration 2100.0)
+(set-task-duration 600.0)
 
-(set-output-dir "./test/fatigue/pvt_35min")
+(set-output-dir "./test/fatigue/pvt_88hour")
 
 (add-dm
     (goal isa goal state wait)
@@ -28,17 +33,17 @@
     :cst nil
     :v nil
     :fatigue t   
-    :iu 3
+    :iu 3.1
     :ut 2.4
     
     ;;:microlapses nil
     :fpbmc .018
     :fpmc -.05
     
-    :utbmc .012
+    :utbmc .012  
     :utmc -.01
     
-    :fp-dec 0.982
+    :fp-dec .99 ;;1.0002
     
     :egs .25
     ;:cst t
@@ -47,7 +52,7 @@
     :randomize-time t
     :vpft t
     
-    :max-prep-time-diff 10.0  
+    :max-prep-time-diff 10.0
 )
 
 (goal-focus goal)
@@ -121,4 +126,5 @@
         state wait
 )
 (spp :u 0)
+
 

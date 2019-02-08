@@ -126,12 +126,11 @@ public class Fatigue extends Module {
 //			fatigueFP = getFatigueFPPercent() * (1 - getFatigueFPBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueFPMC());
 //			fatigueUT = getFatigueUT0() * (1 - getFatigueUTBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueUTMC());
 
-			// NEW MODEL addition factor. The utility is being changed in the production class 
+			// NEW MODEL addition factor. *** THE UTILITY IS BEING CHANGED IN THE PRODUCTION CLASS *** 
 			double BioMath = computeBioMathValueForHour();
 			double UTMC0 = getFatigueUTMC0();
 			double UTMC = getFatigueUTMC();
 			double UTBMC = getFatigueUTBMC();
-			//fatigueFP = getFatigueFPPercent() * ( Math.pow(1 + mpTime(), getFatigueFPMC()) - (1 - getFatigueFPBMC() * computeBioMathValueForHour()) ) ; 
 			fatigueUT =  Math.pow(1 + mpTime(), -(UTMC + UTMC0 * BioMath)) + getFatigueUT0() - (UTBMC * BioMath) ;
 		}
 	}
