@@ -31,7 +31,7 @@
 
 (sgp 
     :cst nil
-    :v nil
+    :v t
     :fatigue t   
     :iu 1.5
     :ut 1.2
@@ -74,6 +74,7 @@
         buffer                empty
 ==>
     !eval! (fatigue-reset-percentage)
+        ;;!eval! (fatigue-utility-dec-on)
 )
 ;(spp :u 1)
 
@@ -87,6 +88,7 @@
         state free
 ==>
     !eval! (fatigue-reset-percentage)
+        ;;!eval! (fatigue-utility-dec-off)
     +visual>               
         isa	move-attention
         screen-pos =visual-location
@@ -106,6 +108,7 @@
         state free 
 ==>
     !eval! (fatigue-reset-percentage)
+        ;;!eval! (fatigue-utility-dec-off)
     !output! (=val)
     +manual>
         isa press-key
@@ -125,6 +128,7 @@
         state free 
 ==>
     !eval! (fatigue-reset-percentage)
+        ;; !eval! (fatigue-utility-dec-off)
     !output! ("***  press Key - False Start  ***")
     +manual>
         isa press-key

@@ -333,19 +333,16 @@ public class Production {
 			double FPBMC = model.getFatigue().getFatigueFPBMC();			
 			instU  = model.getFatigue().getFatigueFPPercent() * ( 
 					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  +  noise) ;
-			model.output(name.toString() + " U:" + (Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)) 
-					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
-			
+//			model.output(name.toString() + " U:" + (Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)) 
+//					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
 		}
 		else if (model.getFatigue().isFatigueEnabled() && constantUtility){
 			instU = model.getFatigue().getFatigueFPPercent() *(u + noise);
-			model.output(name.toString() + " U:" + u
-					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+//			model.output(name.toString() + " U:" + u + " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
 		}
 		else{
 			instU = u + noise;
-			model.output(name.toString() + " U:" + u
-					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+//			model.output(name.toString() + "U:" + u + " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
 		}
 		//System.out.println("u  ::: " + instU + "----" + name);
 

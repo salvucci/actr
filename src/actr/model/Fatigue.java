@@ -13,7 +13,8 @@ public class Fatigue extends Module {
 	private Model model;
 
 	private boolean fatigueEnabled = false; 	// Turns fatigue module off / on
-	private boolean runWithMicrolapses = true; 
+	private boolean runWithMicrolapses = true;
+	private boolean runWithUtilityDecrement = true;
 	
 	private double fatigueFPDec = 1; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
 	private double fatigueFPDecSleep1 = 0; 	// FPDec constant for sleep
@@ -249,7 +250,14 @@ public class Fatigue extends Module {
 	public void setRunWithMicrolapses(boolean runWithMicrolapses) {
 		this.runWithMicrolapses = runWithMicrolapses;
 	}
+	
+	public boolean isRunWithUtilityDecrement() {
+		return runWithUtilityDecrement;
+	}
 
+	public void setRunWithUtilityDecrement(boolean runWithUtilityDecrement) {
+		this.runWithUtilityDecrement = runWithUtilityDecrement;
+	}
 	public double getFatigueDAT() {
 		return fatigueDAT;
 	}

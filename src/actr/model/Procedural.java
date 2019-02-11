@@ -208,8 +208,7 @@ public class Procedural extends Module {
 					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
 				microLapses = true;
 
-				if (model.getFatigue().isRunWithMicrolapses()
-						&& finalInst.getProduction().getName().equals(Symbol.get("wait"))){ // NEW for fatigue: decrement happens only for wait production
+				if (model.getFatigue().isRunWithMicrolapses() && model.getFatigue().isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
 					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				}
 				

@@ -161,6 +161,10 @@ public class PVT extends Task {
 		String cmd = it.next();
 		if (cmd.equals("fatigue-reset-percentage")) {
 			fatigueResetPercentage();
+		}else if (cmd.equals("fatigue-utility-dec-on")) {
+			getModel().getFatigue().setRunWithUtilityDecrement(true);
+		}else if (cmd.equals("fatigue-utility-dec-off")) {
+			getModel().getFatigue().setRunWithUtilityDecrement(false);
 		}
 	}
 
@@ -180,12 +184,11 @@ public class PVT extends Task {
 			responseTime = getModel().getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
 			
-			if (responseTime > 5000){
-				getModel().output(getModel().getProcedural().getLastProductionFired().toString());
-				getModel().output("" + responseTime);
-				getModel().stop();
-				
-			}
+//			if (responseTime > 5000){ // just for testing
+//				getModel().output(getModel().getProcedural().getLastProductionFired().toString());
+//				getModel().output("" + responseTime);
+//				getModel().stop();				
+//			}
 			
 			if (response != null) {
 				currentSession.numberOfResponses++;
