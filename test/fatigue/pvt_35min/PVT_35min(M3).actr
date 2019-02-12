@@ -44,7 +44,7 @@
     :utmc  .01 ;;.02
     :utmc0 0
     
-    :fp-dec 0.006
+    :fp-dec 0.0055
     
     :egs .25
     ;:cst t
@@ -59,7 +59,6 @@
 
 (goal-focus goal)
 
-
 (p wait 
     =goal>
         isa goal
@@ -69,6 +68,7 @@
         buffer                empty
 ==>
     !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-on)
 )
 ;(spp :u 1)
 
@@ -82,6 +82,7 @@
         state free
 ==>
     !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
     +visual>               
         isa	move-attention
         screen-pos =visual-location
@@ -101,6 +102,7 @@
         state free 
 ==>
     !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
     !output! (=val)
     +manual>
         isa press-key
@@ -120,6 +122,7 @@
         state free 
 ==>
     !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
     !output! ("***  press Key - False Start  ***")
     +manual>
         isa press-key
