@@ -348,13 +348,19 @@ public class Production {
 
 		Instantiation inst = new Instantiation (this, model.getTime(), instU);
 
+		boolean fatigueMismatch = false;
+		
 		for (int i = 0; i < conditions.size(); i++) {
 			BufferCondition bc = conditions.elementAt(i);
 			if (!bc.test(inst)) {
-				if (model.getProcedural().whyNotTrace)
-					model.output("   X instantiation failed\n");
-				model.getProcedural().whyNotTrace = savedWhyNotTrace;
-				return null;
+				if (model.getFatigue().isFatigueEnabled() && model.getFatigue().isFatiguePartialMatching()) {
+					fatigueMismatch = true;
+				} else {
+					if (model.getProcedural().whyNotTrace)
+						model.output("   X instantiation failed\n");
+					model.getProcedural().whyNotTrace = savedWhyNotTrace;
+					return null;
+				}
 			}
 		}
 
@@ -364,11 +370,21 @@ public class Production {
 			if (model.getProcedural().whyNotTrace)
 				model.output("   [delayed] " + dsc.buffer + ">");
 			if (!dsc.slotCondition.test(dsc.buffer, dsc.bufferChunk, inst)) {
-				if (model.getProcedural().whyNotTrace)
-					model.output("   X instantiation failed\n");
-				model.getProcedural().whyNotTrace = savedWhyNotTrace;
-				return null;
+				if (model.getFatigue().isFatigueEnabled() && model.getFatigue().isFatiguePartialMatching()) {
+					fatigueMismatch = true;
+				} else {
+					if (model.getProcedural().whyNotTrace)
+						model.output("   X instantiation failed\n");
+					model.getProcedural().whyNotTrace = savedWhyNotTrace;
+					return null;
+				}
 			}
+		}
+
+		if (fatigueMismatch) {
+			// if the production has not matched but fatigue partial matching is on,
+			// set instantiation utility to 0 (see Walsh, Gunzelmann, & Van Dongen, 2017)
+			inst.setUtility(0 + noise);
 		}
 
 		if (model.getProcedural().whyNotTrace)
