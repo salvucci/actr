@@ -16,6 +16,8 @@ public class Fatigue extends Module {
 	private boolean runWithMicrolapses = true;
 	private boolean runWithUtilityDecrement = true;
 	
+	private boolean fatiguePartialMatching = true;
+	
 	private double fatigueFPDec = 1; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
 	private double fatigueFPDecSleep1 = 0; 	// FPDec constant for sleep
 	private double fatigueFPDecSleep2 = 0; 	// FPDec constant for sleep
@@ -241,6 +243,14 @@ public class Fatigue extends Module {
 
 	public void setFatigueEnabled(boolean fatigueEnabled) {
 		this.fatigueEnabled = fatigueEnabled;
+	}
+
+	public boolean isFatiguePartialMatching() {
+		return fatiguePartialMatching;
+	}
+
+	public void setFatiguePartialMatching(boolean b) {
+		this.fatiguePartialMatching = b;
 	}
 
 	public boolean isRunWithMicrolapses() {

@@ -693,9 +693,11 @@ public class Model {
 
 		// Fatigue parameters
 		else if (parameter.equals(":fatigue")) {
-			fatigue.setFatigueEnabled((!value.equals("nil")));
+			fatigue.setFatigueEnabled(!value.equals("nil"));
 			procedural.utilityUseThreshold = !value.equals("nil");
 		}
+		else if (parameter.equals(":fatigue-partial-matching"))
+			fatigue.setFatiguePartialMatching(!value.equals("nil"));
 		else if (parameter.equals(":fp-dec"))
 			fatigue.setFatigueFPDec(Double.valueOf(value));
 		else if (parameter.equals(":fp-dec-sleep1"))
