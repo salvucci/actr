@@ -354,7 +354,11 @@ public class Production {
 			BufferCondition bc = conditions.elementAt(i);
 			if (!bc.test(inst)) {
 				if (model.getFatigue().isFatigueEnabled() && model.getFatigue().isFatiguePartialMatching()) {
-					fatigueMismatch = true;
+					Chunk bufferChunk = model.getBuffers().get(bc.getBuffer());
+					if (bufferChunk == null)
+						return null;
+					else
+						fatigueMismatch = true;
 				} else {
 					if (model.getProcedural().whyNotTrace)
 						model.output("   X instantiation failed\n");
