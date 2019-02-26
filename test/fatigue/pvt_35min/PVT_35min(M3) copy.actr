@@ -28,7 +28,7 @@
     :cst nil
     :v t
     :fatigue t 
-    :fatigue-partial-matching t
+    :fatigue-partial-matching nil
     :iu 1.5
     :ut 1.2
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X

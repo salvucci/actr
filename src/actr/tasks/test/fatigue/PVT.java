@@ -171,8 +171,8 @@ public class PVT extends Task {
 	// calling percentage reset after any new task presentation (audio or visual)
 	void fatigueResetPercentage() {
 		getModel().getFatigue().fatigueResetPercentages();
-		if (getModel().isVerbose())
-			getModel().output("!!!! Fatigue Percentage Reset !!!!");
+//		if (getModel().isVerbose())
+//			getModel().output("!!!! Fatigue Percentage Reset !!!!");
 	}
 
 	@Override

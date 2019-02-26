@@ -201,8 +201,8 @@ public class Procedural extends Module {
 				realActionTime = model.randomizeTime(realActionTime);
 
 			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
-				if (model.verboseTrace)
-					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
+//				if (model.verboseTrace)
+//					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
 			
 			if (model.getFatigue().isFatigueEnabled() && 
 					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
@@ -213,7 +213,9 @@ public class Procedural extends Module {
 				}
 				
 				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
-						"[no rule fired, utility below threshold] [microlapse]") {
+						"[no rule fired, utility below threshold] [microlapse] "
+						+ "[u:" + String.format("%.2f", finalInst.getUtility()) 
+						+ " ut:" + String.format("%.2f", model.getFatigue().getFatigueUT()) + "]") {
 					public void action() {
 						findInstantiations(buffers);
 					}
