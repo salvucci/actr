@@ -26,7 +26,7 @@
 
 (sgp 
     :cst nil
-    :v t
+    :v nil
     :fatigue t 
     :fatigue-partial-matching nil
     :iu 1.5
@@ -55,6 +55,7 @@
     :vpft t
     
     :max-prep-time-diff 10.0  
+    :visual-attention-latency .035
 )
 
 
