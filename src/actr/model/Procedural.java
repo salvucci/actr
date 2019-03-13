@@ -200,7 +200,7 @@ public class Procedural extends Module {
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
+//			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
 //				if (model.verboseTrace)
 //					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
 			
@@ -208,7 +208,7 @@ public class Procedural extends Module {
 					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
 				microLapses = true;
 
-				if (model.getFatigue().isRunWithMicrolapses() && model.getFatigue().isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
+				if (model.getFatigue().isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
 					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				}
 				

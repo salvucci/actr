@@ -13,7 +13,6 @@ public class Fatigue extends Module {
 	private Model model;
 
 	private boolean fatigueEnabled = false; 	// Turns fatigue module off / on
-	private boolean runWithMicrolapses = true;
 	private boolean runWithUtilityDecrement = true;
 	
 	private boolean fatiguePartialMatching = true;
@@ -251,14 +250,6 @@ public class Fatigue extends Module {
 
 	public void setFatiguePartialMatching(boolean b) {
 		this.fatiguePartialMatching = b;
-	}
-
-	public boolean isRunWithMicrolapses() {
-		return runWithMicrolapses;
-	}
-
-	public void setRunWithMicrolapses(boolean runWithMicrolapses) {
-		this.runWithMicrolapses = runWithMicrolapses;
 	}
 	
 	public boolean isRunWithUtilityDecrement() {

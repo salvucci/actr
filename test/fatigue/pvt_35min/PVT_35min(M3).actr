@@ -26,9 +26,9 @@
 
 (sgp 
     :cst nil
-    :v nil
-    :fatigue t 
-    :fatigue-partial-matching t
+    :v t
+    ;;:fatigue t 
+    ;;:fatigue-partial-matching t
     :iu 1.5
     :ut 1.2
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
@@ -54,6 +54,7 @@
     :randomize-time t
     :vpft t
     
+    :motor-feature-prep-time 0
     :max-prep-time-diff 10.0  
     :visual-attention-latency .035
 )
