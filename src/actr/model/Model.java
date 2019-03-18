@@ -729,9 +729,7 @@ public class Model {
 		else if (parameter.equals(":fdc"))
 			fatigue.setFatigueFDC(Double.valueOf(value));
 		else if (parameter.equals(":hour"))
-			fatigue.setFatigueHour(Double.valueOf(value));
-		else if (parameter.equals(":hour"))
-			fatigue.setFatigueHour(Double.valueOf(value));
+			fatigue.setFatigueStartTime(Double.valueOf(value));
 		else if (parameter.equals(":p0"))
 			fatigue.fatigueP0 = Double.valueOf(value);
 		else if (parameter.equals(":u0"))

@@ -56,7 +56,7 @@ public class PVT extends Task {
 		PVTduration = getModel().getFatigue().getTaskDuration();
 		timesOfPVT = getModel().getFatigue().getTaskSchdule();
 
-		getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
+		getModel().getFatigue().setFatigueStartTime(timesOfPVT.get(sessionNumber));
 		getModel().getFatigue().startFatigueSession();
 
 
@@ -141,7 +141,7 @@ public class PVT extends Task {
 						sleepAttackIndex = 0;
 						currentSession.startTime = getModel().getTime();
 						currentBlock.startTime = getModel().getTime();
-						getModel().getFatigue().setFatigueHour(timesOfPVT.get(sessionNumber));
+						getModel().getFatigue().setFatigueStartTime(timesOfPVT.get(sessionNumber));
 						getModel().getFatigue().startFatigueSession();
 
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random

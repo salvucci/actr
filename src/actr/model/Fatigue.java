@@ -39,8 +39,10 @@ public class Fatigue extends Module {
 	private double fatigueUtility0 = 0;         //Constant utility offset
 	private double fatigueFDBMC = -0.02681;  	//Coefficient relating biomath value to fd
 	private double fatigueFDC = 0.95743;  		// Constant fd offset
-	private double fatigueHour = 0;   			/* Initiates a new session by providing the number of hours 
-													since the beginning of the sleep schedule */
+	private double fatigueStartTime = 0;   			/* Initiates a new session by providing the number of hours 
+													since the beginning of the sleep schedule.
+													The format is : hh + mm/60
+													e.g. 5:30 = 5.5  */
 	private int numberOfConsecutiveMicroLapses = 1;
 	double startTimeSC = 0;  					/* Records the time in second at the start of a session, 
 									    			so proper within-session offsets can be calculated */
@@ -98,11 +100,19 @@ public class Fatigue extends Module {
 		}
 	}
 
+	// Biomathematical for the start time of the session in the form of hh + (mm/60)
 	public double computeBioMathValueForHour(){
 		if (pvalues.isEmpty())
 			return 0;
 		else
-			return pvalues.ceilingEntry(fatigueHour).getValue();
+			return pvalues.ceilingEntry(fatigueStartTime).getValue();
+	}
+	
+	public double computeBioMathValue(){
+		if (pvalues.isEmpty())
+			return 0;
+		else
+			return pvalues.ceilingEntry(fatigueStartTime + mpTime()/60).getValue();
 	}
 
 	/**
@@ -129,7 +139,7 @@ public class Fatigue extends Module {
 //			fatigueUT = getFatigueUT0() * (1 - getFatigueUTBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueUTMC());
 
 			// NEW MODEL addition factor. *** THE UTILITY IS BEING CHANGED IN THE PRODUCTION CLASS *** 
-			double BioMath = computeBioMathValueForHour();
+			double BioMath = computeBioMathValue();
 			double UTMC0 = getFatigueUTMC0();
 			double UTMC = getFatigueUTMC();
 			double UTBMC = getFatigueUTBMC();
@@ -159,8 +169,8 @@ public class Fatigue extends Module {
 	 * @param hour
 	 * Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
 	 */
-	public void setFatigueHour(double hour) {
-		fatigueHour = hour;
+	public void setFatigueStartTime(double hour) {
+		fatigueStartTime = hour;
 	}
 
 	/**
