@@ -15,7 +15,7 @@ public class Fatigue extends Module {
 	private boolean fatigueEnabled = false; 	// Turns fatigue module off / on
 	private boolean runWithUtilityDecrement = true;
 	
-	private boolean fatiguePartialMatching = true;
+	private boolean fatiguePartialMatching = false;
 	
 	private double fatigueFPDec = 1; 	// Decrease in fp after each microlapse (NEW VALUE FOR THE MULTIPICATION)
 	private double fatigueFPDecSleep1 = 0; 	// FPDec constant for sleep

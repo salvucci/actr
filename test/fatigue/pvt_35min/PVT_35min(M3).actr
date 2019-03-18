@@ -16,7 +16,7 @@
     32  ;; 24 +12
 )
 
-(set-task-duration 2100.0)
+(set-task-duration 2100.0) ;;2100
 
 (set-output-dir "./test/fatigue/pvt_35min")
 
@@ -51,12 +51,12 @@
     ;:cst t
     
     :dat .05
-    :randomize-time t
+    ;;:randomize-time t
     :vpft t
     
-    :motor-feature-prep-time 0
+    :motor-feature-prep-time 0 ; .05
     :max-prep-time-diff 10.0  
-    :visual-attention-latency .035
+    :visual-attention-latency .005 ; .035
 )
 
 

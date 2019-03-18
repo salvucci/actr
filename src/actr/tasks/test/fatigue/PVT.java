@@ -184,6 +184,10 @@ public class PVT extends Task {
 			responseTime = getModel().getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
 			
+			if (getModel().isVerbose() && responseTime < 150)
+				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
+			
 //			if (responseTime > 5000){ // just for testing
 //				getModel().output(getModel().getProcedural().getLastProductionFired().toString());
 //				getModel().output("" + responseTime);
@@ -416,11 +420,12 @@ public class PVT extends Task {
 		
 		////////////////////////////////////////////////////////////
 		for (int i = 0; i < numberOfSessions; i++){
-			getModel().output("Session" + (i+1) + "\t" + "Block# \tAlert RT Medain\t%L Mean\t%L SD \t%L 95CI\t%FS Mean"
+			getModel().output("Session" + (i+1) + "\t" + "Block# \t(Alert RT Median)\t%L Mean\t%L SD \t%L 95CI\t%FS Mean"
 					+ "\t%FS SD\t%FS 95CI\t#L Mean");
 			for (int j = 0; j < numberOfBlocks; j++){
 				getModel().output("\t\tBlock" + (j+1)
-						+ "\t" + df2.format(blocksMedianAlertResponses[i][j].mean())
+						+ "\t(" + df2.format(blocksMedianAlertResponses[i][j].mean())
+						+ "\tSD:" + df2.format(blocksMedianAlertResponses[i][j].stddev()) +")"
 						+ "\t\t" + df2.format(blocksProportionLapses[i][j].mean() * 100)
 						+ "\t" + df2.format(blocksProportionLapses[i][j].stddev() * 100)
 						+ "\t" + df2.format(blocksProportionLapses[i][j].CI_95percent() * 100)
