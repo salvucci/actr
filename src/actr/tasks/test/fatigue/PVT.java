@@ -420,19 +420,19 @@ public class PVT extends Task {
 		
 		////////////////////////////////////////////////////////////
 		for (int i = 0; i < numberOfSessions; i++){
-			getModel().output("Session" + (i+1) + "\t" + "Block# \t(Alert RT Median)\t%L Mean\t%L SD \t%L 95CI\t%FS Mean"
-					+ "\t%FS SD\t%FS 95CI\t#L Mean");
+			getModel().output("Session " + (i+1) + "\t" + "Block# \tAlert RT       \t% Lapses        \t% False Starts  \t# Lapses");
+			getModel().output("        " +         "\t" + "       \t(Median\tSD   )\t(Mean\tSD\t95CI)\t(Mean\tSD\t95CI)\tMean");
 			for (int j = 0; j < numberOfBlocks; j++){
 				getModel().output("\t\tBlock" + (j+1)
 						+ "\t(" + df2.format(blocksMedianAlertResponses[i][j].mean())
-						+ "\tSD:" + df2.format(blocksMedianAlertResponses[i][j].stddev()) +")"
-						+ "\t\t" + df2.format(blocksProportionLapses[i][j].mean() * 100)
+						+ "\t" + df2.format(blocksMedianAlertResponses[i][j].stddev()) +")"
+						+ "\t(" + df2.format(blocksProportionLapses[i][j].mean() * 100)
 						+ "\t" + df2.format(blocksProportionLapses[i][j].stddev() * 100)
-						+ "\t" + df2.format(blocksProportionLapses[i][j].CI_95percent() * 100)
-						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].mean() * 100) 
-						+ "\t\t" + df2.format(blocksProportionFalseStarts[i][j].stddev() * 100)
-						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].CI_95percent() * 100)
-						+ "\t\t" + df2.format(blocksNumberLapses[i][j].mean())
+						+ "\t" + df2.format(blocksProportionLapses[i][j].CI_95percent() * 100) +")"
+						+ "\t(" + df2.format(blocksProportionFalseStarts[i][j].mean() * 100) 
+						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].stddev() * 100)
+						+ "\t" + df2.format(blocksProportionFalseStarts[i][j].CI_95percent() * 100) +")"
+						+ "\t" + df2.format(blocksNumberLapses[i][j].mean())
 						);
 			}
 			getModel().outputInLine("\n\n");
