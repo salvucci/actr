@@ -45,6 +45,7 @@ public class PVT extends Task {
 
 	@Override
 	public void start() {
+		getModel().output("Staring a new session ========== "  + sessionNumber);
 		random = new Random();
 		lastTime = 0;
 		currentSession = new SessionPVT();
@@ -124,8 +125,9 @@ public class PVT extends Task {
 
 		// Starting a new Session
 		else {
+			getModel().output("Stoping session ========== "  + sessionNumber);
 			currentSession.blocks.add(currentBlock);
-			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValueforHour(timesOfPVT.get(sessionNumber));
+			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValue(timesOfPVT.get(sessionNumber));
 			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT.get(sessionNumber));
 			sessions.add(currentSession);
 			sessionNumber++;
@@ -135,6 +137,7 @@ public class PVT extends Task {
 				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
+						getModel().output("Staring a new session ========== "  + sessionNumber);
 						currentSession = new SessionPVT();
 						currentBlock = currentSession.new Block();
 						stimulusVisibility = false;
@@ -147,6 +150,7 @@ public class PVT extends Task {
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
 						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+						fatigueResetPercentage();
 					}
 				});
 			} else {

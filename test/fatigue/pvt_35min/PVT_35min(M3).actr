@@ -26,37 +26,37 @@
 
 (sgp 
     :cst nil
-    :v t
-    ;;:fatigue t 
-    ;;:fatigue-partial-matching t
-    :iu 1.5
-    :ut 1.2
+    :v nil
+    :fatigue t 
+    :fatigue-partial-matching t
+    :iu 1.55
+    :ut 1.25
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
     ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
     ;; best value for  BioMath=4.26 (10am) : X=
     ;; IU = BM * ( fpbmc - utbmc ) + X + UT0
     
     ;;:microlapses nil
-    :fpbmc .029
-    :fpmc .077 ;;.13
-    :fpmc0 0.001
+    :fpbmc .03
+    :fpmc .081 ;;.13
+    :fpmc0 0
     
     :utbmc 0.015
-    :utmc  .01 ;;.02
+    :utmc  .03 ;;.02
     :utmc0 0
     
-    :fp-dec 0.0055
+    :fp-dec 0.007
     
     :egs .25
     ;:cst t
     
     :dat .05
-    ;;:randomize-time t
+    :randomize-time t
     :vpft t
     
     :motor-feature-prep-time 0 ; .05
     :max-prep-time-diff 10.0  
-    :visual-attention-latency .005 ; .035
+    :visual-attention-latency .045 ; .035
 )
 
 

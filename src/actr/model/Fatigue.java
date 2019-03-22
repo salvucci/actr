@@ -158,13 +158,13 @@ public class Fatigue extends Module {
 //				); // model 3
 	}
 
-	public double getBioMathModelValueforHour(double hour){
+	public double getBioMathModelValue(double hour){
 		if (pvalues.isEmpty())
 			return 0;
 		else
 			return pvalues.ceilingEntry(hour).getValue();
 	}
-
+	
 	/**
 	 * @param hour
 	 * Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
