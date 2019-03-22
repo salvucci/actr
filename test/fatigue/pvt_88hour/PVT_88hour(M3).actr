@@ -50,7 +50,7 @@
     :utmc  .03 ;;.02
     :utmc0 0
     
-    :fp-dec 0.007
+    :fp-dec 0.006
     
     :egs .25
     ;:cst t

@@ -388,7 +388,7 @@ public class Production {
 		if (fatigueMismatch) {
 			// if the production has not matched but fatigue partial matching is on,
 			// set instantiation utility to 0 (see Walsh, Gunzelmann, & Van Dongen, 2017)
-			inst.setUtility(0 + noise);
+			inst.setUtility(model.getFatigue().getFatigueFPPercent() * (0 + noise));
 		}
 
 		if (model.getProcedural().whyNotTrace)

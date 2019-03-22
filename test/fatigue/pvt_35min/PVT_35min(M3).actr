@@ -38,14 +38,14 @@
     
     ;;:microlapses nil
     :fpbmc .03
-    :fpmc .081 ;;.13
+    :fpmc .09 ;;.13
     :fpmc0 0
     
     :utbmc 0.015
-    :utmc  .03 ;;.02
+    :utmc  .035 ;;.02
     :utmc0 0
     
-    :fp-dec 0.007
+    :fp-dec 0.006
     
     :egs .25
     ;:cst t
@@ -56,7 +56,7 @@
     
     :motor-feature-prep-time 0 ; .05
     :max-prep-time-diff 10.0  
-    :visual-attention-latency .045 ; .035
+    :visual-attention-latency .035 ; .035
 )
 
 
@@ -86,7 +86,7 @@
         state free
 ==>
     !eval! (fatigue-reset-percentage)
-    !eval! (fatigue-utility-dec-off)
+    !eval! (fatigue-utility-dec-on)
     +visual>               
         isa	move-attention
         screen-pos =visual-location
@@ -106,7 +106,7 @@
         state free 
 ==>
     !eval! (fatigue-reset-percentage)
-    !eval! (fatigue-utility-dec-off)
+    !eval! (fatigue-utility-dec-on)
     !output! (=visual)
     !output! (=val)
     +manual>
