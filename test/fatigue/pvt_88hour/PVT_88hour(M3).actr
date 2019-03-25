@@ -34,20 +34,20 @@
     :v nil
     :fatigue t 
     :fatigue-partial-matching t
-    :iu 1.55
-    :ut 1.25
+    :iu 1.9
+    :ut 1.22
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
     ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
     ;; best value for  BioMath=4.26 (10am) : X=
     ;; IU = BM * ( fpbmc - utbmc ) + X + UT0
     
     ;;:microlapses nil
-    :fpbmc .03
-    :fpmc .081 ;;.13
+    :fpbmc .031
+    :fpmc .25 ;;.13
     :fpmc0 0
     
-    :utbmc 0.015
-    :utmc  .03 ;;.02
+    :utbmc 0.01
+    :utmc  .04 ;;.02
     :utmc0 0
     
     :fp-dec 0.006
@@ -61,7 +61,7 @@
     
     :motor-feature-prep-time 0 ; .05
     :max-prep-time-diff 10.0  
-    :visual-attention-latency .045 ; .035
+    :visual-attention-latency .060 ; .035
 )
 
 (goal-focus goal)
