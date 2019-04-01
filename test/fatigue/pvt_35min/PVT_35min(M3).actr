@@ -29,7 +29,7 @@
     :v nil
     :fatigue t 
     :fatigue-partial-matching t
-    :iu 1.9
+    :iu 1.63
     :ut 1.22
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
     ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
@@ -37,11 +37,11 @@
     ;; IU = BM * ( fpbmc - utbmc ) + X + UT0
     
     ;;:microlapses nil
-    :fpbmc .031
-    :fpmc .25 ;;.13
+    :fpbmc .028
+    :fpmc .12 ;;.13
     :fpmc0 0
     
-    :utbmc 0.01
+    :utbmc .01
     :utmc  .04 ;;.02
     :utmc0 0
     
@@ -56,7 +56,7 @@
     
     :motor-feature-prep-time 0 ; .05
     :max-prep-time-diff 10.0  
-    :visual-attention-latency .060 ; .035
+    :visual-attention-latency .055 ; .035
 )
 
 
