@@ -166,11 +166,11 @@ public class Fatigue extends Module {
 	}
 	
 	/**
-	 * @param hour
+	 * @param startTime
 	 * Initiates a new session by providing the number of hours since the beginning of the sleep schedule 
 	 */
-	public void setFatigueStartTime(double hour) {
-		fatigueStartTime = hour;
+	public void setFatigueStartTime(double startTime) {
+		fatigueStartTime = startTime;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package actr.tasks.test.fatigue;
+package actr.tasks.fatigue;
 
 import java.util.*;
 import java.io.File;
@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 import actr.model.Event;
 import actr.model.Symbol;
 import actr.task.*;
-import actr.tasks.test.fatigue.SessionPVT.Block;
+import actr.tasks.fatigue.SessionPVT.Block;
 
 /**
  * Model of PVT test and Fatigue mechanism 

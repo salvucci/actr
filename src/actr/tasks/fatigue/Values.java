@@ -1,4 +1,4 @@
-package actr.tasks.test.fatigue;
+package actr.tasks.fatigue;
 
 import java.text.DecimalFormat;
 import java.util.Collections;

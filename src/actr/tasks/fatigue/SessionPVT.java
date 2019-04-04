@@ -1,7 +1,8 @@
-package actr.tasks.test.fatigue;
+package actr.tasks.fatigue;
 
 import java.util.Vector;
-import actr.tasks.test.fatigue.Values;
+
+import actr.tasks.fatigue.Values;
 
 public class SessionPVT {
 
