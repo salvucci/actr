@@ -232,7 +232,8 @@ public class PVT extends Task {
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-
+		Result result = new Result();
+		
 		PVT task0 = (PVT) tasks[0]; // getting the numbers of sessions and blocks
 		int numberOfSessions = task0.sessions.size();
 		int numberOfBlocks = task0.sessions.get(0).blocks.size();
@@ -444,7 +445,6 @@ public class PVT extends Task {
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////		
 		// Writing the output to csv files in the specified directory (outputDIR)
-		Result result = new Result();
 		String DIR = getModel().getFatigue().getOutputDIR();
 
 		if (DIR == null)
