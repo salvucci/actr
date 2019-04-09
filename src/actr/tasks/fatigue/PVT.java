@@ -11,7 +11,9 @@ import actr.task.*;
 import actr.tasks.fatigue.SessionPVT.Block;
 
 /**
- * Model of PVT test and Fatigue mechanism 
+ * The core class for a model of PVT using fatigue mechanism 
+ * to be performed by an ACT-R model.
+ * <p>
  * 
  * @author Ehsan Khosroshahi
  * 
@@ -19,7 +21,7 @@ import actr.tasks.fatigue.SessionPVT.Block;
 
 public class PVT extends Task {
 	private double PVTduration = 0;
-	private ArrayList<Double> timesOfPVT;
+	public ArrayList<Double> timesOfPVT;
 
 	private TaskLabel label;
 	private double lastTime = 0;
@@ -29,13 +31,16 @@ public class PVT extends Task {
 	private String response = null;
 	private double responseTime = 0;
 	private int sleepAttackIndex = 0; // the variable for handling sleep attacks
-	Random random;
+	private Random random;
 
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
 	private SessionPVT currentSession;
-	private Vector<SessionPVT> sessions = new Vector<SessionPVT>();
+	public Vector<SessionPVT> sessions = new Vector<SessionPVT>();
 
+	/**
+	 * Constructs a new task.
+	 */
 	public PVT() {
 		super();
 		label = new TaskLabel("", 200, 150, 40, 20);
@@ -129,6 +134,7 @@ public class PVT extends Task {
 			currentSession.blocks.add(currentBlock);
 			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValue(timesOfPVT.get(sessionNumber));
 			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT.get(sessionNumber));
+			currentSession.timeOfTheDay = timesOfPVT.get(sessionNumber) % 24;
 			sessions.add(currentSession);
 			sessionNumber++;
 			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));

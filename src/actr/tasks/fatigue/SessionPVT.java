@@ -22,6 +22,30 @@ public class SessionPVT {
 	double bioMathValue;
 	double timeAwake;
 	
+	public Vector<Block> getBlocks() {
+		return blocks;
+	}
+	
+	public Values getReactionTimes() {
+		return reactionTimes;
+	}
+	
+	public Values getTimeOfReactionsFromStart() {
+		return timeOfReactionsFromStart;
+	}
+	
+	public double getTimeOfTheDay() {
+		return timeOfTheDay;
+	}
+	
+	public double getBioMathValue() {
+		return bioMathValue;
+	}
+	
+	public double getTimeAwake() {
+		return timeAwake;
+	}
+	
 	public int getNumberOfAlertResponses(){
 		int count = 0;
 		for (int i = 0; i < reactionTimes.size() ; i++) 
@@ -128,7 +152,7 @@ public class SessionPVT {
 	}
 
 	// 5-min blocks
-	class Block {
+	public class Block {
 		Values blockReactionTimes = new Values();
 		Values blockTimeOfReactionsFromStart = new Values();
 		double startTime;
