@@ -9,7 +9,7 @@
 ;;@author Ehsan Khosroshahi
 ;;;;;
 
-(set-task "actr.tasks.test.fatigue.PVT")
+(set-task "actr.tasks.fatigue.PVT")
 (set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 143.5)(151.5 167.5))
 
 (set-task-schedule 
@@ -34,8 +34,8 @@
     :v nil
     :fatigue t 
     :fatigue-partial-matching t
-    :iu 1.63
-    :ut 1.22
+    :iu 1.51
+    :ut 1.1
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
     ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
     ;; best value for  BioMath=4.26 (10am) : X=
