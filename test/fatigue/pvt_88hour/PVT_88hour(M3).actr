@@ -34,15 +34,15 @@
     :v nil
     :fatigue t 
     :fatigue-partial-matching t
-    :iu 1.51
-    :ut 1.1
+    :iu 1.56
+    :ut 1.15
     ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
     ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
     ;; best value for  BioMath=4.26 (10am) : X=
     ;; IU = BM * ( fpbmc - utbmc ) + X + UT0
     
     ;;:microlapses nil
-    :fpbmc .028
+    :fpbmc .029
     :fpmc .12 ;;.13
     :fpmc0 0
     
