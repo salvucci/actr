@@ -1,8 +1,6 @@
 package actr.env;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
@@ -120,17 +118,14 @@ public class Main extends JApplet {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
-		if (onMac())
-			MacOS.start();
-		else {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					core = new Core();
-					core.startup();
-				}
+//		if (onMac())
+//			MacOS.start();
+//		else {
+			SwingUtilities.invokeLater(() -> {
+				core = new Core();
+				core.startup();
 			});
-		}
+//		}
 	}
 
 	/**
@@ -140,12 +135,9 @@ public class Main extends JApplet {
 	public void init() {
 		applet = this;
 		JButton button = new JButton("Launch ACT-R");
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				core = new Core();
-				core.newFrame();
-			}
+		button.addActionListener(arg0 -> {
+			core = new Core();
+			core.newFrame();
 		});
 		setLayout(new BorderLayout());
 		add(button, BorderLayout.CENTER);

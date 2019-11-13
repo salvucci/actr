@@ -1,10 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Declarative memory that holds chunks of declarative knowledge.
@@ -12,11 +8,11 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Declarative extends Module {
-	private Model model;
-	private Map<Symbol, Chunk> chunks;
-	private Map<Symbol, ChunkType> chunkTypes;
-	private Map<String, Double> similarities;
-	private Vector<Chunk> finsts;
+	private final Model model;
+	private final Map<Symbol, Chunk> chunks;
+	private final Map<Symbol, ChunkType> chunkTypes;
+	private final Map<String, Double> similarities;
+	private final List<Chunk> finsts;
 	// private double lastCleanup = 0;
 
 	double retrievalThreshold = 0.0;
@@ -42,15 +38,15 @@ public class Declarative extends Module {
 
 	Declarative(Model model) {
 		this.model = model;
-		chunks = new HashMap<Symbol, Chunk>();
-		chunkTypes = new HashMap<Symbol, ChunkType>();
-		similarities = new HashMap<String, Double>();
-		finsts = new Vector<Chunk>();
+		chunks = new HashMap<>();
+		chunkTypes = new HashMap<>();
+		similarities = new HashMap<>();
+		finsts = new Vector<>();
 		// lastCleanup = 0;
 
 		if (extendedMemoryClass != null) {
 			try {
-				extendedMemory = extendedMemoryClass.newInstance();
+				extendedMemory = extendedMemoryClass.getConstructor().newInstance();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -82,16 +78,14 @@ public class Declarative extends Module {
 	}
 
 	Chunk add(Chunk chunk, boolean preventMerge) {
-		if (get(chunk.getName()) != null)
+		if (get(chunk.name()) != null)
 			return chunk;
 
 		if (!preventMerge) {
-			Iterator<Chunk> it = chunks.values().iterator();
-			while (it.hasNext()) {
-				Chunk existingChunk = it.next();
+			for (Chunk existingChunk : chunks.values()) {
 				if (chunk.equals(existingChunk)) {
 					existingChunk.addUse();
-					model.getBuffers().replaceSlotValues(chunk, existingChunk);
+					model.buffers.replaceSlotValues(chunk, existingChunk);
 					return existingChunk;
 				}
 			}
@@ -100,9 +94,7 @@ public class Declarative extends Module {
 		chunk.setFan(1);
 
 		if (!optimizedFan) {
-			Iterator<Chunk> it = chunks.values().iterator();
-			while (it.hasNext()) {
-				Chunk existingChunk = it.next();
+			for (Chunk existingChunk : chunks.values()) {
 				chunk.increaseFan(chunk.appearsInSlotsOf(existingChunk));
 			}
 		}
@@ -115,7 +107,7 @@ public class Declarative extends Module {
 		}
 
 		chunk.setCreationTime(model.getTime());
-		chunks.put(chunk.getName(), chunk);
+		chunks.put(chunk.name(), chunk);
 		return chunk;
 	}
 
@@ -139,23 +131,13 @@ public class Declarative extends Module {
 		return chunks.size();
 	}
 
-	/**
-	 * Gets the chunk iterator for all chunks.
-	 * 
-	 * @return the iterator
-	 */
-	public Iterator<Chunk> getChunks() {
-		return chunks.values().iterator();
-	}
-
+	
 	Chunk findRetrieval(Chunk request) {
-		HashSet<Chunk> matches = new HashSet<Chunk>();
+		Set<Chunk> matches = null;
 		if (activationTrace)
 			model.output("*** finding retrieval for request " + request);
 
-		Iterator<Chunk> it = chunks.values().iterator();
-		while (it.hasNext()) {
-			Chunk potential = it.next();
+		for (Chunk potential : chunks.values()) {
 			boolean match = true;
 			Iterator<Symbol> slots = request.getSlotNames();
 			while (slots.hasNext()) {
@@ -166,28 +148,29 @@ public class Declarative extends Module {
 						finsts.clear();
 					else if (potential.isRetrieved() != value.toBoolean()) {
 						match = false;
-						continue;
 					}
 				} else {
 					Symbol potval = potential.get(slot);
 					if (!partialMatching || (slot == Symbol.isa || slot.getString().charAt(0) == ':'))
 						if (potval == null || (potval != request.get(slot)))
-							if (!model.getDeclarative().isa(potval, value)) {
+							if (!model.declarative.isa(potval, value)) {
 								match = false;
-								continue;
 							}
 				}
 			}
-			if (match)
+			if (match) {
+				if (matches==null)
+					matches = new HashSet<>();
 				matches.add(potential);
+			}
 		}
 
-		if (matches.isEmpty()) {
+		if (matches==null) {
 			Chunk chunk = null;
 			if (extendedMemory != null) {
 				if (model.isVerbose())
 					model.output("declarative", "extended memory: request " + request);
-				chunk = extendedMemory.findRetrieval(request, model);
+				chunk = ExtendedMemory.findRetrieval(request, model);
 				if (model.isVerbose()) {
 					if (chunk != null)
 						model.output("declarative", "extended memory: found " + chunk);
@@ -199,21 +182,21 @@ public class Declarative extends Module {
 				model.output("*** no matching chunks");
 			return chunk;
 		} else {
-			it = matches.iterator();
+			Iterator<Chunk> it = matches.iterator();
 			Chunk chunk = it.next();
 			if (activationTrace)
-				model.output("*** testing " + chunk.getName() + " " + chunk);
+				model.output("*** testing " + chunk.name() + " " + chunk);
 			double highestActivation = chunk.computeActivation(request);
 			if (activationTrace)
-				model.output("*** activation " + chunk.getName() + " = " + String.format("%.3f", highestActivation));
+				model.output("*** activation " + chunk.name() + " = " + String.format("%.3f", highestActivation));
 			Chunk highestChunk = chunk;
 			while (it.hasNext()) {
 				chunk = it.next();
 				if (activationTrace)
-					model.output("*** testing " + chunk.getName() + " " + chunk);
+					model.output("*** testing " + chunk.name() + " " + chunk);
 				double act = chunk.computeActivation(request);
 				if (activationTrace)
-					model.output("*** activation " + chunk.getName() + " = " + String.format("%.3f", act));
+					model.output("*** activation " + chunk.name() + " = " + String.format("%.3f", act));
 				if (act > highestActivation) {
 					highestActivation = act;
 					highestChunk = chunk;
@@ -221,7 +204,7 @@ public class Declarative extends Module {
 			}
 			if (highestActivation >= retrievalThreshold) {
 				if (activationTrace)
-					model.output("*** retrieving " + highestChunk.getName() + " " + highestChunk);
+					model.output("*** retrieving " + highestChunk.name() + " " + highestChunk);
 				return highestChunk;
 			} else {
 				if (activationTrace)
@@ -233,49 +216,50 @@ public class Declarative extends Module {
 
 	@Override
 	void update() {
-		for (int i = 0; i < finsts.size(); i++) {
-			Chunk c = finsts.elementAt(i);
+		final int fs = finsts.size();
+		for (int i = 0; i < fs; i++) {
+			Chunk c = finsts.get(i);
 			if (c.getRetrievalTime() < model.getTime() - declarativeFinstSpan) {
 				c.setRetrieved(false);
 				// XXX c.setRetrievalTime (0); // why was this here??
-				finsts.removeElementAt(i);
+				finsts.remove(i);
 			}
 		}
 
-		Chunk request = model.getBuffers().get(Symbol.retrieval);
+		Chunk request = model.buffers.get(Symbol.retrieval);
 		if (request != null && request.isRequest()) {
 			request.setRequest(false);
-			model.getBuffers().clear(Symbol.retrieval);
+			model.buffers.clear(Symbol.retrieval);
 			if (model.verboseTrace)
 				model.output("declarative", "start-retrieval");
 			final Chunk retrieval = findRetrieval(request);
 			if (retrieval != null) {
-				double retrievalTime = latencyFactor * Math.exp(-retrieval.getActivation());
-				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
-				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.requested);
+				double retrievalTime = latencyFactor * Math.exp(-retrieval.activation());
+				model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
+				model.buffers.setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.requested);
 				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative",
-						"retrieved-chunk [" + retrieval.getName() + "]") {
+						"retrieved-chunk [" + retrieval.name() + "]") {
 					@Override
 					public void action() {
 						retrieval.setRetrieved(true);
 						retrieval.setRetrievalTime(model.getTime());
 						finsts.add(retrieval);
-						if (finsts.size() > declarativeNumFinsts)
-							finsts.removeElementAt(0);
+						if (fs > declarativeNumFinsts)
+							finsts.remove(0);
 						retrieval.addUse();
-						model.getBuffers().set(Symbol.retrieval, retrieval);
-						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.free);
-						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.full);
+						model.buffers.set(Symbol.retrieval, retrieval);
+						model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.free);
+						model.buffers.setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.full);
 					}
 				});
 			} else {
 				double retrievalTime = latencyFactor * Math.exp(-retrievalThreshold);
-				model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
+				model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
 				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative", "retrieval-failure") {
 					@Override
 					public void action() {
-						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.state, Symbol.error);
-						model.getBuffers().setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.empty);
+						model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.error);
+						model.buffers.setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.empty);
 					}
 				});
 			}
@@ -307,7 +291,7 @@ public class Declarative extends Module {
 
 	boolean checkFinsts(Symbol name) {
 		for (int i = 0; i < finsts.size(); i++)
-			if (finsts.elementAt(i).getName() == name)
+			if (finsts.get(i).name() == name)
 				return true;
 		return false;
 	}
@@ -327,20 +311,15 @@ public class Declarative extends Module {
 		Double d = similarities.get(chunk1.getString() + "$" + chunk2.getString());
 		if (d == null)
 			d = similarities.get(chunk2.getString() + "$" + chunk1.getString());
-		if (d == null)
-			return -1.0;
-		else
-			return d.doubleValue();
+		return d == null ? -1.0 : d;
 	}
 
 	void setSimilarity(Symbol chunk1, Symbol chunk2, double value) {
-		similarities.put(chunk1.getString() + "$" + chunk2.getString(), new Double(value));
+		similarities.put(chunk1.getString() + "$" + chunk2.getString(), value);
 	}
 
 	void setAllBaseLevels(double baseLevel) {
-		Iterator<Chunk> it = chunks.values().iterator();
-		while (it.hasNext())
-			it.next().setBaseLevel(baseLevel);
+		for (Chunk chunk : chunks.values()) chunk.setBaseLevel(baseLevel);
 	}
 
 	/**
@@ -363,9 +342,7 @@ public class Declarative extends Module {
 	@Override
 	public String toString() {
 		String s = "";
-		Iterator<Chunk> it = chunks.values().iterator();
-		while (it.hasNext())
-			s += it.next() + "\n";
+		for (Chunk chunk : chunks.values()) s += chunk + "\n";
 		return s;
 	}
 }

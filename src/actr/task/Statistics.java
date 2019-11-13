@@ -6,7 +6,9 @@ package actr.task;
  * 
  * @author Dario Salvucci
  */
-public class Statistics {
+public enum Statistics {
+	;
+
 	/**
 	 * Flattens the given two-dimensional array into a one-dimensional array.
 	 * 
@@ -14,13 +16,12 @@ public class Statistics {
 	 *            the two-dimensional array
 	 * @return the one-dimensional array
 	 */
-	public static double[] flatten(double a[][]) {
+	public static double[] flatten(double[][] a) {
 		int maxi = a.length;
 		int maxj = a[0].length;
-		double b[] = new double[maxi * maxj];
+		double[] b = new double[maxi * maxj];
 		for (int i = 0; i < maxi; i++)
-			for (int j = 0; j < maxj; j++)
-				b[i * maxj + j] = a[i][j];
+			System.arraycopy(a[i], 0, b, i * maxj, maxj);
 		return b;
 	}
 
@@ -31,13 +32,13 @@ public class Statistics {
 	 *            the array
 	 * @return the max value
 	 */
-	public static double max(double a[]) {
+	public static double max(double[] a) {
 		if (a.length == 0)
 			return 0;
 		double max = 0;
-		for (int i = 0; i < a.length; i++)
-			if (a[i] > max)
-				max = a[i];
+		for (double v : a)
+			if (v > max)
+				max = v;
 		return max;
 	}
 
@@ -48,12 +49,11 @@ public class Statistics {
 	 *            the array
 	 * @return the mean value
 	 */
-	public static double mean(double a[]) {
+	public static double mean(double[] a) {
 		if (a.length == 0)
 			return 0;
 		double sum = 0;
-		for (int i = 0; i < a.length; i++)
-			sum += a[i];
+		for (double v : a) sum += v;
 		return sum / a.length;
 	}
 
@@ -64,7 +64,7 @@ public class Statistics {
 	 *            the array
 	 * @return the mean value
 	 */
-	public static double average(double a[]) {
+	public static double average(double[] a) {
 		return mean(a);
 	}
 
@@ -75,13 +75,12 @@ public class Statistics {
 	 *            the array
 	 * @return the standard deviation
 	 */
-	public static double stddev(double a[]) {
+	public static double stddev(double[] a) {
 		if (a.length == 0)
 			return 0;
 		double ma = mean(a);
 		double sum = 0;
-		for (int i = 0; i < a.length; i++)
-			sum += Math.pow(a[i] - ma, 2);
+		for (double v : a) sum += Math.pow(v - ma, 2);
 		return Math.sqrt(sum / (a.length - 1));
 	}
 
@@ -92,7 +91,7 @@ public class Statistics {
 	 *            the array
 	 * @return the standard error
 	 */
-	public static double stderr(double a[]) {
+	public static double stderr(double[] a) {
 		return Math.sqrt(stddev(a));
 	}
 
@@ -103,7 +102,7 @@ public class Statistics {
 	 *            the array
 	 * @return the size of the confidence interval
 	 */
-	public static double confidence(double a[]) {
+	public static double confidence(double[] a) {
 		return 1.96 * stderr(a);
 	}
 
@@ -116,7 +115,7 @@ public class Statistics {
 	 *            the second array
 	 * @return the correlation
 	 */
-	public static double correlation(double a1[], double a2[]) {
+	public static double correlation(double[] a1, double[] a2) {
 		if (a1.length <= 1 || (a1.length != a2.length))
 			return 0;
 		double ma = mean(a1), mb = mean(a2);
@@ -137,7 +136,7 @@ public class Statistics {
 	 *            the second array
 	 * @return the correlation
 	 */
-	public static double correlation(double a1[][], double a2[][]) {
+	public static double correlation(double[][] a1, double[][] a2) {
 		return correlation(flatten(a1), flatten(a2));
 	}
 
@@ -150,7 +149,7 @@ public class Statistics {
 	 *            the second array
 	 * @return the RMSE
 	 */
-	public static double rmse(double a1[], double a2[]) {
+	public static double rmse(double[] a1, double[] a2) {
 		if (a1.length <= 1 || (a1.length != a2.length))
 			return 0;
 		double sum = 0;
@@ -169,7 +168,7 @@ public class Statistics {
 	 *            the second array
 	 * @return the RMSE
 	 */
-	public static double rmse(double a1[][], double a2[][]) {
+	public static double rmse(double[][] a1, double[][] a2) {
 		return rmse(flatten(a1), flatten(a2));
 	}
 
@@ -183,7 +182,7 @@ public class Statistics {
 	 *            the human data
 	 * @return the normalized error
 	 */
-	public static double error(double model[], double human[]) {
+	public static double error(double[] model, double[] human) {
 		double rmse = rmse(model, human);
 		// double mean = mean(human);
 		// return Math.abs (rmse / mean);
@@ -201,7 +200,7 @@ public class Statistics {
 	 *            the human data
 	 * @return the normalized error
 	 */
-	public static double error(double model[][], double human[][]) {
+	public static double error(double[][] model, double[][] human) {
 		return error(flatten(model), flatten(human));
 	}
 }

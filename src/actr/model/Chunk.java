@@ -1,10 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Chunks of declarative knowledge represented as pairings of slots and slot
@@ -19,20 +15,20 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Chunk {
-	private Model model;
-	private Symbol name;
+	public final Model model;
+	private /*final*/ Symbol name;
 	private boolean isRequest;
 	private boolean retrieved;
 	private double retrievalTime;
 	private double lastUsedAsGoal = 0;
-	private Map<Symbol, Symbol> slots;
-	private List<SlotCondition> requestConditions;
+	private final Map<Symbol, Symbol> slots = new HashMap<>();
+	private final List<SlotCondition> requestConditions = new ArrayList<>();
 	private double creationTime;
 	private int useCount;
-	private Vector<Double> uses;
+	private final List<Double> uses = new ArrayList<>();
 	private int fan;
 	private double baseLevel, activation;
-	private int threadID;
+	@Deprecated private int threadID;
 
 	/**
 	 * Creates a new chunk.
@@ -43,12 +39,9 @@ public class Chunk {
 	public Chunk(Symbol name, Model model) {
 		this.name = name;
 		this.model = model;
-		slots = new HashMap<Symbol, Symbol>();
-		requestConditions = new Vector<SlotCondition>();
 		creationTime = model.getTime();
 		isRequest = false;
 		useCount = 0;
-		uses = new Vector<Double>();
 		fan = 1;
 		baseLevel = 0;
 		activation = 0;
@@ -59,9 +52,7 @@ public class Chunk {
 
 	Chunk copy() {
 		Chunk c2 = new Chunk(Symbol.getUnique(name.getString()), model);
-		Iterator<Symbol> it = slots.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol slot = it.next();
+		for (Symbol slot : slots.keySet()) {
 			c2.set(slot, get(slot));
 		}
 		// c2.creationTime = creationTime;
@@ -79,7 +70,7 @@ public class Chunk {
 	 * 
 	 * @return the chunk name
 	 */
-	public Symbol getName() {
+	public Symbol name() {
 		return name;
 	}
 
@@ -88,7 +79,7 @@ public class Chunk {
 	 * 
 	 * @return the chunk activation
 	 */
-	public double getActivation() {
+	public double activation() {
 		return activation;
 	}
 
@@ -97,7 +88,7 @@ public class Chunk {
 	 * 
 	 * @return the base-level activation
 	 */
-	public double getBaseLevel() {
+	public double baseLevel() {
 		return baseLevel;
 	}
 
@@ -117,7 +108,7 @@ public class Chunk {
 		return lastUsedAsGoal;
 	}
 
-	void setName(Symbol name) {
+	@Deprecated void setName(Symbol name) {
 		this.name = name;
 	}
 
@@ -147,10 +138,7 @@ public class Chunk {
 	 */
 	public Symbol get(Symbol slot) {
 		Symbol sym = slots.get(slot);
-		if (sym == null)
-			return Symbol.nil;
-		else
-			return sym;
+		return sym == null ? Symbol.nil : sym;
 	}
 
 	/**
@@ -187,11 +175,11 @@ public class Chunk {
 	 * @param value
 	 */
 	public void set(Symbol slot, Symbol value) {
-		boolean adjustFan = (model.getDeclarative().get(name) != null);
+		boolean adjustFan = (model.declarative.get(name) != null);
 
 		Symbol oldValue = get(slot);
 		if (adjustFan && oldValue != Symbol.nil) {
-			Chunk oldValueChunk = model.getDeclarative().get(oldValue);
+			Chunk oldValueChunk = model.declarative.get(oldValue);
 			if (oldValueChunk != null)
 				oldValueChunk.decreaseFan();
 		}
@@ -201,10 +189,10 @@ public class Chunk {
 		else {
 			slots.put(slot, value);
 			if (adjustFan && slot != Symbol.isa && value != Symbol.nil) {
-				Chunk valueChunk = model.getDeclarative().get(value);
+				Chunk valueChunk = model.declarative.get(value);
 				if (valueChunk == null) {
 					valueChunk = new Chunk(value, model);
-					valueChunk = model.getDeclarative().add(valueChunk);
+					valueChunk = model.declarative.add(valueChunk);
 				}
 				valueChunk.increaseFan();
 			}
@@ -215,13 +203,13 @@ public class Chunk {
 		creationTime = time;
 		useCount = 1;
 		uses.clear();
-		uses.add(new Double(time));
+		uses.add(time);
 	}
 
 	void setBaseLevel(double baseLevel) {
-		if (!model.getDeclarative().baseLevelLearning)
+		if (!model.declarative.baseLevelLearning)
 			this.baseLevel = baseLevel;
-		else if (model.getDeclarative().optimizedLearning)
+		else if (model.declarative.optimizedLearning)
 			useCount = (int) Math.round(baseLevel);
 		else {
 			int n = (int) Math.round(baseLevel);
@@ -240,53 +228,42 @@ public class Chunk {
 	 *            the chunk for comparison
 	 * @return <tt>true</tt> if the chunks are equal
 	 */
-	public boolean equals(Chunk c2) {
+	@Override public boolean equals(Object x) {
+		if (this == x)
+			return true;
+		Chunk c2 = (Chunk)x;
 		if (slotCount() == 0 && c2.slotCount() == 0)
-			return (name == c2.getName());
+			return (name == c2.name());
 		if (slotCount() != c2.slotCount())
 			return false;
-		Iterator<Symbol> it = getSlotNames();
-		while (it.hasNext()) {
-			Symbol slot = it.next();
-			Symbol value = get(slot);
-			Symbol value2 = c2.get(slot);
-			if (value != value2)
-				return false;
-		}
-		return true;
+		return slots.equals(c2.slots);
 	}
 
 	double computeBaseLevel() {
-		if (!model.getDeclarative().baseLevelLearning)
+		if (!model.declarative.baseLevelLearning)
 			return baseLevel;
 		double time = model.getTime();
 		if (time <= creationTime)
 			time = creationTime + .001;
-		if (model.getDeclarative().optimizedLearning) {
-			baseLevel = Math.log(useCount / (1 - model.getDeclarative().baseLevelDecayRate))
-					- model.getDeclarative().baseLevelDecayRate * Math.log(time - creationTime);
+		if (model.declarative.optimizedLearning) {
+			baseLevel = Math.log(useCount / (1 - model.declarative.baseLevelDecayRate))
+					- model.declarative.baseLevelDecayRate * Math.log(time - creationTime);
 		} else {
 			double sum = 0;
-			for (int i = 0; i < uses.size(); i++) {
-				double use = uses.elementAt(i).doubleValue();
-				sum += Math.pow(time - use, -model.getDeclarative().baseLevelDecayRate);
+			int n = uses.size();
+			for (double use : uses) {
+				sum += Math.pow(time - use, -model.declarative.baseLevelDecayRate);
 			}
 			baseLevel = Math.log(sum);
 		}
 		return baseLevel;
 	}
 
-	int appearsInSlotsOf(Chunk c2) {
+	int appearsInSlotsOf(Chunk c) {
 		int count = 0;
-		Iterator<Symbol> it = c2.slots.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol slot = it.next();
-			if (slot != Symbol.get("isa")) {
-				Symbol value = c2.get(slot);
-				if (value == name)
-					count++;
-			}
-		}
+		for (Symbol slot : c.slots.keySet())
+			if (slot != Symbol.get("isa") && c.get(slot) == name)
+				count++;
 		return count;
 	}
 
@@ -307,10 +284,7 @@ public class Chunk {
 	}
 
 	double computeSji(Chunk cj, Chunk ci) {
-		if (cj.appearsInSlotsOf(ci) == 0 && cj.getName() != ci.getName())
-			return 0;
-		else
-			return model.getDeclarative().maximumAssociativeStrength - Math.log(cj.fan);
+		return cj.appearsInSlotsOf(ci) == 0 && cj.name() != ci.name() ? 0 : model.declarative.maximumAssociativeStrength - Math.log(cj.fan);
 	}
 
 	double computeSpreadingActivation(Chunk goal, double totalW) {
@@ -326,13 +300,13 @@ public class Chunk {
 			// continue;
 			if (value == Symbol.nil)
 				continue;
-			Chunk cj = model.getDeclarative().get(value);
+			Chunk cj = model.declarative.get(value);
 			if (cj == null)
 				continue;
 			numGoalSlots++;
-			if (model.getDeclarative().activationTrace && computeSji(cj, this) != 0)
-				model.output("***    spreading activation " + goal.getName() + ": " + cj.getName() + " -> "
-						+ this.getName() + " [" + String.format("%.3f", computeSji(cj, this)) + "]");
+			if (model.declarative.activationTrace && computeSji(cj, this) != 0)
+				model.output("***    spreading activation " + goal.name() + ": " + cj.name() + " -> "
+						+ this.name() + " [" + String.format("%.3f", computeSji(cj, this)) + "]");
 			sum += computeSji(cj, this);
 		}
 		double wji = (numGoalSlots == 0) ? 0 : totalW / numGoalSlots;
@@ -341,43 +315,38 @@ public class Chunk {
 
 	double computePartialMatch(Chunk request) {
 		double sum = 0;
-		Iterator<Symbol> it = request.slots.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol slot = it.next();
+		for (Symbol slot : request.slots.keySet()) {
 			if (slot == Symbol.isa)
 				continue;
 			Symbol value = request.get(slot);
-			sum += model.getDeclarative().getSimilarity(value, get(slot));
+			sum += model.declarative.getSimilarity(value, get(slot));
 		}
-		return model.getDeclarative().mismatchPenalty * sum;
+		return model.declarative.mismatchPenalty * sum;
 	}
 
 	double computeActivation(Chunk request) {
 		activation = computeBaseLevel();
-		if (model.getDeclarative().spreadingActivation) {
-			if (model.getDeclarative().goalActivation > 0) {
-				Chunk goal = model.getBuffers().get(Symbol.goal);
+		if (model.declarative.spreadingActivation) {
+			if (model.declarative.goalActivation > 0) {
+				Chunk goal = model.buffers.get(Symbol.goal);
 				if (goal != null)
-					activation += computeSpreadingActivation(goal, model.getDeclarative().goalActivation);
+					activation += computeSpreadingActivation(goal, model.declarative.goalActivation);
 			}
-			if (model.getDeclarative().imaginalActivation > 0) {
-				Chunk imaginal = model.getBuffers().get(Symbol.imaginal);
+			if (model.declarative.imaginalActivation > 0) {
+				Chunk imaginal = model.buffers.get(Symbol.imaginal);
 				if (imaginal != null)
-					activation += computeSpreadingActivation(imaginal, model.getDeclarative().imaginalActivation);
+					activation += computeSpreadingActivation(imaginal, model.declarative.imaginalActivation);
 			}
 		}
-		if (model.getDeclarative().partialMatching)
+		if (model.declarative.partialMatching)
 			activation += computePartialMatch(request);
-		if (model.getDeclarative().activationNoiseS != 0)
-			activation += Utilities.getNoise(model.getDeclarative().activationNoiseS);
+		if (model.declarative.activationNoiseS != 0)
+			activation += Utilities.getNoise(model.declarative.activationNoiseS);
 		return activation;
 	}
 
 	int getUseCount() {
-		if (model.getDeclarative().optimizedLearning)
-			return useCount;
-		else
-			return uses.size();
+		return model.declarative.optimizedLearning ? useCount : uses.size();
 	}
 
 	/**
@@ -402,10 +371,10 @@ public class Chunk {
 	}
 
 	void addUse() {
-		if (model.getDeclarative().optimizedLearning)
+		if (model.declarative.optimizedLearning)
 			useCount++;
 		else
-			uses.add(new Double(model.getTime()));
+			uses.add(model.getTime());
 	}
 
 	void addRequestCondition(SlotCondition condition) {
@@ -428,12 +397,11 @@ public class Chunk {
 		Symbol isa = get(Symbol.isa);
 		if (isa != null && isa != Symbol.nil)
 			s += " isa " + isa;
-		Iterator<Symbol> it = slots.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol slot = it.next();
+		for (Map.Entry<Symbol, Symbol> entry : slots.entrySet()) {
+			Symbol slot = entry.getKey();
 			if (slot == Symbol.isa)
 				continue;
-			Symbol value = slots.get(slot);
+			Symbol value = entry.getValue();
 			s += " " + slot + " " + value;
 		}
 		return s + ")"; // + " [bl="+getBaseLevel()+"] [fan=" + fan + "]";

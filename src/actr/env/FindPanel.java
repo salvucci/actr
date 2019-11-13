@@ -8,8 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
@@ -30,11 +28,15 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 class FindPanel extends JPanel {
-	private Frame frame;
-	private boolean forEditor;
-	private JTextField findTF, replaceTF;
-	private JCheckBox ignoreCaseCB, wrapAroundCB;
-	private JButton nextButton, previousButton, replaceButton, replaceAllButton;
+	private final Frame frame;
+	private final boolean forEditor;
+	private final JTextField findTF;
+	private final JTextField replaceTF;
+	private final JCheckBox ignoreCaseCB;
+	private final JButton nextButton;
+	private final JButton previousButton;
+	private final JButton replaceButton;
+	private final JButton replaceAllButton;
 	private int searchStart;
 	private boolean inPanel;
 
@@ -92,7 +94,7 @@ class FindPanel extends JPanel {
 		ignoreCaseCB.setSelected(true);
 		makeSmall(ignoreCaseCB);
 
-		wrapAroundCB = new JCheckBox("Wrap around");
+		JCheckBox wrapAroundCB = new JCheckBox("Wrap around");
 		wrapAroundCB.setSelected(false);
 		makeSmall(wrapAroundCB);
 
@@ -117,42 +119,22 @@ class FindPanel extends JPanel {
 		cbPanel.add(Box.createHorizontalGlue());
 
 		nextButton = new JButton("Next");
-		nextButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				findNext();
-			}
-		});
+		nextButton.addActionListener(e -> findNext());
 		nextButton.setEnabled(false);
 		makeSmall(nextButton);
 
 		previousButton = new JButton("Previous");
-		previousButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				findPrevious();
-			}
-		});
+		previousButton.addActionListener(e -> findPrevious());
 		previousButton.setEnabled(false);
 		makeSmall(previousButton);
 
 		replaceButton = new JButton("Replace");
-		replaceButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				replace();
-			}
-		});
+		replaceButton.addActionListener(e -> replace());
 		replaceButton.setEnabled(false);
 		makeSmall(replaceButton);
 
 		replaceAllButton = new JButton("Replace All");
-		replaceAllButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				replaceAll();
-			}
-		});
+		replaceAllButton.addActionListener(e -> replaceAll());
 		replaceAllButton.setEnabled(false);
 		makeSmall(replaceAllButton);
 
@@ -216,12 +198,12 @@ class FindPanel extends JPanel {
 		setVisible(false);
 	}
 
-	JComponent makeSmall(JComponent component) {
+	static JComponent makeSmall(JComponent component) {
 		component.putClientProperty("JComponent.sizeVariant", "small");
 		return component;
 	}
 
-	void scrollTo(JTextComponent tc, int pos, double proportion) {
+	static void scrollTo(JTextComponent tc, int pos, double proportion) {
 		double top = .20;
 		double bottom = .60;
 		try {
@@ -238,14 +220,14 @@ class FindPanel extends JPanel {
 	void find(boolean forward) {
 		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		String findText = findTF.getText();
-		if (findText.equals(""))
+		if (findText.isEmpty())
 			return;
 		String text = textComponent.getText();
 		if (ignoreCaseCB.isSelected()) {
 			findText = findText.toLowerCase();
 			text = text.toLowerCase();
 		}
-		int pos = -1;
+		int pos;
 		if (forward) {
 			pos = text.indexOf(findText, searchStart);
 			if (pos == -1)
@@ -301,7 +283,7 @@ class FindPanel extends JPanel {
 			return;
 
 		String findText = findTF.getText();
-		if (findText.equals(""))
+		if (findText.isEmpty())
 			return;
 		String replaceText = replaceTF.getText();
 		String text = frame.getEditor().getText();
@@ -341,14 +323,14 @@ class FindPanel extends JPanel {
 	}
 
 	boolean isFindNextPossible() {
-		return (!findTF.getText().equals(""));
+		return (!findTF.getText().isEmpty());
 	}
 
 	void update() {
 		JTextComponent textComponent = (forEditor) ? frame.getEditor() : frame.getOutputArea();
 		if (textComponent == null)
 			return;
-		boolean findEnabled = (!findTF.getText().equals(""));
+		boolean findEnabled = (!findTF.getText().isEmpty());
 		boolean replaceEnabled = findEnabled && (textComponent.getSelectionEnd() > textComponent.getSelectionStart());
 		nextButton.setEnabled(findEnabled);
 		previousButton.setEnabled(findEnabled);

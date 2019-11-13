@@ -11,7 +11,7 @@ import javax.swing.JPanel;
  * @author Dario Salvucci
  */
 public class TaskCross extends JPanel implements TaskComponent {
-	int size;
+	final int size;
 
 	/**
 	 * Creates a new cross.

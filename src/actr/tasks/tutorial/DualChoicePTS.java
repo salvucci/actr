@@ -17,18 +17,18 @@ import actr.task.Utilities;
  */
 public class DualChoicePTS extends Task {
 	// Task Code
-	final double trialSpacing = 10.0;
-	final int totalTrials = 24;
+	static final double trialSpacing = 10.0;
+	static final int totalTrials = 24;
 
-	TaskLabel label;
+	final TaskLabel label;
 	int numTrials = -1;
 	double auralVocalStartTime, visualManualStartTime;
 	Trial currentTrial;
-	Vector<Trial> trials = new Vector<Trial>();
+	final Vector<Trial> trials = new Vector<>();
 
 	TrialType currentTrialType = TrialType.AURAL_VOCAL;
 
-	class Trial {
+	static class Trial {
 		double visualManualResponseTime;
 		double auralVocalResponseTime;
 		TrialType type;
@@ -50,7 +50,7 @@ public class DualChoicePTS extends Task {
 		addPeriodicUpdate(trialSpacing);
 	}
 
-	Random random = new Random();
+	final Random random = new Random();
 
 	String randomAuralStimulus() {
 		int i = random.nextInt(3);
@@ -143,15 +143,15 @@ public class DualChoicePTS extends Task {
 
 	// Analysis Code
 
-	double humanRT[][] = { { .446, .456 }, { .281, .283 } };
+	final double[][] humanRT = { { .446, .456 }, { .281, .283 } };
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double modelRT[][] = new double[2][2];
-		double modelCount[] = new double[3];
+		double[][] modelRT = new double[2][2];
+		double[] modelCount = new double[3];
 
-		for (int i = 0; i < tasks.length; i++) {
-			DualChoicePTS task = (DualChoicePTS) (tasks[i]);
+		for (Task value : tasks) {
+			DualChoicePTS task = (DualChoicePTS) value;
 			for (int j = 0; j < task.trials.size(); j++) {
 				Trial trial = task.trials.elementAt(j);
 				if (trial.type.equals(TrialType.AURAL_VOCAL)) {

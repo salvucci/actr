@@ -6,13 +6,13 @@ package actr.model;
  * @author Dario Salvucci
  */
 public class Temporal extends Module {
-	private Model model;
+	private final Model model;
 	private int ticks = 0;
 	private double tick = 0;
 
-	double timeNoise = .015;
-	double timeMultiplier = 1.1;
-	double timeMasterStartIncrement = .011;
+	final double timeNoise = .015;
+	final double timeMultiplier = 1.1;
+	final double timeMasterStartIncrement = .011;
 
 	Temporal(Model model) {
 		this.model = model;
@@ -20,11 +20,11 @@ public class Temporal extends Module {
 
 	@Override
 	void update() {
-		Chunk request = model.getBuffers().get(Symbol.temporal);
+		Chunk request = model.buffers.get(Symbol.temporal);
 		if (request == null || !request.isRequest())
 			return;
 		request.setRequest(false);
-		model.getBuffers().clear(Symbol.temporal);
+		model.buffers.clear(Symbol.temporal);
 
 		if (request.get(Symbol.isa) == Symbol.get("time")) {
 			tick = timeMasterStartIncrement;
@@ -33,10 +33,10 @@ public class Temporal extends Module {
 			Chunk timeChunk = new Chunk(Symbol.getUnique("time"), model);
 			timeChunk.set(Symbol.isa, Symbol.time);
 			timeChunk.set(Symbol.ticks, Symbol.get(0));
-			model.getBuffers().set(Symbol.temporal, timeChunk);
+			model.buffers.set(Symbol.temporal, timeChunk);
 
-			model.getBuffers().setSlot(Symbol.temporalState, Symbol.buffer, Symbol.full);
-			model.getBuffers().setSlot(Symbol.temporalState, Symbol.state, Symbol.busy);
+			model.buffers.setSlot(Symbol.temporalState, Symbol.buffer, Symbol.full);
+			model.buffers.setSlot(Symbol.temporalState, Symbol.state, Symbol.busy);
 
 			model.removeEvents("temporal");
 			queueTickIncrement();
@@ -51,7 +51,7 @@ public class Temporal extends Module {
 				tick *= timeMultiplier;
 				tick += Utilities.getNoise(timeNoise * tick);
 
-				model.getBuffers().setSlot(Symbol.temporal, Symbol.ticks, Symbol.get(ticks));
+				model.buffers.setSlot(Symbol.temporal, Symbol.ticks, Symbol.get(ticks));
 
 				queueTickIncrement();
 			}

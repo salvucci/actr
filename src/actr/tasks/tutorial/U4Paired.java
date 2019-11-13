@@ -16,21 +16,21 @@ import actr.task.Utilities;
 public class U4Paired extends Task {
 	// --- Task Code ---//
 
-	TaskLabel label;
+	final TaskLabel label;
 	double lastTime = 0;
 	int pairIndex = 0, pairItem = 0;
-	String[][] pairs = { { "bank", "0" }, { "card", "1" }, { "dart", "2" }, { "face", "3" }, { "game", "4" },
+	final String[][] pairs = { { "bank", "0" }, { "card", "1" }, { "dart", "2" }, { "face", "3" }, { "game", "4" },
 			{ "hand", "5" }, { "jack", "6" }, { "king", "7" }, { "lamb", "8" }, { "mask", "9" }, { "neck", "0" },
 			{ "pipe", "1" }, { "quip", "2" }, { "rope", "3" }, { "sock", "4" }, { "tent", "5" }, { "vent", "6" },
 			{ "wall", "7" }, { "xray", "8" }, { "zinc", "9" } };
 	int iteration = 0;
-	final int runIterations = 8;
+	static final int runIterations = 8;
 	String response = null;
 	double responseTime = 0;
 	Trial currentTrial;
-	Vector<Trial> trials = new Vector<Trial>();
+	final Vector<Trial> trials = new Vector<>();
 
-	class Trial {
+	static class Trial {
 		int responses = 0;
 		int responsesCorrect = 0;
 		double responseTotalTime = 0;
@@ -88,14 +88,14 @@ public class U4Paired extends Task {
 
 	@Override
 	public void typeKey(char c) {
-		response = c + "";
+		response = String.valueOf(c);
 		responseTime = getModel().getTime() - lastTime;
 	}
 
 	// --- Analysis Code ---//
 
-	double humanTimes[] = { 0.0, 2.158, 1.967, 1.762, 1.680, 1.552, 1.467, 1.402 };
-	double humanCorrect[] = { 0.000, .526, .667, .798, .887, .924, .958, .954 };
+	final double[] humanTimes = { 0.0, 2.158, 1.967, 1.762, 1.680, 1.552, 1.467, 1.402 };
+	final double[] humanCorrect = { 0.000, .526, .667, .798, .887, .924, .958, .954 };
 
 	@Override
 	public int analysisIterations() {
@@ -108,8 +108,8 @@ public class U4Paired extends Task {
 		double[] modelCorrect = new double[runIterations];
 		for (int i = 0; i < runIterations; i++) {
 			double responses = 0, responsesCorrect = 0, responseTime = 0;
-			for (int n = 0; n < tasks.length; n++) {
-				U4Paired task = (U4Paired) tasks[n];
+			for (Task value : tasks) {
+				U4Paired task = (U4Paired) value;
 				responses += task.trials.elementAt(i).responses;
 				responsesCorrect += task.trials.elementAt(i).responsesCorrect;
 				responseTime += task.trials.elementAt(i).responseTotalTime;

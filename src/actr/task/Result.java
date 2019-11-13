@@ -3,14 +3,16 @@ package actr.task;
 import java.util.Vector;
 
 public class Result {
-	private Vector<Measure> measures = new Vector<Measure>();
+	private Vector<Measure> measures = new Vector<>();
 
-	public static boolean includeRMSE = false;
+	public static final boolean includeRMSE = false;
 
-	private class Measure {
-		String name;
-		double r, error, rmse;
-		int points;
+	private static class Measure {
+		final String name;
+		final double r;
+		final double error;
+		double rmse;
+		final int points;
 		String resultString;
 
 		Measure(String name, double r, double error, int points) {
@@ -20,7 +22,7 @@ public class Result {
 			this.points = points;
 		}
 
-		public Measure(String name, double model[], double human[]) {
+		public Measure(String name, double[] model, double[] human) {
 			this.name = name;
 			this.r = Statistics.correlation(model, human);
 			this.error = Statistics.error(model, human);
@@ -44,14 +46,14 @@ public class Result {
 		}
 	}
 
-	private class OkMeasure extends Measure {
+	private static class OkMeasure extends Measure {
 		OkMeasure(String name) {
 			super(name, 0, 0, 0);
 			resultString = "-ok-";
 		}
 	}
 
-	private class NotOkMeasure extends Measure {
+	private static class NotOkMeasure extends Measure {
 		NotOkMeasure(String name) {
 			super(name, 0, 0, 0);
 			resultString = "XXXX";
@@ -59,7 +61,7 @@ public class Result {
 	}
 
 	public Result() {
-		measures = new Vector<Measure>();
+		measures = new Vector<>();
 	}
 
 	public Result(String name, boolean ok) {
@@ -70,11 +72,11 @@ public class Result {
 		measures.add(new Measure(name, r, error, points));
 	}
 
-	public Result(String name, double model[], double human[]) {
+	public Result(String name, double[] model, double[] human) {
 		measures.add(new Measure(name, model, human));
 	}
 
-	public Result(String name, double model[][], double human[][]) {
+	public Result(String name, double[][] model, double[][] human) {
 		measures.add(new Measure(name, Statistics.flatten(model), Statistics.flatten(human)));
 	}
 
@@ -82,11 +84,11 @@ public class Result {
 		measures.add(new Measure(name, r, error, points));
 	}
 
-	public void add(String name, double model[], double human[]) {
+	public void add(String name, double[] model, double[] human) {
 		measures.add(new Measure(name, model, human));
 	}
 
-	public void add(String name, double model[][], double human[][]) {
+	public void add(String name, double[][] model, double[][] human) {
 		measures.add(new Measure(name, Statistics.flatten(model), Statistics.flatten(human)));
 	}
 

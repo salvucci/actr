@@ -10,21 +10,19 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Bold {
-	private Model model;
-	private Map<Symbol, Activity> activities;
+	private final Model model;
+	private final Map<Symbol, Activity> activities;
 
 	boolean brainImaging = false;
-	double boldScale = .75;
-	double boldExponent = 6;
-	double boldIncrement = .200; // 1.5;
-	double boldSettle = 40;
+	final double boldScale = .75;
+	final double boldExponent = 6;
+	final double boldIncrement = .200; // 1.5;
+	final double boldSettle = 40;
 
-	private final Symbol buffers[] = { Symbol.retrieval, Symbol.imaginal, Symbol.visual, Symbol.aural, Symbol.manual,
-			Symbol.vocal };
 	private final double boldMax = maximum();
 
-	private class Span {
-		double startTime;
+	private static class Span {
+		final double startTime;
 		boolean active;
 
 		Span(double st, boolean a) {
@@ -33,8 +31,8 @@ public class Bold {
 		}
 	}
 
-	private class Activity {
-		Vector<Span> spans = new Vector<Span>();
+	private static class Activity {
+		final Vector<Span> spans = new Vector<>();
 
 		Activity() {
 			spans.add(new Span(0.0, false));
@@ -64,9 +62,10 @@ public class Bold {
 	Bold(Model model) {
 		this.model = model;
 
-		activities = new HashMap<Symbol, Activity>();
-		for (int i = 0; i < buffers.length; i++)
-			activities.put(buffers[i], new Activity());
+		activities = new HashMap<>();
+		Symbol[] buffers = {Symbol.retrieval, Symbol.imaginal, Symbol.visual, Symbol.aural, Symbol.manual,
+			Symbol.vocal};
+		for (Symbol buffer : buffers) activities.put(buffer, new Activity());
 	}
 
 	void start() {
@@ -87,7 +86,7 @@ public class Bold {
 
 		model.updateVisuals();
 
-		if (model.getEvents().hasMoreEvents()) {
+		if (model.events.hasMoreEvents()) {
 			model.addEvent(new actr.model.Event(model.getTime() + boldIncrement, "bold", "") {
 				@Override
 				public void action() {
@@ -103,7 +102,7 @@ public class Bold {
 
 	void recordActivity(Symbol buffer) {
 		Symbol stateBuffer = (buffer.isState()) ? buffer : Symbol.get("?" + buffer.getString());
-		Chunk c = model.getBuffers().get(stateBuffer);
+		Chunk c = model.buffers.get(stateBuffer);
 		boolean active = (c.get(Symbol.buffer) != Symbol.empty
 				|| (c.get(Symbol.state) != Symbol.free && c.get(Symbol.state) != Symbol.error));
 
@@ -156,9 +155,6 @@ public class Bold {
 
 	public double getValue(Symbol buffer) {
 		Activity activity = activities.get(buffer);
-		if (activity != null)
-			return cumulative(activity);
-		else
-			return 0;
+		return activity != null ? cumulative(activity) : 0;
 	}
 }

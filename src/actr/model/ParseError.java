@@ -1,10 +1,10 @@
 package actr.model;
 
 public class ParseError {
-	private String text;
-	private int offset;
-	private int line;
-	private boolean fatal;
+	private final String text;
+	private final int offset;
+	private final int line;
+	private final boolean fatal;
 
 	ParseError(String text, int offset, int line, boolean fatal) {
 		this.text = text;

@@ -2,8 +2,6 @@ package actr.env;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -64,24 +62,14 @@ class Toolbar extends JToolBar {
 		JButton runButton = addButton(actions.runAction, 20);
 		final String[][] speedOptions = { { "5x Slower", "0.2" }, { "3x Slower", "0.33" }, { "Real-Time", "1" },
 				{ "3x Faster", "3" }, { "5x Faster", "5" }, { "10x Faster", "10" } };
-		addDropButton("Run Speed", runButton, speedOptions, 2, new Setter() {
-			@Override
-			public void set(String s) {
-				speedup = s;
-			}
-		});
+		addDropButton("Run Speed", runButton, speedOptions, 2, s -> speedup = s);
 
 		add(Box.createHorizontalStrut(6));
 
 		JButton runAnalysisButton = addButton(actions.runAnalysisAction, 20);
 		final String[][] iterationOptions = { { "Task Default", "" }, { "1", "1" }, { "3", "3" }, { "5", "5" },
 				{ "10", "10" }, { "20", "20" }, { "50", "50" }, { "100", "100" } };
-		addDropButton("Number of Iterations", runAnalysisButton, iterationOptions, 0, new Setter() {
-			@Override
-			public void set(String s) {
-				iterations = s;
-			}
-		});
+		addDropButton("Number of Iterations", runAnalysisButton, iterationOptions, 0, s -> iterations = s);
 
 		add(Box.createHorizontalStrut(6));
 
@@ -133,14 +121,9 @@ class Toolbar extends JToolBar {
 		menu.addSeparator();
 		ButtonGroup group = new ButtonGroup();
 		for (int i = 0; i < options.length; i++) {
-			final String pair[] = options[i];
+			final String[] pair = options[i];
 			JMenuItem item = new JRadioButtonMenuItem(pair[0]);
-			item.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setter.set(pair[1]);
-				}
-			});
+			item.addActionListener(e -> setter.set(pair[1]));
 			group.add(item);
 			menu.add(item);
 			if (i == defaultOption) {

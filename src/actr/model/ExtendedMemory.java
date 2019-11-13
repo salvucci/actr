@@ -6,8 +6,10 @@ package actr.model;
  * 
  * @author Dario Salvucci
  */
-public class ExtendedMemory {
-	public Chunk findRetrieval(Chunk request, Model model) {
+public enum ExtendedMemory {
+	;
+
+	public static Chunk findRetrieval(Chunk request, Model model) {
 		return null;
 	}
 }

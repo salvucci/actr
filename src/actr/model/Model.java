@@ -2,8 +2,9 @@ package actr.model;
 
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import actr.env.Frame;
 import actr.task.Task;
@@ -14,35 +15,36 @@ import actr.task.Task;
  * @author Dario Salvucci
  */
 public class Model {
-	private Declarative declarative;
-	private Procedural procedural;
-	private Vision vision;
-	private Audio audio;
-	private Motor motor;
-	private Speech speech;
-	private Imaginal imaginal;
-	private Temporal temporal;
-	private Bold bold;
-	private Buffers buffers;
-	private Events events;
+	public final Declarative declarative;
+	public final Procedural procedural;
+	public final Vision vision;
+	public final Audio audio;
+	public final Motor motor;
+	public final Speech speech;
+	public final Imaginal imaginal;
+	public final Temporal temporal;
+	public final Bold bold;
+	public final Buffers buffers;
+	public final Events events;
 	private Task task;
 	private double time;
 	private boolean stop;
 	private boolean taskUpdated;
 	private int currentThreadID = 1;
-	private Vector<ParseError> errors;
-	private Frame frame;
+	public final List<ParseError> errors;
+	public final Frame frame;
 
 	boolean realTime = false;
 	double realTimeMultiplier = 1;
 	boolean verboseTrace = true;
 	boolean runUntilStop = false;
-	boolean bufferStuffing = true;
+	final boolean bufferStuffing = true;
 	boolean randomizeTime = false;
 	double randomizeTimeValue = 3;
 
 	private Model(Frame frame) {
 		this.frame = frame;
+		errors = new ArrayList<>();
 		declarative = new Declarative(this);
 		procedural = new Procedural(this);
 		vision = new Vision(this);
@@ -57,7 +59,6 @@ public class Model {
 		time = 0;
 		task = new Task();
 		taskUpdated = false;
-		errors = new Vector<ParseError>();
 
 		initialize();
 	}
@@ -116,105 +117,6 @@ public class Model {
 
 	public static Model compile(File file, Frame frame) {
 		return compile(file, frame, null);
-	}
-
-	/**
-	 * Gets the declarative module.
-	 * 
-	 * @return the declarative module
-	 */
-	public Declarative getDeclarative() {
-		return declarative;
-	}
-
-	/**
-	 * Gets the procedural module.
-	 * 
-	 * @return the procedural module
-	 */
-	public Procedural getProcedural() {
-		return procedural;
-	}
-
-	/**
-	 * Gets the vision module.
-	 * 
-	 * @return the vision module
-	 */
-	public Vision getVision() {
-		return vision;
-	}
-
-	/**
-	 * Gets the audio module.
-	 * 
-	 * @return the audio module
-	 */
-	public Audio getAudio() {
-		return audio;
-	}
-
-	/**
-	 * Gets the motor module.
-	 * 
-	 * @return the motor module
-	 */
-	public Motor getMotor() {
-		return motor;
-	}
-
-	/**
-	 * Gets the speech module.
-	 * 
-	 * @return the speech module
-	 */
-	public Speech getSpeech() {
-		return speech;
-	}
-
-	/**
-	 * Gets the imaginal module.
-	 * 
-	 * @return the imaginal module
-	 */
-	public Imaginal getImaginal() {
-		return imaginal;
-	}
-
-	/**
-	 * Gets the temporal module.
-	 * 
-	 * @return the temporal module
-	 */
-	public Temporal getTemporal() {
-		return temporal;
-	}
-
-	/**
-	 * Gets the BOLD module.
-	 * 
-	 * @return the BOLD module
-	 */
-	public Bold getBold() {
-		return bold;
-	}
-
-	/**
-	 * Gets the current buffers.
-	 * 
-	 * @return the buffers
-	 */
-	public Buffers getBuffers() {
-		return buffers;
-	}
-
-	/**
-	 * Gets the current events queue.
-	 * 
-	 * @return the events queue
-	 */
-	public Events getEvents() {
-		return events;
 	}
 
 	/**
@@ -449,13 +351,13 @@ public class Model {
 			time = event.getTime();
 
 			taskUpdated = false;
-			if (verboseTrace && !event.getModule().equals("task") && !event.getModule().equals("bold")
-					&& !event.getModule().equals(""))
-				output(event.getModule(), event.getDescription());
+			if (verboseTrace && !event.module.equals("task") && !event.module.equals("bold")
+					&& !event.module.isEmpty())
+				output(event.module, event.description);
 			event.action();
 
-			if (!event.getModule().equals("procedural") && !event.getModule().equals("bold")
-					&& (taskUpdated || !event.getModule().equals("task")) && !events.scheduled("procedural"))
+			if (!event.module.equals("procedural") && !event.module.equals("bold")
+					&& (taskUpdated || !event.module.equals("task")) && !events.scheduled("procedural"))
 				procedural.findInstantiations(buffers);
 		}
 		if (verboseTrace) {
@@ -514,158 +416,207 @@ public class Model {
 	}
 
 	void setParameter(String parameter, String value, Tokenizer t) {
-		if (parameter.equals(":esc")) {
-			if (value.equals("nil"))
-				recordWarning("unsupported parameter value: " + parameter + " " + value, t);
-		} else if (parameter.equals(":v"))
-			verboseTrace = !value.equals("nil");
-		else if (parameter.equals(":real-time")) {
-			realTime = !value.equals("nil");
-			realTimeMultiplier = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-		} else if (parameter.equals(":rus"))
-			runUntilStop = !value.equals("nil");
-		else if (parameter.equals(":randomize-time")) {
-			randomizeTime = !value.equals("nil");
-			if (randomizeTime) {
-				try {
-					randomizeTimeValue = Double.valueOf(value);
-				} catch (NumberFormatException e) {
-					randomizeTimeValue = 3;
+		switch (parameter) {
+			case ":esc":
+				if (nil(value))
+					recordWarning("unsupported parameter value: " + parameter + " " + value, t);
+				break;
+			case ":v":
+				verboseTrace = !nil(value);
+				break;
+			case ":real-time":
+				realTime = !nil(value);
+				realTimeMultiplier = (!nil(value)) ? Double.parseDouble(value) : 0;
+				break;
+			case ":rus":
+				runUntilStop = !nil(value);
+				break;
+			case ":randomize-time":
+				randomizeTime = !nil(value);
+				if (randomizeTime) {
+					try {
+						randomizeTimeValue = Double.parseDouble(value);
+					} catch (NumberFormatException e) {
+						randomizeTimeValue = 3;
+					}
 				}
-			}
+				break;
+			case ":dat":
+				procedural.actionTime = Double.parseDouble(value);
+				break;
+			case ":vpft":
+				procedural.variableProductionFiringTime = !nil(value);
+				break;
+			case ":ul":
+				procedural.utilityLearning = !nil(value);
+				break;
+			case ":egs":
+				procedural.utilityNoiseS = Double.parseDouble(value);
+				break;
+			case ":alpha":
+				procedural.utilityLearningAlpha = Double.parseDouble(value);
+				break;
+			case ":epl":
+				procedural.productionLearning = !nil(value);
+				break;
+			case ":iu":
+				procedural.initialUtility = Double.parseDouble(value);
+				break;
+			case ":tt":
+				procedural.productionCompilationThresholdTime = Double.parseDouble(value);
+				break;
+			case ":nu":
+				procedural.productionCompilationNewUtility = Double.parseDouble(value);
+				break;
+			case ":cst":
+				procedural.conflictSetTrace = !nil(value);
+				break;
+			case ":pct":
+				procedural.productionCompilationTrace = !nil(value);
+				break;
+			case ":rt":
+				declarative.retrievalThreshold = Double.parseDouble(value);
+				break;
+			case ":lf":
+				declarative.latencyFactor = Double.parseDouble(value);
+				break;
+			case ":bll":
+				declarative.baseLevelLearning = (!nil(value));
+				declarative.baseLevelDecayRate = (!nil(value)) ? Double.parseDouble(value) : 0;
+				break;
+			case ":ol":
+				declarative.optimizedLearning = !nil(value);
+				break;
+			case ":optimized-fan":
+				declarative.optimizedFan = !nil(value);
+				break;
+			case ":ans":
+				declarative.activationNoiseS = Double.parseDouble(value);
+				break;
+			case ":ga":
+				declarative.goalActivation = Double.parseDouble(value);
+				break;
+			case ":imaginal-activation":
+				declarative.imaginalActivation = Double.parseDouble(value);
+				break;
+			case ":mas":
+				declarative.spreadingActivation = (!nil(value));
+				declarative.maximumAssociativeStrength = (!nil(value)) ? Double.parseDouble(value) : 0;
+				break;
+			case ":mp":
+				declarative.partialMatching = (!nil(value));
+				declarative.mismatchPenalty = (!nil(value)) ? Double.parseDouble(value) : 0;
+				break;
+			case ":declarative-num-finsts":
+				declarative.declarativeNumFinsts = Integer.parseInt(value);
+				break;
+			case ":declarative-finst-span":
+				declarative.declarativeFinstSpan = Double.parseDouble(value);
+				break;
+			case ":act":
+				declarative.activationTrace = !nil(value);
+				break;
+			case ":visual-attention-latency":
+				vision.visualAttentionLatency = Double.parseDouble(value);
+				break;
+			case ":visual-movement-tolerance":
+				vision.visualMovementTolerance = Double.parseDouble(value);
+				break;
+			case ":visual-num-finsts":
+				vision.visualNumFinsts = Integer.parseInt(value);
+				break;
+			case ":visual-finst-span":
+				vision.visualFinstSpan = Double.parseDouble(value);
+				break;
+			case ":visual-onset-span":
+				vision.visualOnsetSpan = Double.parseDouble(value);
+				break;
+			case ":tone-detect-delay":
+				audio.toneDetectDelay = Double.parseDouble(value);
+				break;
+			case ":tone-recode-delay":
+				audio.toneRecodeDelay = Double.parseDouble(value);
+				break;
+			case ":digit-detect-delay":
+				audio.digitDetectDelay = Double.parseDouble(value);
+				break;
+			case ":digit-recode-delay":
+				audio.digitRecodeDelay = Double.parseDouble(value);
+				break;
+			case ":motor-feature-prep-time":
+				motor.featurePrepTime = Double.parseDouble(value);
+				break;
+			case ":motor-initiation-time":
+				motor.movementInitiationTime = Double.parseDouble(value);
+				break;
+			case ":motor-burst-time":
+				motor.burstTime = Double.parseDouble(value);
+				break;
+			case ":peck-fitts-coeff":
+				motor.peckFittsCoeff = Double.parseDouble(value);
+				break;
+			case ":mouse-fitts-coeff":
+				motor.mouseFittsCoeff = Double.parseDouble(value); // new
+				break;
+			case ":min-fitts-time":
+				motor.minFittsTime = Double.parseDouble(value);
+				break;
+			case ":default-target-width":
+				motor.defaultTargetWidth = Double.parseDouble(value);
+				break;
+			case ":syllable-rate":
+				speech.syllableRate = Double.parseDouble(value);
+				break;
+			case ":char-per-syllable":
+				speech.charsPerSyllable = Integer.parseInt(value);
+				break;
+			case ":subvocalize-detect-delay":
+				speech.subvocalizeDetectDelay = Double.parseDouble(value);
+				break;
+			case ":imaginal-delay":
+				imaginal.imaginalDelay = Double.parseDouble(value);
+				break;
+
+			// below are new parameters
+			case ":add-chunk-on-new-request":
+				declarative.addChunkOnNewRequest = !nil(value);
+				break;
+			case ":buffer-chunk-decay":
+				buffers.bufferChunkDecay = (!nil(value));
+				buffers.bufferChunkLife = (!nil(value)) ? Double.parseDouble(value) : 0;
+				break;
+			case ":tct":
+				procedural.threadedCognitionTrace = (!nil(value));
+				break;
+			case ":pc-threaded":
+				procedural.productionCompilationThreaded = (!nil(value));
+				break;
+			case ":pc-add-utilities":
+				procedural.productionCompilationAddUtilities = (!nil(value));
+				break;
+			case ":emma":
+				vision.useEMMA = (!nil(value));
+				break;
+			case ":emma-enc-fac":
+				vision.emmaEncodingTimeFactor = Double.parseDouble(value);
+				break;
+			case ":emma-enc-exp":
+				vision.emmaEncodingExponentFactor = Double.parseDouble(value);
+				break;
+			case ":brain-imaging":
+				bold.brainImaging = (!nil(value));
+				break;
+			case ":case-sensitive":
+				t.caseSensitive = (!nil(value));
+				break;
+			default:
+				recordWarning("ignoring parameter " + parameter, t);
+				break;
 		}
+	}
 
-		else if (parameter.equals(":dat"))
-			procedural.actionTime = Double.valueOf(value);
-		else if (parameter.equals(":vpft"))
-			procedural.variableProductionFiringTime = !value.equals("nil");
-		else if (parameter.equals(":ul"))
-			procedural.utilityLearning = !value.equals("nil");
-		else if (parameter.equals(":egs"))
-			procedural.utilityNoiseS = Double.valueOf(value);
-		else if (parameter.equals(":alpha"))
-			procedural.utilityLearningAlpha = Double.valueOf(value);
-		else if (parameter.equals(":epl"))
-			procedural.productionLearning = !value.equals("nil");
-		else if (parameter.equals(":iu"))
-			procedural.initialUtility = Double.valueOf(value);
-		else if (parameter.equals(":tt"))
-			procedural.productionCompilationThresholdTime = Double.valueOf(value);
-		else if (parameter.equals(":nu"))
-			procedural.productionCompilationNewUtility = Double.valueOf(value);
-		else if (parameter.equals(":cst"))
-			procedural.conflictSetTrace = !value.equals("nil");
-		else if (parameter.equals(":pct"))
-			procedural.productionCompilationTrace = !value.equals("nil");
-
-		else if (parameter.equals(":rt"))
-			declarative.retrievalThreshold = Double.valueOf(value);
-		else if (parameter.equals(":lf"))
-			declarative.latencyFactor = Double.valueOf(value);
-		else if (parameter.equals(":bll")) {
-			declarative.baseLevelLearning = (!value.equals("nil"));
-			declarative.baseLevelDecayRate = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-		} else if (parameter.equals(":ol"))
-			declarative.optimizedLearning = !value.equals("nil");
-		else if (parameter.equals(":optimized-fan"))
-			declarative.optimizedFan = !value.equals("nil");
-		else if (parameter.equals(":ans"))
-			declarative.activationNoiseS = Double.valueOf(value);
-		else if (parameter.equals(":ga"))
-			declarative.goalActivation = Double.valueOf(value);
-		else if (parameter.equals(":imaginal-activation"))
-			declarative.imaginalActivation = Double.valueOf(value);
-		else if (parameter.equals(":mas")) {
-			declarative.spreadingActivation = (!value.equals("nil"));
-			declarative.maximumAssociativeStrength = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-		} else if (parameter.equals(":mp")) {
-			declarative.partialMatching = (!value.equals("nil"));
-			declarative.mismatchPenalty = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-		} else if (parameter.equals(":declarative-num-finsts"))
-			declarative.declarativeNumFinsts = Integer.valueOf(value);
-		else if (parameter.equals(":declarative-finst-span"))
-			declarative.declarativeFinstSpan = Double.valueOf(value);
-		else if (parameter.equals(":act"))
-			declarative.activationTrace = !value.equals("nil");
-
-		else if (parameter.equals(":visual-attention-latency"))
-			vision.visualAttentionLatency = Double.valueOf(value);
-		else if (parameter.equals(":visual-movement-tolerance"))
-			vision.visualMovementTolerance = Double.valueOf(value);
-		else if (parameter.equals(":visual-num-finsts"))
-			vision.visualNumFinsts = Integer.valueOf(value);
-		else if (parameter.equals(":visual-finst-span"))
-			vision.visualFinstSpan = Double.valueOf(value);
-		else if (parameter.equals(":visual-onset-span"))
-			vision.visualOnsetSpan = Double.valueOf(value);
-
-		else if (parameter.equals(":tone-detect-delay"))
-			audio.toneDetectDelay = Double.valueOf(value);
-		else if (parameter.equals(":tone-recode-delay"))
-			audio.toneRecodeDelay = Double.valueOf(value);
-		else if (parameter.equals(":digit-detect-delay"))
-			audio.digitDetectDelay = Double.valueOf(value);
-		else if (parameter.equals(":digit-recode-delay"))
-			audio.digitRecodeDelay = Double.valueOf(value);
-
-		else if (parameter.equals(":motor-feature-prep-time"))
-			motor.featurePrepTime = Double.valueOf(value);
-		else if (parameter.equals(":motor-initiation-time"))
-			motor.movementInitiationTime = Double.valueOf(value);
-		else if (parameter.equals(":motor-burst-time"))
-			motor.burstTime = Double.valueOf(value);
-		else if (parameter.equals(":peck-fitts-coeff"))
-			motor.peckFittsCoeff = Double.valueOf(value);
-		else if (parameter.equals(":mouse-fitts-coeff"))
-			motor.mouseFittsCoeff = Double.valueOf(value); // new
-		else if (parameter.equals(":min-fitts-time"))
-			motor.minFittsTime = Double.valueOf(value);
-		else if (parameter.equals(":default-target-width"))
-			motor.defaultTargetWidth = Double.valueOf(value);
-
-		else if (parameter.equals(":syllable-rate"))
-			speech.syllableRate = Double.valueOf(value);
-		else if (parameter.equals(":char-per-syllable"))
-			speech.charsPerSyllable = Integer.valueOf(value);
-		else if (parameter.equals(":subvocalize-detect-delay"))
-			speech.subvocalizeDetectDelay = Double.valueOf(value);
-
-		else if (parameter.equals(":imaginal-delay"))
-			imaginal.imaginalDelay = Double.valueOf(value);
-
-		// below are new parameters
-
-		else if (parameter.equals(":add-chunk-on-new-request"))
-			declarative.addChunkOnNewRequest = !value.equals("nil");
-
-		else if (parameter.equals(":buffer-chunk-decay")) {
-			buffers.bufferChunkDecay = (!value.equals("nil"));
-			buffers.bufferChunkLife = (!value.equals("nil")) ? Double.valueOf(value) : 0;
-		}
-
-		else if (parameter.equals(":tct"))
-			procedural.threadedCognitionTrace = (!value.equals("nil"));
-
-		else if (parameter.equals(":pc-threaded"))
-			procedural.productionCompilationThreaded = (!value.equals("nil"));
-		else if (parameter.equals(":pc-add-utilities"))
-			procedural.productionCompilationAddUtilities = (!value.equals("nil"));
-
-		else if (parameter.equals(":emma"))
-			vision.useEMMA = (!value.equals("nil"));
-		else if (parameter.equals(":emma-enc-fac"))
-			vision.emmaEncodingTimeFactor = Double.valueOf(value);
-		else if (parameter.equals(":emma-enc-exp"))
-			vision.emmaEncodingExponentFactor = Double.valueOf(value);
-
-		else if (parameter.equals(":brain-imaging"))
-			bold.brainImaging = (!value.equals("nil"));
-
-		else if (parameter.equals(":case-sensitive"))
-			t.caseSensitive = (!value.equals("nil"));
-
-		else
-			recordWarning("ignoring parameter " + parameter, t);
+	private static boolean nil(String value) {
+		return value.equals("nil");
 	}
 
 	/**

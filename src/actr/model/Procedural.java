@@ -1,10 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Procedural memory that holds skill knowledge represented as production rules.
@@ -12,11 +8,11 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Procedural extends Module {
-	private Model model;
-	private Map<Symbol, Production> productions;
-	private Vector<Instantiation> rewardFirings;
+	private final Model model;
+	private final Map<Symbol, Production> productions;
+	private final List<Instantiation> rewardFirings;
 	private Instantiation lastFiredInst;
-	private Map<Integer, Instantiation> lastFiredOnThread;
+	private final Map<Integer, Instantiation> lastFiredOnThread;
 
 	double actionTime = .050;
 	boolean variableProductionFiringTime = false;
@@ -38,10 +34,10 @@ public class Procedural extends Module {
 
 	Procedural(Model model) {
 		this.model = model;
-		productions = new HashMap<Symbol, Production>();
-		rewardFirings = new Vector<Instantiation>();
+		productions = new HashMap<>();
+		rewardFirings = new Vector<>();
 		lastFiredInst = null;
-		lastFiredOnThread = new HashMap<Integer, Instantiation>();
+		lastFiredOnThread = new HashMap<>();
 	}
 
 	void add(Production p) {
@@ -78,9 +74,7 @@ public class Procedural extends Module {
 	}
 
 	Production exists(Production p) {
-		Iterator<Production> it = productions.values().iterator();
-		while (it.hasNext()) {
-			Production ip = it.next();
+		for (Production ip : productions.values()) {
 			if (ip.equals(p))
 				return ip;
 		}
@@ -101,13 +95,11 @@ public class Procedural extends Module {
 		// "conflict-resolution");
 		buffers.removeDecayedChunks();
 
-		HashSet<Instantiation> set = new HashSet<Instantiation>();
+		HashSet<Instantiation> set = new HashSet<>();
 		buffers.sortGoals();
 
 		if (buffers.numGoals() == 0) {
-			Iterator<Production> it = productions.values().iterator();
-			while (it.hasNext()) {
-				Production p = it.next();
+			for (Production p : productions.values()) {
 				Instantiation inst = p.instantiate(buffers);
 				if (inst != null)
 					set.add(inst);
@@ -117,9 +109,7 @@ public class Procedural extends Module {
 				buffers.tryGoal(i);
 				if (threadedCognitionTrace)
 					model.output("*** (tct) trying goal " + buffers.get(Symbol.goal));
-				Iterator<Production> it = productions.values().iterator();
-				while (it.hasNext()) {
-					Production p = it.next();
+				for (Production p : productions.values()) {
 					Instantiation inst = p.instantiate(buffers);
 					if (inst != null)
 						set.add(inst);
@@ -167,30 +157,30 @@ public class Procedural extends Module {
 			String extra = "";
 			if (buffers.numGoals() > 1) {
 				Chunk goal = buffers.get(Symbol.goal);
-				extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
+				extra = " [" + ((goal != null) ? goal.name().getString() : "nil") + "]";
 			}
 
 			model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
 					"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
 				@Override
 				public void action() {
-					fire(finalInst, buffers);
+					fire(finalInst);
 					findInstantiations(buffers);
 				}
 			});
 		}
 	}
 
-	void fire(Instantiation inst, Buffers buffers) {
+	void fire(Instantiation inst) {
 		inst.getProduction().fire(inst);
 		model.update();
 
 		if (productionLearning) {
 			Instantiation lastFired = (!productionCompilationThreaded) ? lastFiredInst
-					: lastFiredOnThread.get(new Integer(inst.getThreadID()));
+					: lastFiredOnThread.get(inst.getThreadID());
 
 			if (lastFired != null && inst.getTime()
-					- lastFired.getTime() > model.getProcedural().productionCompilationThresholdTime) {
+					- lastFired.getTime() > model.procedural.productionCompilationThresholdTime) {
 				if (productionCompilationTrace)
 					model.output("*** (pct) no compilation: too much time between firings");
 			} else if (lastFired != null) {
@@ -213,12 +203,12 @@ public class Procedural extends Module {
 							model.output("*** (pct) strengthening " + oldp.getName() + " [u="
 									+ String.format("%.3f", oldp.getUtility()) + "]");
 					} else {
-						model.getProcedural().add(newp);
+						model.procedural.add(newp);
 						if (productionCompilationTrace) {
 							model.output("\n*** (pct)\n");
-							model.output("" + lastFired.getProduction().toString(lastFired));
-							model.output("" + inst.getProduction().toString(inst));
-							model.output("" + newp);
+							model.output(lastFired.getProduction().toString(lastFired));
+							model.output(inst.getProduction().toString(inst));
+							model.output(String.valueOf(newp));
 							// model.output
 							// ("*** (pct) new production:\n"+newp);
 						}
@@ -234,12 +224,12 @@ public class Procedural extends Module {
 		}
 
 		lastFiredInst = inst;
-		lastFiredOnThread.put(new Integer(inst.getThreadID()), inst);
+		lastFiredOnThread.put(inst.getThreadID(), inst);
 
 		if (utilityLearning) {
 			rewardFirings.add(inst);
 			if (rewardFirings.size() > 100)
-				rewardFirings.removeElementAt(0);
+				rewardFirings.remove(0);
 		}
 		if (utilityLearning && inst.getProduction().hasReward()) {
 			adjustUtilities(inst.getProduction().getReward());
@@ -249,8 +239,9 @@ public class Procedural extends Module {
 
 	void adjustUtilities(double reward) {
 		double alpha = utilityLearningAlpha;
-		for (int i = 0; i < rewardFirings.size(); i++) {
-			Instantiation inst = rewardFirings.elementAt(i);
+		int ff = rewardFirings.size();
+		for (int i = 0; i < ff; i++) {
+			Instantiation inst = rewardFirings.get(i);
 			Production p = inst.getProduction();
 			double pReward = reward - (model.getTime() - inst.getTime());
 			p.setUtility(p.getUtility() + alpha * (pReward - p.getUtility()));
@@ -267,9 +258,7 @@ public class Procedural extends Module {
 	@Override
 	public String toString() {
 		String s = "";
-		Iterator<Production> it = productions.values().iterator();
-		while (it.hasNext())
-			s += it.next() + "\n";
+		for (Production production : productions.values()) s += production + "\n";
 		return s;
 	}
 }

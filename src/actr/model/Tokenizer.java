@@ -10,9 +10,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * A tokenizer that breaks an ACT-R model file into relevant tokens for the
@@ -21,14 +19,14 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 class Tokenizer {
-	private Reader reader = null;
+	private Reader reader;
 	private int c = 0;
 	private int offset = 0;
 	private int line = 1;
 	private int lastOffset = 0, lastLine = 1;
 	private String token = "";
-	private Vector<String> putbacks = new Vector<String>();
-	private Map<String, String> variables = new HashMap<String, String>();
+	private final List<String> putbacks = new ArrayList<>();
+	private final Map<String, String> variables = new HashMap<>();
 
 	boolean caseSensitive = false;
 
@@ -95,7 +93,7 @@ class Tokenizer {
 			line++;
 	}
 
-	boolean isSpecial(int c2) {
+	static boolean isSpecial(int c2) {
 		return c2 == '(' || c2 == ')';
 	}
 
@@ -109,8 +107,7 @@ class Tokenizer {
 		lastLine = line;
 
 		if (!putbacks.isEmpty()) {
-			token = putbacks.elementAt(0);
-			putbacks.removeElementAt(0);
+			token = putbacks.remove(0);
 			return;
 		}
 

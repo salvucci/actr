@@ -1,10 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * The vision module representing ACT-R's visual perception.
@@ -12,10 +8,10 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Vision extends Module {
-	private Model model;
-	private Map<Symbol, VisualObject> visicon;
-	private Map<Symbol, VisualObject> vislocs;
-	private Vector<VisualObject> finsts;
+	private final Model model;
+	private final Map<Symbol, VisualObject> visicon;
+	private final Map<Symbol, VisualObject> vislocs;
+	private final List<VisualObject> finsts;
 	private VisualObject lastEncodedVisObj = null;
 	private double lastVisLocRequestX, lastVisLocRequestY;
 	private int eyeX, eyeY;
@@ -27,31 +23,36 @@ public class Vision extends Module {
 	double visualOnsetSpan = 0.5;
 
 	boolean useEMMA = false;
-	private Map<String, Double> frequencies;
+	private final Map<String, Double> frequencies;
 	double emmaEncodingTimeFactor = .006;
 	double emmaEncodingExponentFactor = .4;
-	double emmaPreparationTime = .135;
-	double emmaDefaultFrequency = .01;
-	double emmaExecutionBaseTime = .070;
-	double emmaExecutionTimeIncrement = .002;
+	final double emmaPreparationTime = .135;
+	final double emmaDefaultFrequency = .01;
+	final double emmaExecutionBaseTime = .070;
+	final double emmaExecutionTimeIncrement = .002;
 
 	Vision(Model model) {
 		this.model = model;
-		visicon = new HashMap<Symbol, VisualObject>();
-		vislocs = new HashMap<Symbol, VisualObject>();
-		finsts = new Vector<VisualObject>();
+		visicon = new HashMap<>();
+		vislocs = new HashMap<>();
+		finsts = new Vector<>();
 		lastVisLocRequestX = lastVisLocRequestY = 0;
 		eyeX = eyeY = 100;
-		frequencies = new HashMap<String, Double>();
+		frequencies = new HashMap<>();
 	}
 
 	private class VisualObject {
-		Symbol id, kind, value;
-		int x, y, w, h;
+		final Symbol id;
+		final Symbol kind;
+		final Symbol value;
+		int x;
+		int y;
+		final int w;
+		final int h;
 		double d;
 		boolean attended;
 		double attendedTime;
-		double creationTime;
+		final double creationTime;
 		Chunk visloc;
 		double encodingStart;
 		double encodingTime;
@@ -80,10 +81,7 @@ public class Vision extends Module {
 
 	Chunk getVisualLocation(Symbol name) {
 		VisualObject vo = vislocs.get(name);
-		if (vo != null)
-			return vo.visloc;
-		else
-			return model.getDeclarative().get(name);
+		return vo != null ? vo.visloc : model.declarative.get(name);
 	}
 
 	/**
@@ -124,12 +122,12 @@ public class Vision extends Module {
 	public void addVisual(String id, String type, String value, int x, int y, int w, int h, double d) {
 		VisualObject vo = new VisualObject(Symbol.get(id), Symbol.get(type), Symbol.get(value), x, y, w, h, d);
 		visicon.put(Symbol.get(id), vo);
-		if (model.bufferStuffing && (model.getBuffers().get(Symbol.visloc) == null
-				|| model.getBuffers().get(Symbol.vislocState).get(Symbol.buffer) == Symbol.unrequested)) {
+		if (model.bufferStuffing && (model.buffers.get(Symbol.visloc) == null
+				|| model.buffers.get(Symbol.vislocState).get(Symbol.buffer) == Symbol.unrequested)) {
 			double newDist = Utilities.distance(vo.x, vo.y, lastVisLocRequestX, lastVisLocRequestY);
 			double curDist = 99999;
 			try {
-				Chunk curvisloc = model.getBuffers().get(Symbol.visloc);
+				Chunk curvisloc = model.buffers.get(Symbol.visloc);
 				double sx = curvisloc.get(Symbol.screenx).toDouble();
 				double sy = curvisloc.get(Symbol.screeny).toDouble();
 				curDist = Utilities.distance(sx, sy, lastVisLocRequestX, lastVisLocRequestY);
@@ -138,11 +136,11 @@ public class Vision extends Module {
 
 			if (newDist < curDist) {
 				Chunk visloc = createVisLocChunk(vo);
-				if (model.verboseTrace && model.getBuffers().get(Symbol.visloc) == null)
-					model.output("vision", "unrequested [" + visloc.getName().getString() + "]");
-				model.getBuffers().set(Symbol.visloc, visloc);
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.state, Symbol.free);
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.buffer, Symbol.unrequested);
+				if (model.verboseTrace && model.buffers.get(Symbol.visloc) == null)
+					model.output("vision", "unrequested [" + visloc.name().getString() + "]");
+				model.buffers.set(Symbol.visloc, visloc);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.state, Symbol.free);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.buffer, Symbol.unrequested);
 			}
 		}
 		model.noteTaskUpdated();
@@ -248,39 +246,23 @@ public class Vision extends Module {
 	}
 
 	void setVisualFrequency(String string, double frequency) {
-		frequencies.put(string, new Double(frequency));
+		frequencies.put(string, frequency);
 	}
 
 	private boolean matches(Symbol slot, Symbol value, VisualObject vo) {
 		if (slot == Symbol.isa)
 			return true;
 		if (slot == Symbol.kind) {
-			if (value != vo.kind)
-				return false;
-			else
-				return true;
+			return value == vo.kind;
 		}
 		if (slot == Symbol.get("-kind")) {
-			if (value == vo.kind)
-				return false;
-			else
-				return true;
+			return value != vo.kind;
 		}
 		if (slot == Symbol.get(":nearest"))
 			return true;
 
 		if (slot == Symbol.get(":attended")) {
-			if (value == Symbol.get("new")) {
-				if (vo.creationTime < model.getTime() - visualOnsetSpan)
-					return false;
-				else
-					return true;
-			} else {
-				if (value != Symbol.get(vo.attended))
-					return false;
-				else
-					return true;
-			}
+			return value == Symbol.get("new") ? !(vo.creationTime < model.getTime() - visualOnsetSpan) : value == Symbol.get(vo.attended);
 		}
 
 		if (value == Symbol.lowest || value == Symbol.highest)
@@ -327,10 +309,7 @@ public class Vision extends Module {
 			return false;
 		if (slot == Symbol.get(">=screen-x") && !(vo.x >= vi))
 			return false;
-		if (slot == Symbol.get(">=screen-y") && !(vo.y >= vi))
-			return false;
-
-		return true;
+		return slot != Symbol.get(">=screen-y") || vo.y >= vi;
 	}
 
 	private boolean matches(Chunk request, VisualObject vo) {
@@ -365,11 +344,11 @@ public class Vision extends Module {
 		visloc.set(Symbol.height, Symbol.get(vo.h));
 		visloc.set(Symbol.distance, Symbol.get(vo.d));
 		vo.visloc = visloc;
-		vislocs.put(visloc.getName(), vo);
+		vislocs.put(visloc.name(), vo);
 		return visloc;
 	}
 
-	private Symbol slotWithLowestHighest(Chunk request) {
+	private static Symbol slotWithLowestHighest(Chunk request) {
 		Iterator<Symbol> it = request.getSlotNames();
 		while (it.hasNext()) {
 			Symbol slot = it.next();
@@ -396,13 +375,15 @@ public class Vision extends Module {
 			lastVisLocRequestY = 0;
 		}
 
-		HashSet<VisualObject> found = new HashSet<VisualObject>();
+		Set<VisualObject> found = null;
 		while (it.hasNext()) {
 			VisualObject vo = it.next();
-			if (matches(request, vo))
+			if (matches(request, vo)) {
+				if (found==null) found = new HashSet<>();
 				found.add(vo);
+			}
 		}
-		if (found.isEmpty())
+		if (found == null)
 			return null;
 
 		Symbol nearest = request.get(Symbol.get(":nearest"));
@@ -411,11 +392,9 @@ public class Vision extends Module {
 			if (lohiSlot != null) {
 				VisualObject bestvo = null;
 				int best = 0;
-				Iterator<VisualObject> itVO = found.iterator();
-				while (itVO.hasNext()) {
-					VisualObject voTry = itVO.next();
+				for (VisualObject voTry : found) {
 					int vovalue = (lohiSlot.getString().charAt(lohiSlot.getString().length() - 1) == 'x') ? voTry.x
-							: voTry.y;
+						: voTry.y;
 					if (request.get(lohiSlot) == Symbol.lowest) {
 						if (bestvo == null || vovalue < best) {
 							bestvo = voTry;
@@ -445,23 +424,21 @@ public class Vision extends Module {
 			double nearestX = vislocChunk.get(Symbol.screenx).toDouble();
 			double nearestY = vislocChunk.get(Symbol.screeny).toDouble();
 			VisualObject bestvo = null;
-			double best = 99999;
-			Iterator<VisualObject> itVO = found.iterator();
-			while (itVO.hasNext()) {
-				VisualObject voTry = itVO.next();
+			double bestSq = Double.POSITIVE_INFINITY;
+			for (VisualObject voTry : found) {
 				double dx = voTry.x - nearestX;
 				double dy = voTry.y - nearestY;
-				double dist = Math.sqrt(dx * dx + dy * dy);
-				if (bestvo == null || dist < best) {
+				double distSq = (dx * dx + dy * dy);
+				if (bestvo == null || distSq < bestSq) {
 					bestvo = voTry;
-					best = dist;
+					bestSq = distSq;
 				}
 			}
 			return createVisLocChunk(bestvo);
 		}
 	}
 
-	private double gaussianNoise(double sd) {
+	private static double gaussianNoise(double sd) {
 		double v = sd * sd;
 		double s = Math.sqrt(3.0 * v) / Math.PI;
 		return (s == 0) ? 0 : Utilities.getNoise(s);
@@ -476,7 +453,7 @@ public class Vision extends Module {
 
 	private double computeEncodingTime(VisualObject vo) {
 		Double freqdouble = frequencies.get(vo.value.getString());
-		double frequency = (freqdouble != null) ? freqdouble.doubleValue() : emmaDefaultFrequency;
+		double frequency = (freqdouble != null) ? freqdouble : emmaDefaultFrequency;
 		double t_enc = (emmaEncodingTimeFactor * (-Math.log(frequency))
 				* Math.exp(emmaEncodingExponentFactor * computeEccentricity(vo)));
 		double noise = gaussianNoise(t_enc / 3.0);
@@ -489,37 +466,37 @@ public class Vision extends Module {
 	@Override
 	void update() {
 		for (int i = 0; i < finsts.size(); i++) {
-			VisualObject vo = finsts.elementAt(i);
+			VisualObject vo = finsts.get(i);
 			if (vo.attendedTime < model.getTime() - visualFinstSpan) {
 				vo.attended = false;
 				vo.attendedTime = 0;
-				finsts.removeElementAt(i);
+				finsts.remove(i);
 			}
 		}
 
-		Chunk request = model.getBuffers().get(Symbol.visloc);
+		Chunk request = model.buffers.get(Symbol.visloc);
 		if (request != null && request.isRequest()) {
 			request.setRequest(false);
-			model.getBuffers().clear(Symbol.visloc);
+			model.buffers.clear(Symbol.visloc);
 			Chunk visloc = findVisualLocation(request, visicon.values().iterator());
 			if (visloc != null) {
 				if (model.verboseTrace)
-					model.output("vision", "find-location [" + visloc.getName().getString() + "]");
-				model.getBuffers().set(Symbol.visloc, visloc);
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.state, Symbol.free);
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.buffer, Symbol.requested);
+					model.output("vision", "find-location [" + visloc.name().getString() + "]");
+				model.buffers.set(Symbol.visloc, visloc);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.state, Symbol.free);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.buffer, Symbol.requested);
 			} else {
 				if (model.verboseTrace)
 					model.output("vision", "error");
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.state, Symbol.error);
-				model.getBuffers().setSlot(Symbol.vislocState, Symbol.buffer, Symbol.empty);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.state, Symbol.error);
+				model.buffers.setSlot(Symbol.vislocState, Symbol.buffer, Symbol.empty);
 			}
 		}
 
-		request = model.getBuffers().get(Symbol.visual);
+		request = model.buffers.get(Symbol.visual);
 		if (request != null && request.isRequest() && request.get(Symbol.isa) == Symbol.get("move-attention")) {
 			request.setRequest(false);
-			model.getBuffers().clear(Symbol.visual);
+			model.buffers.clear(Symbol.visual);
 			Symbol vislocName = request.get(Symbol.screenpos);
 			if (vislocName == null) {
 				model.outputWarning("bad visual location");
@@ -540,8 +517,8 @@ public class Vision extends Module {
 			visual.set(Symbol.height, Symbol.get(vo.h));
 			if (model.verboseTrace)
 				model.output("vision", "move-attention");
-			model.getBuffers().setSlot(Symbol.visualState, Symbol.state, Symbol.busy);
-			model.getBuffers().setSlot(Symbol.visualState, Symbol.buffer, Symbol.requested);
+			model.buffers.setSlot(Symbol.visualState, Symbol.state, Symbol.busy);
+			model.buffers.setSlot(Symbol.visualState, Symbol.buffer, Symbol.requested);
 
 			double encodingTime = (useEMMA) ? computeEncodingTime(vo) : model.randomizeTime(visualAttentionLatency);
 			vo.encodingStart = model.getTime();
@@ -549,7 +526,7 @@ public class Vision extends Module {
 			lastEncodedVisObj = vo;
 
 			model.addEvent(new Event(model.getTime() + encodingTime, "vision",
-					"encoding-complete [" + visual.getName() + "]") {
+					"encoding-complete [" + visual.name() + "]") {
 				@Override
 				public void action() {
 					model.getTask().moveAttention(vo.x, vo.y);
@@ -557,12 +534,11 @@ public class Vision extends Module {
 					vo.attendedTime = model.getTime();
 					finsts.add(vo);
 					if (finsts.size() > visualNumFinsts) {
-						finsts.elementAt(0).attended = false;
-						finsts.removeElementAt(0);
+						finsts.remove(0).attended = false;
 					}
-					model.getBuffers().set(Symbol.visual, visual);
-					model.getBuffers().setSlot(Symbol.visualState, Symbol.state, Symbol.free);
-					model.getBuffers().setSlot(Symbol.visualState, Symbol.buffer, Symbol.full);
+					model.buffers.set(Symbol.visual, visual);
+					model.buffers.setSlot(Symbol.visualState, Symbol.state, Symbol.free);
+					model.buffers.setSlot(Symbol.visualState, Symbol.buffer, Symbol.full);
 				}
 			});
 
@@ -575,7 +551,7 @@ public class Vision extends Module {
 		model.removeEvents("eye", "preparation-complete");
 
 		model.addEvent(new Event(model.getTime() + model.randomizeTime(emmaPreparationTime), "eye",
-				"preparation-complete [" + visual.getName() + "]") {
+				"preparation-complete [" + visual.name() + "]") {
 			@Override
 			public void action() {
 				executeEyeMovement(vo, visual);
@@ -588,7 +564,7 @@ public class Vision extends Module {
 				.randomizeTime(emmaExecutionBaseTime + emmaExecutionTimeIncrement * computeEccentricity(vo));
 
 		model.addEvent(
-				new Event(model.getTime() + executionTime, "eye", "execution-complete [" + visual.getName() + "]") {
+				new Event(model.getTime() + executionTime, "eye", "execution-complete [" + visual.name() + "]") {
 					@Override
 					public void action() {
 						double sd = .1 * Utilities.angle2pixels(computeEccentricity(vo));
@@ -617,9 +593,7 @@ public class Vision extends Module {
 	 */
 	public String visualObjects() {
 		String s = "";
-		Iterator<VisualObject> it = visicon.values().iterator();
-		while (it.hasNext())
-			s += it.next() + "\n";
+		for (VisualObject visualObject : visicon.values()) s += visualObject + "\n";
 		return s;
 	}
 }

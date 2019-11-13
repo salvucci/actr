@@ -31,9 +31,9 @@ class Parser {
 		}
 	}
 
-	boolean contains(String s, String a[]) {
-		for (int i = 0; i < a.length; i++)
-			if (a[i].equals(s))
+	static boolean contains(String s, String[] a) {
+		for (String value : a)
+			if (value.equals(s))
 				return true;
 		return false;
 	}
@@ -54,211 +54,231 @@ class Parser {
 				}
 			}
 
-			while (t.hasMoreTokens() || !t.getToken().equals("")) {
+			label:
+			while (t.hasMoreTokens() || !t.getToken().isEmpty()) {
 				if (!t.getToken().equals("("))
 					model.recordError(t);
 				t.advance();
 
-				if (t.getToken().equals("set-task")) {
-					t.advance();
-					String taskName = t.getToken();
-					taskName = taskName.substring(1, taskName.length() - 1);
-					Task task = Task.createTaskInstance(taskName);
-					if (taskOverride == null) {
-						if (task != null) {
-							model.setTask(task);
-							task.setModel(model);
-						} else
-							model.recordError("task '" + taskName + "' is not defined", t);
-					}
-					t.advance();
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("set-parameter")) {
-					t.advance();
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						String parameter = t.getToken();
+				switch (t.getToken()) {
+					case "set-task":
 						t.advance();
-						if (t.getToken().equals(")")) {
+						String taskName = t.getToken();
+						taskName = taskName.substring(1, taskName.length() - 1);
+						Task task = Task.createTaskInstance(taskName);
+						if (taskOverride == null) {
+							if (task != null) {
+								model.setTask(task);
+								task.setModel(model);
+							} else
+								model.recordError("task '" + taskName + "' is not defined", t);
+						}
+						t.advance();
+						if (!t.getToken().equals(")"))
 							model.recordError(t);
-							break;
-						}
-						String value = t.getToken();
 						t.advance();
-						if (!parameter.startsWith("*") || !parameter.endsWith("*"))
-							model.recordWarning("parameter should start and end with '*'", t);
-						t.addVariable(parameter, value);
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("p") || t.getToken().equals("p*")) {
-					Production p = parseProduction(model);
-					model.getProcedural().add(p);
-				} else if (t.getToken().equals("add-dm")) {
-					t.advance();
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						Chunk c = parseChunk(model);
-						Symbol cname = c.getName();
-						c = model.getDeclarative().add(c, true);
-						if (cname != c.getName())
-							model.recordWarning("chunk '" + cname + "' has been merged into '" + c.getName() + "'", t);
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("chunk-type")) {
-					t.advance();
-					ChunkType chunkType = parseChunkType(model);
-					if (chunkType != null)
-						model.getDeclarative().add(chunkType);
-				} else if (t.getToken().equals("add-math-facts")) {
-					t.advance();
-					String plusFact = t.getToken();
-					t.advance();
-					String timesFact = t.getToken();
-					t.advance();
-					for (int i = 1; i <= 12; i++)
-						for (int j = 1; j <= 12; j++) {
-							String name = "plus-" + i + "-" + j;
-							String slots = "isa " + plusFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" sum \"" + (i + j)
-									+ "\"";
-							Chunk c = parseNewChunk(model, Symbol.getUnique(name), slots);
-							model.getDeclarative().add(c, true);
-							name = "times-" + i + "-" + j;
-							slots = "isa " + timesFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" product \"" + (i * j)
-									+ "\"";
-							c = parseNewChunk(model, Symbol.getUnique(name), slots);
-							model.getDeclarative().add(c, true);
-						}
-					for (int i = 0; i <= 99; i++) {
-						String s = "\"" + i + "\"";
-						model.getVision().setVisualFrequency(s, (i < 10) ? .1 : .01);
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("goal-focus")) {
-					t.advance();
-					String goalName = t.getToken();
-					t.advance();
-					Chunk c = model.getDeclarative().get(Symbol.get(goalName));
-					if (c != null)
-						model.getBuffers().set(Symbol.goal, c);
-					else
-						model.recordWarning("chunk '" + goalName + "' has not been defined", t);
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("spp")) {
-					t.advance();
-					Symbol pname = lastProduction;
-					if (!t.getToken().startsWith(":") && !t.getToken().startsWith(")")) {
-						pname = Symbol.get(t.getToken());
+						break;
+					case "set-parameter":
 						t.advance();
-					}
-					Production p = model.getProcedural().get(pname);
-					if (p == null) {
-						model.recordError("production '" + pname + "' has not been defined", t);
-						while (t.hasMoreTokens() && !t.getToken().equals(")"))
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							String parameter = t.getToken();
 							t.advance();
+							if (t.getToken().equals(")")) {
+								model.recordError(t);
+								break;
+							}
+							String value = t.getToken();
+							t.advance();
+							if (!parameter.startsWith("*") || !parameter.endsWith("*"))
+								model.recordWarning("parameter should start and end with '*'", t);
+							t.addVariable(parameter, value);
+						}
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "p":
+					case "p*": {
+						Production p = parseProduction(model);
+						model.procedural.add(p);
+						break;
+					}
+					case "add-dm":
+						t.advance();
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							Chunk c = parseChunk(model);
+							Symbol cname = c.name();
+							c = model.declarative.add(c, true);
+							if (cname != c.name())
+								model.recordWarning("chunk '" + cname + "' has been merged into '" + c.name() + "'", t);
+						}
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "chunk-type":
+						t.advance();
+						ChunkType chunkType = parseChunkType(model);
+						if (chunkType != null)
+							model.declarative.add(chunkType);
+						break;
+					case "add-math-facts":
+						t.advance();
+						String plusFact = t.getToken();
+						t.advance();
+						String timesFact = t.getToken();
+						t.advance();
+						for (int i = 1; i <= 12; i++)
+							for (int j = 1; j <= 12; j++) {
+								String name = "plus-" + i + "-" + j;
+								String slots = "isa " + plusFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" sum \"" + (i + j)
+									+ "\"";
+								Chunk c = parseNewChunk(model, Symbol.getUnique(name), slots);
+								model.declarative.add(c, true);
+								name = "times-" + i + "-" + j;
+								slots = "isa " + timesFact + " arg1 \"" + i + "\" arg2 \"" + j + "\" product \"" + (i * j)
+									+ "\"";
+								c = parseNewChunk(model, Symbol.getUnique(name), slots);
+								model.declarative.add(c, true);
+							}
+						for (int i = 0; i <= 99; i++) {
+							String s = "\"" + i + "\"";
+							model.vision.setVisualFrequency(s, (i < 10) ? .1 : .01);
+						}
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "goal-focus":
+						t.advance();
+						String goalName = t.getToken();
+						t.advance();
+						Chunk c = model.declarative.get(Symbol.get(goalName));
+						if (c != null)
+							model.buffers.set(Symbol.goal, c);
+						else
+							model.recordWarning("chunk '" + goalName + "' has not been defined", t);
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "spp": {
+						t.advance();
+						Symbol pname = lastProduction;
+						if (!t.getToken().startsWith(":") && !t.getToken().startsWith(")")) {
+							pname = Symbol.get(t.getToken());
+							t.advance();
+						}
+						Production p = model.procedural.get(pname);
+						if (p == null) {
+							model.recordError("production '" + pname + "' has not been defined", t);
+							while (t.hasMoreTokens() && !t.getToken().equals(")"))
+								t.advance();
+							t.advance();
+							break label;
+						}
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							String parameter = t.getToken();
+							t.advance();
+							if (t.getToken().equals(")"))
+								model.recordError("missing parameter value", t);
+							String value = t.getToken();
+							t.advance();
+							p.setParameter(parameter, value, t);
+						}
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
 						t.advance();
 						break;
 					}
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						String parameter = t.getToken();
+					case "sgp":
 						t.advance();
-						if (t.getToken().equals(")"))
-							model.recordError("missing parameter value", t);
-						String value = t.getToken();
-						t.advance();
-						p.setParameter(parameter, value, t);
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("sgp")) {
-					t.advance();
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						String parameter = t.getToken();
-						t.advance();
-						String value = t.getToken();
-						t.advance();
-						model.setParameter(parameter, value, t);
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("set-base-levels")) {
-					t.advance();
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						if (!t.getToken().equals("("))
-							model.recordError(t);
-						t.advance();
-						Chunk c = model.getDeclarative().get(Symbol.get(t.getToken()));
-						t.advance();
-						double baseLevel = Double.valueOf(t.getToken());
-						t.advance();
-						if (c != null)
-							c.setBaseLevel(baseLevel);
-						else
-							model.recordWarning("chunk '" + c + "' has not been defined", t);
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							String parameter = t.getToken();
+							t.advance();
+							String value = t.getToken();
+							t.advance();
+							model.setParameter(parameter, value, t);
+						}
 						if (!t.getToken().equals(")"))
 							model.recordError(t);
 						t.advance();
-					}
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("set-all-base-levels")) {
-					t.advance();
-					double baseLevel = Double.valueOf(t.getToken());
-					model.getDeclarative().setAllBaseLevels(baseLevel);
-					t.advance();
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("set-similarities")) {
-					t.advance();
-					while (t.hasMoreTokens() && !t.getToken().equals(")")) {
-						if (!t.getToken().equals("("))
+						break;
+					case "set-base-levels":
+						t.advance();
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							if (!t.getToken().equals("("))
+								model.recordError(t);
+							t.advance();
+							Chunk cc = model.declarative.get(Symbol.get(t.getToken()));
+							t.advance();
+							double baseLevel = Double.parseDouble(t.getToken());
+							t.advance();
+							if (cc != null)
+								cc.setBaseLevel(baseLevel);
+							else
+								model.recordWarning("chunk '" + cc + "' has not been defined", t);
+							if (!t.getToken().equals(")"))
+								model.recordError(t);
+							t.advance();
+						}
+						if (!t.getToken().equals(")"))
 							model.recordError(t);
 						t.advance();
-						Symbol s1 = Symbol.get(t.getToken());
+						break;
+					case "set-all-base-levels":
 						t.advance();
-						Symbol s2 = Symbol.get(t.getToken());
-						t.advance();
-						model.getDeclarative().setSimilarity(s1, s2, Double.valueOf(t.getToken()));
+						double baseLevel = Double.parseDouble(t.getToken());
+						model.declarative.setAllBaseLevels(baseLevel);
 						t.advance();
 						if (!t.getToken().equals(")"))
 							model.recordError(t);
 						t.advance();
-					}
-					if (!t.getToken().equals(")"))
+						break;
+					case "set-similarities":
+						t.advance();
+						while (t.hasMoreTokens() && !t.getToken().equals(")")) {
+							if (!t.getToken().equals("("))
+								model.recordError(t);
+							t.advance();
+							Symbol s1 = Symbol.get(t.getToken());
+							t.advance();
+							Symbol s2 = Symbol.get(t.getToken());
+							t.advance();
+							model.declarative.setSimilarity(s1, s2, Double.parseDouble(t.getToken()));
+							t.advance();
+							if (!t.getToken().equals(")"))
+								model.recordError(t);
+							t.advance();
+						}
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "start-hand-at-mouse":
+						t.advance();
+						model.motor.moveHandToMouse();
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					case "set-visual-frequency":
+						t.advance();
+						String id = t.getToken();
+						t.advance();
+						double frequency = Double.parseDouble(t.getToken());
+						model.vision.setVisualFrequency(id, frequency);
+						t.advance();
+						if (!t.getToken().equals(")"))
+							model.recordError(t);
+						t.advance();
+						break;
+					default:
 						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("start-hand-at-mouse")) {
-					t.advance();
-					model.getMotor().moveHandToMouse();
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else if (t.getToken().equals("set-visual-frequency")) {
-					t.advance();
-					String id = t.getToken();
-					t.advance();
-					double frequency = Double.valueOf(t.getToken());
-					model.getVision().setVisualFrequency(id, frequency);
-					t.advance();
-					if (!t.getToken().equals(")"))
-						model.recordError(t);
-					t.advance();
-				} else
-					model.recordError(t);
+						break;
+				}
 			}
 		} catch (Exception e) {
-			return;
 		}
 	}
 
@@ -272,14 +292,14 @@ class Parser {
 		Symbol name = Symbol.get(t.getToken());
 		t.advance();
 
-		if (model.getProcedural().get(name) != null) {
+		if (model.procedural.get(name) != null) {
 			String oldname = name.getString();
 			name = Symbol.getUnique(oldname);
 			model.recordWarning("production '" + oldname + "' exists; renaming second production as '" + name + "'", t);
 		}
 
 		Production p = new Production(name, model);
-		Set<String> variables = new HashSet<String>();
+		Set<String> variables = new HashSet<>();
 
 		while (t.hasMoreTokens() && !t.getToken().equals("==>")) {
 			BufferCondition bc = parseBufferCondition(model, variables);
@@ -343,7 +363,7 @@ class Parser {
 		return bc;
 	}
 
-	SlotCondition parseSlotCondition(Model model, Set<String> variables) throws Exception {
+	SlotCondition parseSlotCondition(Model model, Set<String> variables) {
 		String operator = null;
 		if (t.getToken().equals("-") || t.getToken().equals("<") || t.getToken().equals(">")
 				|| t.getToken().equals("<=") || t.getToken().equals(">=")) {
@@ -424,7 +444,7 @@ class Parser {
 		return ba;
 	}
 
-	SlotAction parseSlotAction(Model model, Set<String> variables) throws Exception {
+	SlotAction parseSlotAction(Model model, Set<String> variables) {
 		String operator = null;
 		if (t.getToken().equals("-") || t.getToken().equals("<") || t.getToken().equals(">")
 				|| t.getToken().equals("<=") || t.getToken().equals(">=")) {
@@ -449,7 +469,7 @@ class Parser {
 		Symbol name = Symbol.get(t.getToken());
 		t.advance();
 
-		Chunk c = model.getDeclarative().get(name);
+		Chunk c = model.declarative.get(name);
 		if (c == null)
 			c = new Chunk(name, model);
 		else
@@ -485,7 +505,7 @@ class Parser {
 	}
 
 	ChunkType parseChunkType(Model model) throws Exception {
-		ChunkType chunkType = null;
+		ChunkType chunkType;
 		if (t.getToken().equals("(")) {
 			t.advance();
 			Symbol name = Symbol.get(t.getToken());
@@ -499,7 +519,7 @@ class Parser {
 			t.advance();
 			while (t.hasMoreTokens() && !t.getToken().equals(")")) {
 				Symbol parentName = Symbol.get(t.getToken());
-				ChunkType parent = model.getDeclarative().getChunkType(parentName);
+				ChunkType parent = model.declarative.getChunkType(parentName);
 				if (parent != null)
 					chunkType.addParent(parent);
 				else

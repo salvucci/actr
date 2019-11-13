@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,7 +20,7 @@ import javax.swing.KeyStroke;
 import actr.resources.Resources;
 
 class AboutDialog extends JDialog {
-	private AboutDialog dialog;
+	private final AboutDialog dialog;
 
 	AboutDialog(Core core) {
 		super();
@@ -56,19 +54,9 @@ class AboutDialog extends JDialog {
 			}
 		});
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dialog.setVisible(false);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dialog.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dialog.setVisible(false);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dialog.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(center, BorderLayout.CENTER);

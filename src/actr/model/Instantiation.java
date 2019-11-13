@@ -1,9 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * An instantiation of a production rule specified as a mapping from variables
@@ -12,14 +9,14 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Instantiation {
-	private Production p;
-	private double time;
-	private double u;
-	private Map<Symbol, Symbol> mapping;
-	private Vector<DelayedSlotCondition> delayedSlotConditions;
+	private final Production p;
+	private final double time;
+	private final double u;
+	private final Map<Symbol, Symbol> mapping;
+	private final List<DelayedSlotCondition> delayedSlotConditions;
 	private int threadID = 0;
 
-	class DelayedSlotCondition {
+	static class DelayedSlotCondition {
 		Symbol buffer;
 		SlotCondition slotCondition;
 		Chunk bufferChunk;
@@ -29,15 +26,13 @@ public class Instantiation {
 		this.p = p;
 		this.time = time;
 		this.u = u;
-		mapping = new HashMap<Symbol, Symbol>();
-		delayedSlotConditions = new Vector<DelayedSlotCondition>();
+		mapping = new HashMap<>();
+		delayedSlotConditions = new ArrayList<>();
 	}
 
 	Instantiation copy() {
 		Instantiation newi = new Instantiation(p, time, u);
-		Iterator<Symbol> it = mapping.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol variable = it.next();
+		for (Symbol variable : mapping.keySet()) {
 			Symbol chunk = get(variable);
 			newi.set(variable, chunk);
 		}
@@ -93,9 +88,7 @@ public class Instantiation {
 	}
 
 	void replaceValue(Symbol value1, Symbol value2) {
-		Iterator<Symbol> it = mapping.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol variable = it.next();
+		for (Symbol variable : mapping.keySet()) {
 			Symbol chunk = get(variable);
 			if (chunk == value1)
 				set(variable, value2);
@@ -137,8 +130,8 @@ public class Instantiation {
 		delayedSlotConditions.add(dsc);
 	}
 
-	Iterator<DelayedSlotCondition> getDelayedSlotConditions() {
-		return delayedSlotConditions.iterator();
+	Iterable<DelayedSlotCondition> getDelayedSlotConditions() {
+		return delayedSlotConditions;
 	}
 
 	/**
@@ -150,9 +143,7 @@ public class Instantiation {
 	@Override
 	public String toString() {
 		String s = "<inst " + p.getName() + " ";
-		Iterator<Symbol> it = mapping.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol v = it.next();
+		for (Symbol v : mapping.keySet()) {
 			Symbol c = get(v);
 			s += " " + v + "->" + c;
 		}

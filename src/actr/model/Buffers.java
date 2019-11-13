@@ -11,9 +11,9 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Buffers {
-	private Model model;
-	private Map<Symbol, Chunk> buffers;
-	private Map<Symbol, Double> touchTimes;
+	private final Model model;
+	private final Map<Symbol, Chunk> buffers;
+	private final Map<Symbol, Double> touchTimes;
 	private Vector<Chunk> goals;
 	private double lastGoalSetTime = -1;
 
@@ -22,9 +22,9 @@ public class Buffers {
 
 	Buffers(Model model) {
 		this.model = model;
-		buffers = new HashMap<Symbol, Chunk>();
-		touchTimes = new HashMap<Symbol, Double>();
-		goals = new Vector<Chunk>();
+		buffers = new HashMap<>();
+		touchTimes = new HashMap<>();
+		goals = new Vector<>();
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class Buffers {
 	 *            the buffer
 	 * @return <tt>true</tt> if the buffer is state buffer
 	 */
-	public boolean isState(Symbol buffer) {
+	public static boolean isState(Symbol buffer) {
 		return buffer.getString().charAt(0) == '?';
 	}
 
@@ -77,10 +77,7 @@ public class Buffers {
 	 */
 	public Symbol getSlot(Symbol buffer, Symbol slot) {
 		Chunk c = buffers.get(buffer);
-		if (c == null)
-			return null;
-		else
-			return c.get(slot);
+		return c == null ? null : c.get(slot);
 	}
 
 	/**
@@ -92,10 +89,8 @@ public class Buffers {
 	 *         exist
 	 */
 	public Chunk getBufferChunk(Symbol name) {
-		Iterator<Chunk> it = buffers.values().iterator();
-		while (it.hasNext()) {
-			Chunk chunk = it.next();
-			if (chunk.getName() == name)
+		for (Chunk chunk : buffers.values()) {
+			if (chunk.name() == name)
 				return chunk;
 		}
 		return null;
@@ -127,8 +122,8 @@ public class Buffers {
 				state.set(Symbol.buffer, Symbol.full);
 		}
 
-		if (model.getBold().brainImaging)
-			model.getBold().recordActivity(buffer);
+		if (model.bold.brainImaging)
+			model.bold.recordActivity(buffer);
 	}
 
 	void setSlot(Symbol buffer, Symbol slot, Symbol value) {
@@ -138,8 +133,8 @@ public class Buffers {
 		if (!isState(buffer))
 			touch(buffer);
 
-		if (model.getBold().brainImaging)
-			model.getBold().recordActivity(buffer);
+		if (model.bold.brainImaging)
+			model.bold.recordActivity(buffer);
 	}
 
 	void clear(Symbol buffer) {
@@ -169,12 +164,12 @@ public class Buffers {
 			}
 		}
 
-		if (model.getBold().brainImaging)
-			model.getBold().recordActivity(buffer);
+		if (model.bold.brainImaging)
+			model.bold.recordActivity(buffer);
 	}
 
 	void touch(Symbol buffer) {
-		touchTimes.put(buffer, new Double(model.getTime()));
+		touchTimes.put(buffer, model.getTime());
 	}
 
 	void removeDecayedChunks() {
@@ -185,7 +180,7 @@ public class Buffers {
 			Symbol buffer = it.next();
 			if (buffer == Symbol.retrieval) {
 				Double ttd = touchTimes.get(buffer);
-				double tt = (ttd == null) ? 0 : ttd.doubleValue();
+				double tt = (ttd == null) ? 0 : ttd;
 				if (tt + bufferChunkLife < model.getTime()) {
 					if (model.verboseTrace)
 						model.output("buffers", buffer + " cleared (buffer decay)");
@@ -198,7 +193,7 @@ public class Buffers {
 	}
 
 	void sortGoals() {
-		Vector<Chunk> v = new Vector<Chunk>();
+		Vector<Chunk> v = new Vector<>();
 		while (goals.size() > 0) {
 			double minTime = 1e10;
 			Chunk min = null;
@@ -222,16 +217,14 @@ public class Buffers {
 	}
 
 	void replaceSlotValues(Chunk c1, Chunk c2) {
-		Iterator<Symbol> it = buffers.keySet().iterator();
-		while (it.hasNext()) {
-			Symbol buffer = it.next();
+		for (Symbol buffer : buffers.keySet()) {
 			Chunk chunk = get(buffer);
 			Iterator<Symbol> slots = chunk.getSlotNames();
 			while (slots.hasNext()) {
 				Symbol slot = slots.next();
 				Symbol value = chunk.get(slot);
-				if (value == c1.getName())
-					chunk.set(slot, c2.getName());
+				if (value == c1.name())
+					chunk.set(slot, c2.name());
 			}
 		}
 	}

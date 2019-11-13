@@ -7,7 +7,7 @@ public interface TaskComponent {
 	 * 
 	 * @return the kind string
 	 */
-	public String getKind();
+	String getKind();
 
 	/**
 	 * Gets the value of component (i.e., the "value" slot of the ACT-R visual
@@ -15,5 +15,5 @@ public interface TaskComponent {
 	 * 
 	 * @return the value string
 	 */
-	public String getValue();
+	String getValue();
 }

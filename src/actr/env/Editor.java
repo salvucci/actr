@@ -18,16 +18,14 @@ import javax.swing.AbstractAction;
 import javax.swing.InputMap;
 import javax.swing.JEditorPane;
 import javax.swing.KeyStroke;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledEditorKit;
 
 import actr.model.ParseError;
 
 class Editor extends JEditorPane {
-	private Frame frame;
-	private Preferences prefs;
+	private final Frame frame;
+	private final Preferences prefs;
 	private Document document;
 	private final Color highlightColor = new Color(240, 240, 255);
 	private final Color sidebarColor = new Color(240, 240, 240);
@@ -41,12 +39,7 @@ class Editor extends JEditorPane {
 		document = new Document(frame, prefs, false);
 		setDocument(document);
 
-		addCaretListener(new CaretListener() {
-			@Override
-			public void caretUpdate(CaretEvent e) {
-				frame.update();
-			}
-		});
+		addCaretListener(e -> frame.update());
 
 		InputMap inputMap = getInputMap();
 		int accelerator = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -175,7 +168,7 @@ class Editor extends JEditorPane {
 	}
 
 	void moveCaretPreviousBlock(boolean select) {
-		int start = document.findPreviousMarker(getSelectionStart(), document.getCommandMarkers());
+		int start = Document.findPreviousMarker(getSelectionStart(), document.getCommandMarkers());
 		if (select)
 			moveCaretPosition(start);
 		else

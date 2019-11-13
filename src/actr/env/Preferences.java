@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Vector;
 
 class Preferences {
@@ -15,14 +16,14 @@ class Preferences {
 	boolean autoHilite, autoIndent;
 	Color commandColor, parameterColor, productionColor, chunkColor, bufferColor, commentColor;
 	int indentSpaces;
-	Vector<String> recentFiles = new Vector<String>();
+	final Vector<String> recentFiles = new Vector<>();
 
 	private static final String prefsFilePath = ((Main.inApplet()) ? null
 			: (Main.onMac()) ? System.getProperty("user.home") + "/Library/Preferences/actr.txt"
 					: ((Main.onNix()) ? System.getProperty("user.home") + "/.actr"
 							: System.getProperty("user.home") + File.separator + "actrprefs.txt"));
 
-	private final int maxRecentFiles = 5;
+	private static final int maxRecentFiles = 5;
 
 	private Preferences() {
 		setDefaults();
@@ -53,53 +54,69 @@ class Preferences {
 		try {
 			Preferences prefs = new Preferences();
 			File file = new File(prefsFilePath);
-			FileReader inputStream = null;
+			FileReader inputStream;
 			StringWriter sw = new StringWriter();
 			inputStream = new FileReader(file);
 			int c;
 			while ((c = inputStream.read()) != -1)
 				sw.write(c);
 			inputStream.close();
-			String lines[] = sw.toString().split("\n");
-			for (int i = 0; i < lines.length; i++) {
-				String pair[] = lines[i].split("\\$");
+			String[] lines = sw.toString().split("\n");
+			for (String line : lines) {
+				String[] pair = line.split("\\$");
 				String var = pair[0];
 				String val = pair[1];
 
-				if (var.equals("frameWidth"))
-					prefs.frameWidth = Integer.valueOf(val);
-				else if (var.equals("frameHeight"))
-					prefs.frameHeight = Integer.valueOf(val);
-				else if (var.equals("editorPaneSplit"))
-					prefs.editorPaneSplit = Integer.valueOf(val);
-				else if (var.equals("taskPaneSplit"))
-					prefs.taskPaneSplit = Integer.valueOf(val);
-				else if (var.equals("font"))
-					prefs.font = val;
-				else if (var.equals("fontSize"))
-					prefs.fontSize = Integer.valueOf(val);
-				else if (var.equals("autoHilite"))
-					prefs.autoHilite = val.equals("true");
-				else if (var.equals("autoTab"))
-					prefs.autoIndent = val.equals("true");
-				else if (var.equals("commandColor"))
-					prefs.commandColor = Color.decode(val);
-				else if (var.equals("parameterColor"))
-					prefs.parameterColor = Color.decode(val);
-				else if (var.equals("productionColor"))
-					prefs.productionColor = Color.decode(val);
-				else if (var.equals("chunkColor"))
-					prefs.chunkColor = Color.decode(val);
-				else if (var.equals("bufferColor"))
-					prefs.bufferColor = Color.decode(val);
-				else if (var.equals("commentColor"))
-					prefs.commentColor = Color.decode(val);
-				else if (var.equals("tabSpaces"))
-					prefs.indentSpaces = Integer.valueOf(val);
-				else if (var.equals("recentFiles")) {
-					String paths[] = val.split(",");
-					for (int j = 0; j < paths.length; j++)
-						prefs.recentFiles.add(paths[j]);
+				switch (var) {
+					case "frameWidth":
+						prefs.frameWidth = Integer.parseInt(val);
+						break;
+					case "frameHeight":
+						prefs.frameHeight = Integer.parseInt(val);
+						break;
+					case "editorPaneSplit":
+						prefs.editorPaneSplit = Integer.parseInt(val);
+						break;
+					case "taskPaneSplit":
+						prefs.taskPaneSplit = Integer.parseInt(val);
+						break;
+					case "font":
+						prefs.font = val;
+						break;
+					case "fontSize":
+						prefs.fontSize = Integer.parseInt(val);
+						break;
+					case "autoHilite":
+						prefs.autoHilite = val.equals("true");
+						break;
+					case "autoTab":
+						prefs.autoIndent = val.equals("true");
+						break;
+					case "commandColor":
+						prefs.commandColor = Color.decode(val);
+						break;
+					case "parameterColor":
+						prefs.parameterColor = Color.decode(val);
+						break;
+					case "productionColor":
+						prefs.productionColor = Color.decode(val);
+						break;
+					case "chunkColor":
+						prefs.chunkColor = Color.decode(val);
+						break;
+					case "bufferColor":
+						prefs.bufferColor = Color.decode(val);
+						break;
+					case "commentColor":
+						prefs.commentColor = Color.decode(val);
+						break;
+					case "tabSpaces":
+						prefs.indentSpaces = Integer.parseInt(val);
+						break;
+					case "recentFiles":
+						String[] paths = val.split(",");
+						prefs.recentFiles.addAll(Arrays.asList(paths));
+						break;
 				}
 
 			}
@@ -111,9 +128,9 @@ class Preferences {
 		}
 	}
 
-	String toHex(Color color) {
+	static String toHex(Color color) {
 		String s = Integer.toHexString(color.getRGB());
-		s = "#" + s.substring(s.length() - 6, s.length());
+		s = "#" + s.substring(s.length() - 6);
 		return s;
 	}
 
@@ -152,10 +169,7 @@ class Preferences {
 	}
 
 	String getMostRecentPath() {
-		if (recentFiles.size() > 0)
-			return recentFiles.elementAt(0);
-		else
-			return null;
+		return recentFiles.size() > 0 ? recentFiles.elementAt(0) : null;
 	}
 
 	void addRecentFile(String fileName) {

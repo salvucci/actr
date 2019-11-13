@@ -7,10 +7,10 @@ package actr.model;
  */
 public abstract class Event implements Comparable<Event> {
 	public double time;
-	public String module;
-	public String description;
+	public final String module;
+	public final String description;
 
-	private long uniqueID;
+	private final long uniqueID;
 
 	/**
 	 * Creates a new event.
@@ -38,23 +38,6 @@ public abstract class Event implements Comparable<Event> {
 		return time;
 	}
 
-	/**
-	 * Gets the module associated with this event.
-	 * 
-	 * @return the module string
-	 */
-	public String getModule() {
-		return module;
-	}
-
-	/**
-	 * Gets the description of the event.
-	 * 
-	 * @return the description string
-	 */
-	public String getDescription() {
-		return description;
-	}
 
 	/**
 	 * Compares two events, primarily with respect to their start times.
@@ -64,21 +47,21 @@ public abstract class Event implements Comparable<Event> {
 	 *         normally will not occur due to the unique identifiers)
 	 */
 	@Override
-	public int compareTo(Event e2) {
-		if (time < e2.time)
+	public int compareTo(Event x) {
+		if (this == x) return 0;
+		double t = this.time;
+		double xt = x.time;
+		if (t < xt)
 			return -1;
-		else if (time > e2.time)
+		else if (t > xt)
 			return +1;
-		else if (module.equals("task") && !e2.module.equals("task"))
+		boolean task = module.equals("task");
+		boolean xTask = x.module.equals("task");
+		if (task && !xTask)
 			return -1;
-		else if (!module.equals("task") && e2.module.equals("task"))
+		else if (!task && xTask)
 			return +1;
-		else if (uniqueID < e2.uniqueID)
-			return -1;
-		else if (uniqueID > e2.uniqueID)
-			return +1;
-		else
-			return 0;
+		else return Long.compare(uniqueID, x.uniqueID);
 		// 0 means events will be collapsed together!
 	}
 

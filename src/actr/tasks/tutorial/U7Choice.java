@@ -17,19 +17,19 @@ import actr.task.Utilities;
 public class U7Choice extends Task {
 	// Task Code
 
-	final double trialSpacing = 5.0;
-	final int trialsPerSession = 12;
-	final int totalSessions = 4;
+	static final double trialSpacing = 5.0;
+	static final int trialsPerSession = 12;
+	static final int totalSessions = 4;
 
-	TaskLabel label;
+	final TaskLabel label;
 	int sessionNumber = 1;
 	int trialNumber = 0;
 	double startTime;
 
 	Trial currentTrial;
-	Vector<Trial> trials = new Vector<Trial>();
+	final Vector<Trial> trials = new Vector<>();
 
-	class Trial {
+	static class Trial {
 		int session;
 		double responseTime;
 	}
@@ -46,7 +46,7 @@ public class U7Choice extends Task {
 		addPeriodicUpdate(trialSpacing);
 	}
 
-	Random random = new Random();
+	final Random random = new Random();
 
 	String randomVisualStimulus() {
 		int i = random.nextInt(3);
@@ -92,7 +92,7 @@ public class U7Choice extends Task {
 
 	// Analysis Code
 
-	double humanRT[] = { .62, .56, .49, .46 };
+	final double[] humanRT = { .62, .56, .49, .46 };
 
 	@Override
 	public int analysisIterations() {
@@ -104,11 +104,11 @@ public class U7Choice extends Task {
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double modelRT[] = new double[humanRT.length];
-		double modelCount[] = new double[humanRT.length];
+		double[] modelRT = new double[humanRT.length];
+		double[] modelCount = new double[humanRT.length];
 
-		for (int i = 0; i < tasks.length; i++) {
-			U7Choice task = (U7Choice) (tasks[i]);
+		for (Task value : tasks) {
+			U7Choice task = (U7Choice) value;
 			for (int j = 0; j < task.trials.size(); j++) {
 				Trial trial = task.trials.elementAt(j);
 				modelRT[trial.session - 1] += trial.responseTime;

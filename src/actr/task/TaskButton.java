@@ -1,8 +1,5 @@
 package actr.task;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 
 /**
@@ -30,12 +27,7 @@ public class TaskButton extends JButton implements TaskComponent {
 	public TaskButton(String text, int x, int y, int width, int height) {
 		super(text);
 		setBounds(x, y, width, height);
-		addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doClick();
-			}
-		});
+		addActionListener(e -> doClick());
 	}
 
 	/**

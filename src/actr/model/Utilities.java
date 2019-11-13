@@ -8,8 +8,9 @@ import java.util.Random;
  * 
  * @author Dario Salvucci
  */
-public class Utilities {
-	static Random random = new Random();
+public enum Utilities {
+	;
+	static final Random random = new Random();
 
 	private static long currentID = 0;
 
@@ -59,10 +60,10 @@ public class Utilities {
 	}
 
 	/** The viewing distance to the screen, in inches. */
-	public static double viewingDistance = 30; // from Byrne-IJHCS01 // not 15
+	public static final double viewingDistance = 30; // from Byrne-IJHCS01 // not 15
 
 	/** The value of pixels per inch on the standard display. */
-	public static double pixelsPerInch = 72;
+	public static final double pixelsPerInch = 72;
 
 	/**
 	 * Converts a value from pixels to visual angle on the standard display.
@@ -95,7 +96,7 @@ public class Utilities {
 		if (test.equals(")"))
 			return -9999;
 		if (!test.equals("("))
-			return Double.valueOf(test);
+			return Double.parseDouble(test);
 
 		String operator = it.next();
 		double result = evalCompute(it);
@@ -107,22 +108,31 @@ public class Utilities {
 		if (last == -9999)
 			throw new Exception();
 		while (last != -9999) {
-			if (operator.equals("+"))
-				result += last;
-			else if (operator.equals("-"))
-				result -= last;
-			else if (operator.equals("*"))
-				result *= last;
-			else if (operator.equals("/"))
-				result /= last;
-			else if (operator.equals("my/"))
-				result = (last == 0) ? 0 : result / last;
-			else if (operator.equals("min"))
-				result = (last < result) ? last : result;
-			else if (operator.equals("max"))
-				result = (last > result) ? last : result;
-			else
-				throw new Exception();
+			switch (operator) {
+				case "+":
+					result += last;
+					break;
+				case "-":
+					result -= last;
+					break;
+				case "*":
+					result *= last;
+					break;
+				case "/":
+					result /= last;
+					break;
+				case "my/":
+					result = (last == 0) ? 0 : result / last;
+					break;
+				case "min":
+					result = Math.min(last, result);
+					break;
+				case "max":
+					result = Math.max(last, result);
+					break;
+				default:
+					throw new Exception();
+			}
 			last = evalCompute(it);
 		}
 		return result;
@@ -134,19 +144,21 @@ public class Utilities {
 		double r1 = evalCompute(it);
 		double r2 = evalCompute(it);
 		// it.next(); // ")"
-		if (operator.equals("="))
-			return (r1 == r2);
-		else if (operator.equals("<>"))
-			return (r1 != r2);
-		else if (operator.equals("<"))
-			return (r1 < r2);
-		else if (operator.equals(">"))
-			return (r1 > r2);
-		else if (operator.equals("<="))
-			return (r1 <= r2);
-		else if (operator.equals(">="))
-			return (r1 >= r2);
-		else
-			throw new Exception();
+		switch (operator) {
+			case "=":
+				return (r1 == r2);
+			case "<>":
+				return (r1 != r2);
+			case "<":
+				return (r1 < r2);
+			case ">":
+				return (r1 > r2);
+			case "<=":
+				return (r1 <= r2);
+			case ">=":
+				return (r1 >= r2);
+			default:
+				throw new Exception();
+		}
 	}
 }

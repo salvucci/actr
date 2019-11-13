@@ -14,9 +14,9 @@ public class U5Siegler extends Task {
 
 	int tupleIndex = 0;
 	double lastTime = 0;
-	int[][] tuples = { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 2 }, { 2, 3 }, { 3, 3 } };
+	final int[][] tuples = { { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 2 }, { 2, 3 }, { 3, 3 } };
 	String response;
-	String responses[] = new String[tuples.length];
+	final String[] responses = new String[tuples.length];
 
 	@Override
 	public void start() {
@@ -36,15 +36,15 @@ public class U5Siegler extends Task {
 		if (tupleIndex >= tuples.length)
 			getModel().stop();
 		else {
-			addAural(0.00, "arg1", "sound", "" + tuples[tupleIndex][0]);
-			addAural(0.75, "arg2", "sound", "" + tuples[tupleIndex][1]);
+			addAural(0.00, "arg1", "sound", String.valueOf(tuples[tupleIndex][0]));
+			addAural(0.75, "arg2", "sound", String.valueOf(tuples[tupleIndex][1]));
 		}
 		lastTime = time;
 	}
 
-	static final String numbers[] = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "other" };
+	static final String[] numbers = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "other" };
 
-	int getIndex(String s) {
+	static int getIndex(String s) {
 		for (int i = 0; i < numbers.length; i++)
 			if (numbers[i].equals(s))
 				return i;
@@ -58,7 +58,7 @@ public class U5Siegler extends Task {
 
 	// --- Analysis Code ---//
 
-	static final double humanCounts[][] = { { 0, .05, .86, 0, .02, 0, .02, 0, 0, .06 },
+	static final double[][] humanCounts = { { 0, .05, .86, 0, .02, 0, .02, 0, 0, .06 },
 			{ 0, .04, .07, .75, .04, 0, .02, 0, 0, .09 }, { 0, .02, 0, .10, .75, .05, .01, .03, 0, .06 },
 			{ .02, 0, .04, .05, .80, .04, 0, .05, 0, 0 }, { 0, 0, .07, .09, .25, .45, .08, .01, .01, .06 },
 			{ .04, 0, 0, .05, .21, .09, .48, 0, .02, .11 } };
@@ -70,11 +70,11 @@ public class U5Siegler extends Task {
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double modelCounts[][];
+		double[][] modelCounts;
 		modelCounts = new double[tuples.length][numbers.length];
-		int totals[] = new int[tuples.length];
-		for (int n = 0; n < tasks.length; n++) {
-			U5Siegler task = (U5Siegler) tasks[n];
+		int[] totals = new int[tuples.length];
+		for (Task value : tasks) {
+			U5Siegler task = (U5Siegler) value;
 			for (int i = 0; i < task.responses.length; i++) {
 				int index = getIndex(task.responses[i]);
 				modelCounts[i][index] += 1;

@@ -1,9 +1,6 @@
 package actr.model;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A queue of upcoming events sorted by time.
@@ -11,10 +8,10 @@ import java.util.TreeSet;
  * @author Dario Salvucci
  */
 public class Events {
-	private TreeSet<Event> events;
+	private final TreeSet<Event> events;
 
 	Events() {
-		events = new TreeSet<Event>();
+		events = new TreeSet<>();
 	}
 
 	/**
@@ -71,9 +68,7 @@ public class Events {
 	 *         the given prefix, or <tt>false</tt> otherwise
 	 */
 	public boolean scheduled(String module, String prefix) {
-		Iterator<Event> it = events.iterator();
-		while (it.hasNext()) {
-			Event e = it.next();
+		for (Event e : events) {
 			if (e.module.equals(module) && e.description.startsWith(prefix))
 				return true;
 		}
@@ -81,28 +76,21 @@ public class Events {
 	}
 
 	void changeTime(String module, String prefix, double newTime) {
-		Iterator<Event> it = events.iterator();
-		while (it.hasNext()) {
-			Event e = it.next();
-			if (e.module.equals(module) && e.description.startsWith(prefix)) {
-				events.remove(e);
-				e.time = newTime;
-				// remove and add to re-sort the events
-				events.add(e);
-				return;
+		for (Event e : events) {
+			if (e.time!=newTime) {
+				if (e.module.equals(module) && e.description.startsWith(prefix)) {
+					events.remove(e);
+					e.time = newTime;
+					// remove and add to re-sort the events
+					events.add(e);
+					return;
+				}
 			}
 		}
 	}
 
 	void removeModuleEvents(String module, String prefix) {
-		Set<Event> moduleEvents = new HashSet<Event>();
-		Iterator<Event> it = events.iterator();
-		while (it.hasNext()) {
-			Event e = it.next();
-			if (e.module.equals(module) && e.description.startsWith(prefix))
-				moduleEvents.add(e);
-		}
-		events.removeAll(moduleEvents);
+		events.removeIf(e -> e.module.equals(module) && e.description.startsWith(prefix));
 	}
 
 	void removeModuleEvents(String module) {
@@ -116,10 +104,8 @@ public class Events {
 	 */
 	@Override
 	public String toString() {
-		String s = "Events:\n";
-		Iterator<Event> it = events.iterator();
-		while (it.hasNext())
-			s += it.next() + "\n";
-		return s + "\n";
+		StringBuilder s = new StringBuilder("Events:\n");
+		for (Event event : events) s.append(event).append('\n');
+		return s.append('\n').toString();
 	}
 }

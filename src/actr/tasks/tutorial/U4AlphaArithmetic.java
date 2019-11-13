@@ -16,7 +16,7 @@ import actr.task.Utilities;
 public class U4AlphaArithmetic extends Task {
 	// Task Code
 
-	private final String trialTuples[][] = { { "A", "2", "C", "K" }, { "D", "2", "F", "K" }, { "B", "3", "E", "K" },
+	private final String[][] trialTuples = { { "A", "2", "C", "K" }, { "D", "2", "F", "K" }, { "B", "3", "E", "K" },
 			{ "E", "3", "H", "K" }, { "C", "4", "G", "K" }, { "F", "4", "J", "K" }, { "A", "2", "D", "D" },
 			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" }, { "E", "3", "I", "D" }, { "C", "4", "H", "D" },
 			{ "F", "4", "K", "D" }, { "A", "2", "C", "K" }, { "D", "2", "F", "K" }, { "B", "3", "E", "K" },
@@ -24,12 +24,14 @@ public class U4AlphaArithmetic extends Task {
 			{ "D", "2", "G", "D" }, { "B", "3", "F", "D" }, { "E", "3", "I", "D" }, { "C", "4", "H", "D" },
 			{ "F", "4", "K", "D" } };
 
-	private TaskLabel addend1Label, addend2Label, sumLabel;
+	private final TaskLabel addend1Label;
+	private final TaskLabel addend2Label;
+	private final TaskLabel sumLabel;
 
-	private final double trialSpacing = 5.0;
+	private static final double trialSpacing = 5.0;
 
-	private int totalBlocks = 3;
-	private int totalTrialsPerBlock = 8;
+	private final int totalBlocks = 3;
+	private final int totalTrialsPerBlock = 8;
 
 	private int currentBlock = 1;
 	private int currentTrialInBlock = 0;
@@ -38,9 +40,9 @@ public class U4AlphaArithmetic extends Task {
 
 	private Trial currentTrial;
 
-	Vector<Trial> trials = new Vector<Trial>();
+	final Vector<Trial> trials = new Vector<>();
 
-	class Trial {
+	static class Trial {
 		int block;
 		String addend1, addend2, sum, answer;
 		double responseTime;
@@ -105,14 +107,14 @@ public class U4AlphaArithmetic extends Task {
 
 	// Analysis Code
 
-	private double humanRT[][] = { { 1.84, 2.46, 2.82 }, { 1.21, 1.45, 1.42 }, { 1.14, 1.21, 1.17 } };
+	private final double[][] humanRT = { { 1.84, 2.46, 2.82 }, { 1.21, 1.45, 1.42 }, { 1.14, 1.21, 1.17 } };
 
 	@Override
 	public int analysisIterations() {
 		return 100;
 	}
 
-	private void printTable(double results[][]) {
+	private void printTable(double[][] results) {
 		getModel().output("\tTwo\tThree\tFour");
 		for (int b = 0; b < 3; b++) {
 			String s = "Block " + (b + 1);
@@ -124,11 +126,11 @@ public class U4AlphaArithmetic extends Task {
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double modelRT[][] = new double[3][3];
-		double modelCount[][] = new double[3][3];
+		double[][] modelRT = new double[3][3];
+		double[][] modelCount = new double[3][3];
 
-		for (int i = 0; i < tasks.length; i++) {
-			U4AlphaArithmetic task = (U4AlphaArithmetic) (tasks[i]);
+		for (Task value : tasks) {
+			U4AlphaArithmetic task = (U4AlphaArithmetic) value;
 			for (int j = 0; j < task.trials.size(); j++) {
 				Trial trial = task.trials.elementAt(j);
 

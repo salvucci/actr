@@ -3,7 +3,6 @@ package actr.env;
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
@@ -20,7 +19,7 @@ import javax.swing.KeyStroke;
 import actr.resources.Resources;
 
 class SaveDialog extends JDialog {
-	SaveDialog dialog;
+	final SaveDialog dialog;
 	boolean cancel = false;
 	boolean save = true;
 
@@ -41,30 +40,21 @@ class SaveDialog extends JDialog {
 				+ "\"?</b></font><font size=2><br><br>Your changes will be lost if you don't save them.</font></html>";
 
 		JButton dontSaveButton = new JButton("Don't Save");
-		dontSaveButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				save = false;
-				dialog.setVisible(false);
-			}
+		dontSaveButton.addActionListener(e -> {
+			save = false;
+			dialog.setVisible(false);
 		});
 
 		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cancel = true;
-				dialog.setVisible(false);
-			}
+		cancelButton.addActionListener(e -> {
+			cancel = true;
+			dialog.setVisible(false);
 		});
 
 		JButton saveButton = new JButton("Save");
-		saveButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				save = true;
-				dialog.setVisible(false);
-			}
+		saveButton.addActionListener(e -> {
+			save = true;
+			dialog.setVisible(false);
 		});
 
 		JPanel bottom = new JPanel();
@@ -85,20 +75,14 @@ class SaveDialog extends JDialog {
 		main.add(left, BorderLayout.WEST);
 		main.add(center, BorderLayout.CENTER);
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				save = false;
-				dialog.setVisible(false);
-			}
+		getRootPane().registerKeyboardAction(e -> {
+			save = false;
+			dialog.setVisible(false);
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.META_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cancel = true;
-				dialog.setVisible(false);
-			}
+		getRootPane().registerKeyboardAction(e -> {
+			cancel = true;
+			dialog.setVisible(false);
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().setDefaultButton(saveButton);

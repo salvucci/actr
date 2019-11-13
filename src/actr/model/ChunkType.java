@@ -4,12 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ChunkType {
-	private Symbol name;
-	private Set<ChunkType> parents;
+	private final Symbol name;
+	private final Set<ChunkType> parents;
 
 	ChunkType(Symbol name) {
 		this.name = name;
-		parents = new HashSet<ChunkType>();
+		parents = new HashSet<>();
 	}
 
 	Symbol getName() {
