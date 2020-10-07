@@ -233,7 +233,7 @@ public class Symbol {
 		return s == null ? nil : hashmap.computeIfAbsent(s, Symbol::new);
 	}
 
-	private static Symbol createPervasiveSymbol(String s) {
+	public static Symbol createPervasiveSymbol(String s) {
 		return pervasives.computeIfAbsent(s, Symbol::get);
 	}
 

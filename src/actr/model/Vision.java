@@ -464,7 +464,7 @@ public class Vision extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		for (int i = 0; i < finsts.size(); i++) {
 			VisualObject vo = finsts.get(i);
 			if (vo.attendedTime < model.getTime() - visualFinstSpan) {

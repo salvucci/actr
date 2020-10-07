@@ -224,7 +224,7 @@ public class Chunk {
 	 * Checks if another chunk is equal to this one by checking the equality of
 	 * all slots and values.
 	 * 
-	 * @param c2
+//	 * @param c2
 	 *            the chunk for comparison
 	 * @return <tt>true</tt> if the chunks are equal
 	 */
@@ -258,7 +258,7 @@ public class Chunk {
 					- model.declarative.baseLevelDecayRate * Math.log(time - creationTime);
 		} else {
 			double sum = 0;
-			int n = uses.size();
+//			int n = uses.size();
 			for (double use : uses) {
 				sum += Math.pow(time - use, -model.declarative.baseLevelDecayRate);
 			}

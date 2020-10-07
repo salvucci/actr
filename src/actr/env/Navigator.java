@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
@@ -61,21 +60,18 @@ class Navigator extends JPanel {
 
 		commandCB.removeAllItems();
 		List<Marker> v = document.getCommandMarkers();
-		for (int i = 0; i < v.size(); i++) {
-			Marker marker = v.get(i);
+		for (Marker marker : v) {
 			if (!marker.getText().startsWith("(p ") && !marker.getText().startsWith("(spp "))
 				commandCB.addItem(marker);
 		}
 
 		productionCB.removeAllItems();
 		v = document.getProductionMarkers();
-		for (int i = 0; i < v.size(); i++)
-			productionCB.addItem(v.get(i));
+		for (Marker value : v) productionCB.addItem(value);
 
 		chunkCB.removeAllItems();
 		v = document.getChunkMarkers();
-		for (int i = 0; i < v.size(); i++)
-			chunkCB.addItem(v.get(i));
+		for (Marker marker : v) chunkCB.addItem(marker);
 
 		disableAction = false;
 	}

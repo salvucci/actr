@@ -12,7 +12,7 @@ public class Declarative extends Module {
 	private final Map<Symbol, Chunk> chunks;
 	private final Map<Symbol, ChunkType> chunkTypes;
 	private final Map<String, Double> similarities;
-	private final List<Chunk> finsts;
+	public final List<Chunk> finsts;
 	// private double lastCleanup = 0;
 
 	double retrievalThreshold = 0.0;
@@ -73,11 +73,11 @@ public class Declarative extends Module {
 		return childType.isa(parentType);
 	}
 
-	Chunk add(Chunk chunk) {
+	public Chunk add(Chunk chunk) {
 		return add(chunk, false);
 	}
 
-	Chunk add(Chunk chunk, boolean preventMerge) {
+	public Chunk add(Chunk chunk, boolean preventMerge) {
 		if (get(chunk.name()) != null)
 			return chunk;
 
@@ -215,11 +215,12 @@ public class Declarative extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		final int fs = finsts.size();
+		final double now = model.getTime();
 		for (int i = 0; i < fs; i++) {
 			Chunk c = finsts.get(i);
-			if (c.getRetrievalTime() < model.getTime() - declarativeFinstSpan) {
+			if (c.getRetrievalTime() < now - declarativeFinstSpan) {
 				c.setRetrieved(false);
 				// XXX c.setRetrievalTime (0); // why was this here??
 				finsts.remove(i);
@@ -237,12 +238,12 @@ public class Declarative extends Module {
 				double retrievalTime = latencyFactor * Math.exp(-retrieval.activation());
 				model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
 				model.buffers.setSlot(Symbol.retrievalState, Symbol.buffer, Symbol.requested);
-				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative",
+				model.addEvent(new Event(now + retrievalTime, "declarative",
 						"retrieved-chunk [" + retrieval.name() + "]") {
 					@Override
 					public void action() {
 						retrieval.setRetrieved(true);
-						retrieval.setRetrievalTime(model.getTime());
+						retrieval.setRetrievalTime(time);
 						finsts.add(retrieval);
 						if (fs > declarativeNumFinsts)
 							finsts.remove(0);
@@ -255,7 +256,7 @@ public class Declarative extends Module {
 			} else {
 				double retrievalTime = latencyFactor * Math.exp(-retrievalThreshold);
 				model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.busy);
-				model.addEvent(new Event(model.getTime() + retrievalTime, "declarative", "retrieval-failure") {
+				model.addEvent(new Event(now + retrievalTime, "declarative", "retrieval-failure") {
 					@Override
 					public void action() {
 						model.buffers.setSlot(Symbol.retrievalState, Symbol.state, Symbol.error);
@@ -290,9 +291,9 @@ public class Declarative extends Module {
 	// }
 
 	boolean checkFinsts(Symbol name) {
-		for (int i = 0; i < finsts.size(); i++)
-			if (finsts.get(i).name() == name)
-				return true;
+        for (Chunk finst : finsts)
+            if (finst.name() == name)
+                return true;
 		return false;
 	}
 

@@ -3,6 +3,7 @@ package actr.model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utility code with various utility variables and methods.
@@ -13,10 +14,10 @@ public enum Utilities {
 	;
 	static final Random random = new Random();
 
-	private static long currentID = 0;
+	private static final AtomicLong currentID = new AtomicLong();
 
 	static long getUniqueID() {
-		return (++currentID);
+		return currentID.incrementAndGet();
 	}
 
 	/**
@@ -124,29 +125,14 @@ public enum Utilities {
 			throw new Exception();
 		while (last != -9999) {
 			switch (operator) {
-				case "+":
-					result += last;
-					break;
-				case "-":
-					result -= last;
-					break;
-				case "*":
-					result *= last;
-					break;
-				case "/":
-					result /= last;
-					break;
-				case "my/":
-					result = (last == 0) ? 0 : result / last;
-					break;
-				case "min":
-					result = Math.min(last, result);
-					break;
-				case "max":
-					result = Math.max(last, result);
-					break;
-				default:
-					throw new Exception();
+				case "+" -> result += last;
+				case "-" -> result -= last;
+				case "*" -> result *= last;
+				case "/" -> result /= last;
+				case "my/" -> result = (last == 0) ? 0 : result / last;
+				case "min" -> result = Math.min(last, result);
+				case "max" -> result = Math.max(last, result);
+				default -> throw new Exception();
 			}
 			last = evalCompute(it);
 		}
@@ -159,22 +145,15 @@ public enum Utilities {
 		double r1 = evalCompute(it);
 		double r2 = evalCompute(it);
 		// it.next(); // ")"
-		switch (operator) {
-			case "=":
-				return (r1 == r2);
-			case "<>":
-				return (r1 != r2);
-			case "<":
-				return (r1 < r2);
-			case ">":
-				return (r1 > r2);
-			case "<=":
-				return (r1 <= r2);
-			case ">=":
-				return (r1 >= r2);
-			default:
-				throw new Exception();
-		}
+		return switch (operator) {
+			case "=" -> (r1 == r2);
+			case "<>" -> (r1 != r2);
+			case "<" -> (r1 < r2);
+			case ">" -> (r1 > r2);
+			case "<=" -> (r1 <= r2);
+			case ">=" -> (r1 >= r2);
+			default -> throw new Exception();
+		};
 	}
 
 	public static boolean isNumeric(String s) {
@@ -185,7 +164,7 @@ public enum Utilities {
 		return s.matches("\\d*\\.?\\d+");
 	}
 
-	public static String toString(double a[]) {
+	public static String toString(double[] a) {
 		String s = "";
 		for (int i = 0; i < a.length; i++)
 			s += String.format("%.8f", a[i]) + (i < a.length - 1 ? " " : "");

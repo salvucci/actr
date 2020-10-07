@@ -38,7 +38,7 @@ public class U3Sperling extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		boolean ok = (response.length() == 5
-				&& getModel().procedural.getLastProductionFired().getName().getString().contains("stop-report"));
+				&& getModel().procedural.getLastProductionFired().name.getString().contains("stop-report"));
 		return new Result("U3Sperling", ok);
 	}
 }

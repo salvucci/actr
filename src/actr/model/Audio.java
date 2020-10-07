@@ -111,7 +111,7 @@ public class Audio extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		Chunk request = model.buffers.get(Symbol.aurloc);
 		if (request != null && request.isRequest()) {
 			request.setRequest(false);

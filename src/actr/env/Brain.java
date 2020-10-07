@@ -3,7 +3,6 @@ package actr.env;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.swing.JPanel;
 
@@ -122,8 +121,7 @@ class Brain extends JPanel {
 		}
 
 		if (frame.getModel() != null) {
-			for (int n = 0; n < regions.size(); n++) {
-				Region region = regions.get(n);
+			for (Region region : regions) {
 				double bold = frame.getModel().bold.getValue(Symbol.get(region.buffer));
 
 				if (bold > 0) {

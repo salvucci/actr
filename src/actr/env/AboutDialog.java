@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -30,7 +31,7 @@ class AboutDialog extends JDialog {
 		setUndecorated(true);
 		// setBackground (new Color(0.9f, 0.9f, 0.9f, 0.25f));
 
-		JLabel icon = new JLabel(new ImageIcon(Resources.getImage("actr.png")));
+		JLabel icon = new JLabel(new ImageIcon(Objects.requireNonNull(Resources.getImage("actr.png"))));
 		icon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		JLabel text = new JLabel(

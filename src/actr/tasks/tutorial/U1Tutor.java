@@ -11,7 +11,7 @@ import actr.task.Task;
 public class U1Tutor extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		boolean ok = (getModel().procedural.getLastProductionFired().getName().getString()
+		boolean ok = (getModel().procedural.getLastProductionFired().name.getString()
 				.contains("add-tens-done"));
 		return new Result("U1Tutor", ok);
 	}

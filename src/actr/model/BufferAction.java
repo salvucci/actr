@@ -266,11 +266,9 @@ class BufferAction {
 					model.output(s);
 			} else if (buffer == Symbol.get("bind")) {
 				try {
-					double value = Utilities.evalCompute(tokens.iterator());
-					inst.set(bind, Symbol.get(value));
+					inst.set(bind, Symbol.get(Utilities.evalCompute(tokens.iterator())));
 				} catch (Exception e) {
-					double value = Task.bind(tokens.iterator());
-					inst.set(bind, Symbol.get(value));
+					inst.set(bind, Symbol.get(Task.bind(tokens.iterator())));
 				}
 			} else {
 				try {

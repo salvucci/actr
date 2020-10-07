@@ -67,57 +67,27 @@ class Preferences {
 				String var = pair[0];
 				String val = pair[1];
 
-				switch (var) {
-					case "frameWidth":
-						prefs.frameWidth = Integer.parseInt(val);
-						break;
-					case "frameHeight":
-						prefs.frameHeight = Integer.parseInt(val);
-						break;
-					case "editorPaneSplit":
-						prefs.editorPaneSplit = Integer.parseInt(val);
-						break;
-					case "taskPaneSplit":
-						prefs.taskPaneSplit = Integer.parseInt(val);
-						break;
-					case "font":
-						prefs.font = val;
-						break;
-					case "fontSize":
-						prefs.fontSize = Integer.parseInt(val);
-						break;
-					case "autoHilite":
-						prefs.autoHilite = val.equals("true");
-						break;
-					case "autoTab":
-						prefs.autoIndent = val.equals("true");
-						break;
-					case "commandColor":
-						prefs.commandColor = Color.decode(val);
-						break;
-					case "parameterColor":
-						prefs.parameterColor = Color.decode(val);
-						break;
-					case "productionColor":
-						prefs.productionColor = Color.decode(val);
-						break;
-					case "chunkColor":
-						prefs.chunkColor = Color.decode(val);
-						break;
-					case "bufferColor":
-						prefs.bufferColor = Color.decode(val);
-						break;
-					case "commentColor":
-						prefs.commentColor = Color.decode(val);
-						break;
-					case "tabSpaces":
-						prefs.indentSpaces = Integer.parseInt(val);
-						break;
-					case "recentFiles":
-						String[] paths = val.split(",");
-						prefs.recentFiles.addAll(Arrays.asList(paths));
-						break;
-				}
+                switch (var) {
+                    case "frameWidth" -> prefs.frameWidth = Integer.parseInt(val);
+                    case "frameHeight" -> prefs.frameHeight = Integer.parseInt(val);
+                    case "editorPaneSplit" -> prefs.editorPaneSplit = Integer.parseInt(val);
+                    case "taskPaneSplit" -> prefs.taskPaneSplit = Integer.parseInt(val);
+                    case "font" -> prefs.font = val;
+                    case "fontSize" -> prefs.fontSize = Integer.parseInt(val);
+                    case "autoHilite" -> prefs.autoHilite = val.equals("true");
+                    case "autoTab" -> prefs.autoIndent = val.equals("true");
+                    case "commandColor" -> prefs.commandColor = Color.decode(val);
+                    case "parameterColor" -> prefs.parameterColor = Color.decode(val);
+                    case "productionColor" -> prefs.productionColor = Color.decode(val);
+                    case "chunkColor" -> prefs.chunkColor = Color.decode(val);
+                    case "bufferColor" -> prefs.bufferColor = Color.decode(val);
+                    case "commentColor" -> prefs.commentColor = Color.decode(val);
+                    case "tabSpaces" -> prefs.indentSpaces = Integer.parseInt(val);
+                    case "recentFiles" -> {
+                        String[] paths = val.split(",");
+                        prefs.recentFiles.addAll(Arrays.asList(paths));
+                    }
+                }
 
 			}
 			return prefs;

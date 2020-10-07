@@ -40,7 +40,7 @@ import actr.model.Model;
  */
 public class Task extends JPanel {
 	private String name;
-	private Model model;
+	protected Model model;
 	private boolean showMouse;
 	private int mouseX, mouseY;
 	private boolean showAttention, showEye;
@@ -479,10 +479,11 @@ public class Task extends JPanel {
 	 *            the event
 	 */
 	public void addUpdate(final double timeDelta) {
-		model.addEvent(new actr.model.Event(model.getTime() + timeDelta, "task", "update") {
+		final double now = model.getTime();
+		model.addEvent(new actr.model.Event(now + timeDelta, "task", "update") {
 			@Override
 			public void action() {
-				update(model.getTime());
+				update(time);
 			}
 		});
 	}
@@ -495,8 +496,9 @@ public class Task extends JPanel {
 	 *            the period of the calls to the <tt>update()</tt> method
 	 */
 	public void addPeriodicUpdate(final double timeDelta) {
-		update(model.getTime());
-		model.addEvent(new actr.model.Event(model.getTime() + timeDelta, "task", "update") {
+		final double now = model.getTime();
+		update(now);
+		model.addEvent(new actr.model.Event(now + timeDelta, "task", "update") {
 			@Override
 			public void action() {
 				addPeriodicUpdate(timeDelta);

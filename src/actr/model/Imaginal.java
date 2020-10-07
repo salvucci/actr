@@ -16,7 +16,7 @@ public class Imaginal extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		final Chunk chunk = model.buffers.get(Symbol.imaginal);
 		if (chunk != null && chunk.isRequest()) {
 			chunk.setRequest(false);

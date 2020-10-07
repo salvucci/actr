@@ -11,7 +11,7 @@ import actr.task.Task;
 public class U1Count extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		boolean ok = (getModel().procedural.getLastProductionFired().getName().getString().contains("stop"));
+		boolean ok = (getModel().procedural.getLastProductionFired().name.getString().contains("stop"));
 		return new Result("U1Count", ok);
 	}
 }

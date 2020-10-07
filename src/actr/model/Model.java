@@ -1,13 +1,14 @@
 package actr.model;
 
+import actr.task.Task;
+import actr.env.Frame;
+
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import actr.env.Frame;
-import actr.task.Task;
 
 /**
  * The highest-level class representing an ACT-R model.
@@ -26,7 +27,7 @@ public class Model {
 	public final Bold bold;
 	public final Buffers buffers;
 	public final Events events;
-	private Task task;
+	public actr.task.Task task;
 	private double time;
 	private boolean stop;
 	private boolean taskUpdated;
@@ -34,7 +35,7 @@ public class Model {
 	public final List<ParseError> errors;
 	public final Frame frame;
 
-	private Fatigue fatigue;
+	public final Fatigue fatigue;
 
 	boolean realTime = false;
 	double realTimeMultiplier = 1;
@@ -123,120 +124,12 @@ public class Model {
 		return compile(file, frame, null);
 	}
 
-	/**
-	 * Gets the fatigue module.
-	 *
-	 * @return the fatigue module
-	 */
-	public Fatigue getFatigue() {
-		return fatigue;
-	}
-
-	/**
-	 * Gets the declarative module.
-	 * 
-	 * @return the declarative module
-	 */
-	public Declarative getDeclarative() {
-		return declarative;
-	}
-
-	/**
-	 * Gets the procedural module.
-	 * 
-	 * @return the procedural module
-	 */
-	public Procedural getProcedural() {
-		return procedural;
-	}
-
-	/**
-	 * Gets the vision module.
-	 * 
-	 * @return the vision module
-	 */
-	public Vision getVision() {
-		return vision;
-	}
-
-	/**
-	 * Gets the audio module.
-	 * 
-	 * @return the audio module
-	 */
-	public Audio getAudio() {
-		return audio;
-	}
-
-	/**
-	 * Gets the motor module.
-	 * 
-	 * @return the motor module
-	 */
-	public Motor getMotor() {
-		return motor;
-	}
-
-	/**
-	 * Gets the speech module.
-	 * 
-	 * @return the speech module
-	 */
-	public Speech getSpeech() {
-		return speech;
-	}
-
-	/**
-	 * Gets the imaginal module.
-	 * 
-	 * @return the imaginal module
-	 */
-	public Imaginal getImaginal() {
-		return imaginal;
-	}
-
-	/**
-	 * Gets the temporal module.
-	 * 
-	 * @return the temporal module
-	 */
-	public Temporal getTemporal() {
-		return temporal;
-	}
-
-	/**
-	 * Gets the BOLD module.
-	 * 
-	 * @return the BOLD module
-	 */
-	public Bold getBold() {
-		return bold;
-	}
-
-	/**
-	 * Gets the current buffers.
-	 * 
-	 * @return the buffers
-	 */
-	public Buffers getBuffers() {
-		return buffers;
-	}
-
-	/**
-	 * Gets the current events queue.
-	 * 
-	 * @return the events queue
-	 */
-	public Events getEvents() {
-		return events;
-	}
-
-	/**
+	 /**
 	 * Gets the task for the model to perform.
 	 * 
 	 * @return the current task
 	 */
-	public Task getTask() {
+	public actr.task.Task getTask() {
 		return task;
 	}
 
@@ -246,7 +139,7 @@ public class Model {
 	 * @param task
 	 *            the task to be performed by the model
 	 */
-	public void setTask(Task task) {
+	public void setTask(actr.task.Task task) {
 		this.task = task;
 		task.setModel(this);
 	}
@@ -302,7 +195,7 @@ public class Model {
 		return realTime;
 	}
 
-	Chunk createBufferStateChunk(String buffer, boolean hasBuffer) {
+	public Chunk createBufferStateChunk(String buffer, boolean hasBuffer) {
 		Chunk c = new Chunk(Symbol.get(buffer), this);
 		c.set(Symbol.get("isa"), Symbol.get("buffer-state"));
 		c.set(Symbol.get("state"), Symbol.get("free"));
@@ -725,52 +618,33 @@ public class Model {
 				break;
 			default:
 				// Fatigue parameters
-		else if (parameter.equals(":fatigue")) {
-				fatigue.setFatigueEnabled(!value.equals("nil"));
-				procedural.utilityUseThreshold = !value.equals("nil");
-			}
-			else if (parameter.equals(":fatigue-partial-matching"))
-				fatigue.setFatiguePartialMatching(!value.equals("nil"));
-			else if (parameter.equals(":fp-dec"))
-				fatigue.setFatigueFPDec(Double.valueOf(value));
-			else if (parameter.equals(":fp-dec-sleep1"))
-				fatigue.setFatigueFPDecSleep1(Double.valueOf(value));
-			else if (parameter.equals(":fp-dec-sleep2"))
-				fatigue.setFatigueFPDecSleep2(Double.valueOf(value));
-			else if (parameter.equals(":fp"))
-				fatigue.setFatigueFP(Double.valueOf(value));
-			else if (parameter.equals(":fd-dec"))
-				fatigue.setFatigueFDDec(Double.valueOf(value));
-			else if (parameter.equals(":fd"))
-				fatigue.setFatigueFD(Double.valueOf(value));
-			else if (parameter.equals(":fpbmc"))
-				fatigue.setFatigueFPBMC(Double.valueOf(value));
-			else if (parameter.equals(":fpmc0"))
-				fatigue.setFatigueFPMC0(Double.valueOf(value));
-			else if (parameter.equals(":fpmc"))
-				fatigue.setFatigueFPMC(Double.valueOf(value));
-			else if (parameter.equals(":utbmc"))
-				fatigue.setFatigueUTBMC(Double.valueOf(value));
-			else if (parameter.equals(":utmc"))
-				fatigue.setFatigueUTMC(Double.valueOf(value));
-			else if (parameter.equals(":utmc0"))
-				fatigue.setFatigueUTMC0(Double.valueOf(value));
-			else if (parameter.equals(":ut0"))
-				fatigue.setFatigueUT0(Double.valueOf(value));
-			else if (parameter.equals(":fdbmc"))
-				fatigue.setFatigueFDBMC(Double.valueOf(value));
-			else if (parameter.equals(":fdc"))
-				fatigue.setFatigueFDC(Double.valueOf(value));
-			else if (parameter.equals(":hour"))
-				fatigue.setFatigueStartTime(Double.valueOf(value));
-			else if (parameter.equals(":p0"))
-				fatigue.fatigueP0 = Double.valueOf(value);
-			else if (parameter.equals(":u0"))
-				fatigue.fatigueU0 = Double.valueOf(value);
-			else if (parameter.equals(":k0"))
-				fatigue.fatigueK0 = Double.valueOf(value);
-			else
-				recordWarning("ignoring parameter " + parameter, t);
+				switch (parameter) {
+					case ":fatigue" -> {
+						fatigue.setFatigueEnabled(!value.equals("nil"));
+						procedural.utilityUseThreshold = !value.equals("nil");
+					}
+					case ":fatigue-partial-matching" -> fatigue.setFatiguePartialMatching(!value.equals("nil"));
+					case ":fp-dec" -> fatigue.setFatigueFPDec(Double.parseDouble(value));
+					case ":fp-dec-sleep1" -> fatigue.setFatigueFPDecSleep1(Double.parseDouble(value));
+					case ":fp-dec-sleep2" -> fatigue.setFatigueFPDecSleep2(Double.parseDouble(value));
+					case ":fp" -> fatigue.setFatigueFP(Double.parseDouble(value));
+					case ":fd-dec" -> fatigue.setFatigueFDDec(Double.parseDouble(value));
+					case ":fd" -> fatigue.setFatigueFD(Double.parseDouble(value));
+					case ":fpbmc" -> fatigue.setFatigueFPBMC(Double.parseDouble(value));
+					case ":fpmc0" -> fatigue.setFatigueFPMC0(Double.parseDouble(value));
+					case ":fpmc" -> fatigue.setFatigueFPMC(Double.parseDouble(value));
+					case ":utbmc" -> fatigue.setFatigueUTBMC(Double.parseDouble(value));
+					case ":utmc" -> fatigue.setFatigueUTMC(Double.parseDouble(value));
+					case ":utmc0" -> fatigue.setFatigueUTMC0(Double.parseDouble(value));
+					case ":ut0" -> fatigue.setFatigueUT0(Double.parseDouble(value));
+					case ":fdbmc" -> fatigue.setFatigueFDBMC(Double.parseDouble(value));
+					case ":fdc" -> fatigue.setFatigueFDC(Double.parseDouble(value));
+					case ":hour" -> fatigue.setFatigueStartTime(Double.parseDouble(value));
+					case ":p0" -> fatigue.fatigueP0 = Double.parseDouble(value);
+					case ":u0" -> fatigue.fatigueU0 = Double.parseDouble(value);
+					case ":k0" -> fatigue.fatigueK0 = Double.parseDouble(value);
+					default -> recordWarning("ignoring parameter " + parameter, t);
+				}
 				break;
 		}
 	}
@@ -899,7 +773,7 @@ public class Model {
 		output("Warning: " + s);
 	}
 
-	void recordWarning(String s, Tokenizer t) {
+	public void recordWarning(String s, Tokenizer t) {
 		String text = "Warning: " + s;
 		int offset = t.getLastOffset();
 		int line = t.getLastLine();

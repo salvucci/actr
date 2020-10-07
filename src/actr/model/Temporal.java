@@ -19,7 +19,7 @@ public class Temporal extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		Chunk request = model.buffers.get(Symbol.temporal);
 		if (request == null || !request.isRequest())
 			return;

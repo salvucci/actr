@@ -10,7 +10,7 @@ import java.util.TreeMap;
  * @author salvucci
  */
 public class Fatigue extends Module {
-	private Model model;
+	private final Model model;
 
 	private boolean fatigueEnabled = false; 	// Turns fatigue module off / on
 	private boolean runWithUtilityDecrement = true;
@@ -21,7 +21,7 @@ public class Fatigue extends Module {
 	private double fatigueFPDecSleep1 = 0; 	// FPDec constant for sleep
 	private double fatigueFPDecSleep2 = 0; 	// FPDec constant for sleep
 
-	private double fatigueFPOriginal = 0;
+	private final double fatigueFPOriginal = 0;
 	private double fatigueFP = 1.0;  			// "fatigue parameter" value scales utility calculations
 	private double fatigueUT = 0;  				//Utility threshold (from utilty module)
 	private double fatigueDAT = 0;
@@ -36,7 +36,7 @@ public class Fatigue extends Module {
 	private double fatigueUTMC = 0;  			//oefficient relating minute within session to ut
 	private double fatigueUTMC0 = 0;  			
 	private double fatigueUT0 = 0;				//Constant ut offset
-	private double fatigueUtility0 = 0;         //Constant utility offset
+	private final double fatigueUtility0 = 0;         //Constant utility offset
 	private double fatigueFDBMC = -0.02681;  	//Coefficient relating biomath value to fd
 	private double fatigueFDC = 0.95743;  		// Constant fd offset
 	private double fatigueStartTime = 0;   			/* Initiates a new session by providing the number of hours 
@@ -51,13 +51,13 @@ public class Fatigue extends Module {
 	double fatigueU0 = 38.509212; 				// the initial values of bioMath model
 	double fatigueK0 = 0.019455;  				// the initial values of bioMath model
 
-	private ArrayList<Double> wake = new ArrayList<Double>();
-	private ArrayList<Double> asleep = new ArrayList<Double>();
-	private ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
-	private TreeMap<Double, Double> pvalues = new TreeMap<Double, Double>();
+	private final ArrayList<Double> wake = new ArrayList<>();
+	private final ArrayList<Double> asleep = new ArrayList<>();
+	private ArrayList<ArrayList<Double>> values = new ArrayList<>();
+	private final TreeMap<Double, Double> pvalues = new TreeMap<>();
 
 
-	private ArrayList<Double> TaskSchedule = new ArrayList<Double>();
+	private final ArrayList<Double> TaskSchedule = new ArrayList<>();
 	private double TaskDuration = 0 ;
 	private String outputDIR = null ;
 
@@ -95,8 +95,7 @@ public class Fatigue extends Module {
 			// (awake2 sleep2)....)
 			// returns a hashtable with all performance values where keys are the
 			// time
-			for (int i = 0; i < values.size(); i++)
-				pvalues.put(values.get(i).get(3), values.get(i).get(0));
+			for (ArrayList<Double> value : values) pvalues.put(value.get(3), value.get(0));
 		}
 	}
 
@@ -133,7 +132,7 @@ public class Fatigue extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		if (isFatigueEnabled()) {
 //			fatigueFP = getFatigueFPPercent() * (1 - getFatigueFPBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueFPMC());
 //			fatigueUT = getFatigueUT0() * (1 - getFatigueUTBMC() * computeBioMathValueForHour()) * Math.pow(1 + mpTime(), getFatigueUTMC());
@@ -243,7 +242,7 @@ public class Fatigue extends Module {
 	public void resetFatigueModule() {
 
 		fatigueFP =  fatigueFPOriginal;
-		fatigueUT = model.getProcedural().utilityThreshold;
+        fatigueUT = model.procedural.utilityThreshold;
 	}
 	
 	public boolean isFatigueEnabled() {

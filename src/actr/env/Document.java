@@ -348,7 +348,7 @@ class Document extends DefaultStyledDocument {
 					chunks.add(new Marker(keyword, createPosition(parenPos)));
 				}
 
-				if (keyword.toLowerCase().equals("p")) {
+				if (keyword.equalsIgnoreCase("p")) {
 					inProductionRule = true;
 					while (pos < length && isWhite(charAt(pos)))
 						pos++;
@@ -411,7 +411,7 @@ class Document extends DefaultStyledDocument {
 				if (text.charAt(pos - 1) == '!')
 					if (prefs.autoHilite)
 						setCharacterAttributes(start, pos - start, styleBuffer, false);
-			} else if (pos < length) {
+			} else {
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
 			}
@@ -457,7 +457,7 @@ class Document extends DefaultStyledDocument {
 			else if (parenLevel < startParenLevel && !firstToken.startsWith(")"))
 				realParenLevel = startParenLevel;
 
-			if (firstToken.toLowerCase().equals("(p")) {
+			if (firstToken.equalsIgnoreCase("(p")) {
 				inProduction = true;
 				realParenLevel = 0;
 			} else if (inProduction) {

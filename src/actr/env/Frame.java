@@ -395,8 +395,6 @@ public class Frame extends JFrame {
 		final String modelText = editor.getText();
 		String iterations = toolbar.getIterations();
 		model = Model.compile(modelText, frame);
-		if (model == null)
-			return;
 		Task task = model.getTask();
 		final int n = (iterations.isEmpty()) ? task.analysisIterations() : Integer.parseInt(iterations);
 		(new SwingWorker<>() {
@@ -463,16 +461,10 @@ public class Frame extends JFrame {
 
 					for (String taskOverride : taskOverrides) {
 						model = Model.compile(modelText, frame, taskOverride);
-						if (model == null) {
-							output("Error: Model " + basePath + modelName + " does not exist");
-							break;
-						}
 						int n = model.getTask().analysisIterations();
 						Task[] tasks = new Task[n];
 						for (int i = 0; !stop && i < n; i++) {
 							model = Model.compile(modelText, frame, taskOverride);
-							if (model == null)
-								System.exit(1);
 							brainPanel.setVisible(false);
 							showTask(model.getTask());
 							model.setParameter(":real-time", "nil");
@@ -553,8 +545,6 @@ public class Frame extends JFrame {
 				}
 				file = newFile;
 			}
-			if (file == null)
-				return;
 			StringReader sr = new StringReader(editor.getText());
 			FileWriter outputStream;
 			outputStream = new FileWriter(file);

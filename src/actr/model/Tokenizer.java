@@ -19,7 +19,7 @@ import java.util.*;
  * @author Dario Salvucci
  */
 class Tokenizer {
-	private Reader reader;
+	private final Reader reader;
 	private int c = 0;
 	private int offset = 0;
 	private int line = 1;
@@ -35,7 +35,7 @@ class Tokenizer {
 		readChar();
 		while (c != -1 && Character.isWhitespace(c))
 			readChar();
-		advance();
+		next();
 	}
 
 	Tokenizer(URL url) throws IOException {
@@ -43,7 +43,7 @@ class Tokenizer {
 		readChar();
 		while (c != -1 && Character.isWhitespace(c))
 			readChar();
-		advance();
+		next();
 	}
 
 	Tokenizer(String s) {
@@ -51,14 +51,14 @@ class Tokenizer {
 		readChar();
 		while (c != -1 && Character.isWhitespace(c))
 			readChar();
-		advance();
+		next();
 	}
 
 	boolean hasMoreTokens() {
 		return (c != -1) || !putbacks.isEmpty();
 	}
 
-	String getToken() {
+	final String token() {
 		return token;
 	}
 
@@ -97,7 +97,7 @@ class Tokenizer {
 		return c2 == '(' || c2 == ')';
 	}
 
-	void advance() {
+	void next() {
 		if (!hasMoreTokens()) {
 			token = "";
 			return;
@@ -117,9 +117,8 @@ class Tokenizer {
 			if (c == ';') {
 				while (c != -1 && c != '\n' && c != '\r')
 					readChar();
-			} else if (c == '#') {
-				if (c != -1)
-					readChar(); // '#'
+			} else {
+				readChar(); // '#'
 				if (c != -1)
 					readChar(); // '|'
 				while (c != -1 && c != '|')

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -122,7 +123,7 @@ class PrefDialog extends JDialog {
 		String[] fontSizes = { "9", "10", "11", "12", "13", "14" };
 		fontSizeCB = new JComboBox<>(fontSizes);
 		fontSizeCB.addItemListener(e -> {
-			prefs.fontSize = Integer.parseInt((String) fontSizeCB.getSelectedItem());
+			prefs.fontSize = Integer.parseInt((String) Objects.requireNonNull(fontSizeCB.getSelectedItem()));
 			core.refreshEditors();
 		});
 
@@ -208,7 +209,7 @@ class PrefDialog extends JDialog {
 		String[] indentOptions = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
 		indentSpacesCB = new JComboBox<>(indentOptions);
 		indentSpacesCB.addItemListener(e -> {
-			prefs.indentSpaces = Integer.parseInt((String) indentSpacesCB.getSelectedItem());
+			prefs.indentSpaces = Integer.parseInt((String) Objects.requireNonNull(indentSpacesCB.getSelectedItem()));
 			core.refreshEditors();
 		});
 

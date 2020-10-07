@@ -6,10 +6,10 @@ import actr.tasks.fatigue.Values;
 
 public class SessionPVT {
 
-	Vector<Block> blocks = new Vector<Block>();
+	final Vector<Block> blocks = new Vector<>();
 	int blockIndex = 1;
-	Values reactionTimes = new Values();
-	Values timeOfReactionsFromStart = new Values();
+	final Values reactionTimes = new Values();
+	final Values timeOfReactionsFromStart = new Values();
 	
 	double startTime = 0;
 	double totalSessionTime = 0;
@@ -131,7 +131,7 @@ public class SessionPVT {
 	}
 	
 	public int[] getAlertResponseDistribution () {
-		int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
+		int[] alertResponse = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
 		for (int i = 0; i < reactionTimes.size(); i++) {
 			double responseTime = reactionTimes.get(i);
 			if (responseTime > 150 && responseTime <= 500){
@@ -143,8 +143,8 @@ public class SessionPVT {
 	}
 	
 	public double[] getProportionAlertResponseDistribution () {
-		double proportionAlertResponse[] = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
-		int alertResponse[] = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
+		double[] proportionAlertResponse = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
+		int[] alertResponse = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
 		for (int i = 0; i < 35; i++) {
 			proportionAlertResponse[i] = (double)alertResponse[i] / reactionTimes.size();
 		}
@@ -152,12 +152,12 @@ public class SessionPVT {
 	}
 
 	// 5-min blocks
-	public class Block {
-		Values blockReactionTimes = new Values();
-		Values blockTimeOfReactionsFromStart = new Values();
+	public static class Block {
+		final Values blockReactionTimes = new Values();
+		final Values blockTimeOfReactionsFromStart = new Values();
 		double startTime;
 		double totalBlockTime;
-		int alertResponse[] = new int[35]; // Alert responses (150-500ms, 10ms
+		int[] alertResponse = new int[35]; // Alert responses (150-500ms, 10ms
 		// intervals )
 		int numberOfResponses = 0;
 		
@@ -246,7 +246,7 @@ public class SessionPVT {
 		}
 		
 		public int[] getAlertResponseDistribution () {
-			int alertResponse[] = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
+			int[] alertResponse = new int[35]; // Alert responses (150-500 ms,10 ms intervals )
 			for (int i = 0; i < blockReactionTimes.size(); i++) {
 				double responseTime = blockReactionTimes.get(i);
 				if (responseTime > 150 && responseTime <= 500){
@@ -258,8 +258,8 @@ public class SessionPVT {
 		}
 		
 		public double[] getProportionAlertResponseDistribution () {
-			double proportionAlertResponse[] = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
-			int alertResponse[] = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
+			double[] proportionAlertResponse = new double[35]; // Alert responses (150-500 ms,10 ms intervals )
+			int[] alertResponse = getAlertResponseDistribution(); // Alert responses (150-500 ms,10 ms intervals )
 			for (int i = 0; i < 35; i++) {
 				proportionAlertResponse[i] = (double)alertResponse[i] / blockReactionTimes.size();
 			}

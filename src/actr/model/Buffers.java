@@ -11,7 +11,7 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Buffers {
-	private final Model model;
+	public final Model model;
 	private final Map<Symbol, Chunk> buffers;
 	private final Map<Symbol, Double> touchTimes;
 	private Vector<Chunk> goals;
@@ -96,7 +96,7 @@ public class Buffers {
 		return null;
 	}
 
-	void set(Symbol buffer, Chunk c) {
+	public void set(Symbol buffer, Chunk c) {
 		if (buffer == Symbol.goal) {
 			if (lastGoalSetTime < model.getTime()) {
 				Chunk oldGoal = get(Symbol.goal);

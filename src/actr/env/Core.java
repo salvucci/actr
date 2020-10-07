@@ -35,10 +35,7 @@ public class Core {
 			Starter starter = (Starter) (Class.forName(starterClass).getConstructor().newInstance());
 			starter.startup(this);
 		} catch (Exception e) {
-			if (fileToOpen != null)
-				openFrame(new File(fileToOpen));
-			else
-				newFrame();
+			newFrame();
 		}
 	}
 
@@ -67,9 +64,9 @@ public class Core {
 	 * @return the associated frame, or <tt>null</tt> if not present
 	 */
 	public Frame getFrame(File file) {
-		for (int i = 0; i < frames.size(); i++)
-			if (file.equals(frames.get(i).getFile()))
-				return frames.get(i);
+		for (Frame frame : frames)
+			if (file.equals(frame.getFile()))
+				return frame;
 		return null;
 	}
 
@@ -80,9 +77,9 @@ public class Core {
 	 */
 	public Frame currentFrame() {
 		int n = frames.size();
-		for (int i = 0; i < n; i++)
-			if (frames.get(i).isActive())
-				return frames.get(i);
+		for (Frame frame : frames)
+			if (frame.isActive())
+				return frame;
 		return null;
 	}
 
@@ -115,7 +112,8 @@ public class Core {
 	 * opens the file.
 	 */
 	public void openFrame() {
-		FileDialog fileDialog = new FileDialog(currentFrame(), "Open...", FileDialog.LOAD);
+		final Frame f = currentFrame();
+		FileDialog fileDialog = new FileDialog(f, "Open...", FileDialog.LOAD);
 		fileDialog.setDirectory(prefs.getMostRecentPath());
 		fileDialog.setVisible(true);
 		if (fileDialog.getFile() == null)
@@ -147,8 +145,7 @@ public class Core {
 	}
 
 	void refreshEditors() {
-		for (int i = 0; i < frames.size(); i++)
-			frames.get(i).refresh();
+		for (Frame frame : frames) frame.refresh();
 	}
 
 	/**
@@ -206,8 +203,8 @@ public class Core {
 	 *         otherwise
 	 */
 	public boolean closeAllFrames() {
-		for (int i = 0; i < frames.size(); i++)
-			if (!frames.get(i).close())
+		for (Frame frame : frames)
+			if (!frame.close())
 				return false;
 		return true;
 	}

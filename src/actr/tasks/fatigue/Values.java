@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.Vector;
 
 public class Values {
-	private Vector<Double> v;
+	private final Vector<Double> v;
 
 	public Values() {
-		v = new Vector<Double>();
+		v = new Vector<>();
 	}
 
 	public void add(double d) {
@@ -134,13 +134,13 @@ public class Values {
 		return 1.96 * (stddev()/ Math.sqrt(1.0 * v.size())); 
 	}
 	
-	public static void main(String[] args) {
-		// This is for testing the functions
-		
-		//create Value object
-	    Values v = new Values();
-	   
-	   
-	    
-	}
+//	public static void main(String[] args) {
+//		// This is for testing the functions
+//
+//		//create Value object
+//	    Values v = new Values();
+//
+//
+//
+//	}
 }

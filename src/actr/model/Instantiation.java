@@ -2,6 +2,7 @@ package actr.model;
 
 import java.util.*;
 
+
 /**
  * An instantiation of a production rule specified as a mapping from variables
  * to values.
@@ -9,11 +10,11 @@ import java.util.*;
  * @author Dario Salvucci
  */
 public class Instantiation {
-	private final Production p;
-	private final double time;
-	private final double u;
+	public final Production production;
+	public final double time;
+	private double u;
 	private final Map<Symbol, Symbol> mapping;
-	private final List<DelayedSlotCondition> delayedSlotConditions;
+	public final List<DelayedSlotCondition> delayedSlotConditions;
 	private int threadID = 0;
 
 	static class DelayedSlotCondition {
@@ -22,20 +23,17 @@ public class Instantiation {
 		Chunk bufferChunk;
 	}
 
-	Instantiation(Production p, double time, double u) {
-		this.p = p;
+	Instantiation(Production production, double time, double u) {
+		this.production = production;
 		this.time = time;
 		this.u = u;
-		mapping = new HashMap<>();
+		mapping = new HashMap<>(0);
 		delayedSlotConditions = new ArrayList<>();
 	}
 
 	Instantiation copy() {
-		Instantiation newi = new Instantiation(p, time, u);
-		for (Symbol variable : mapping.keySet()) {
-			Symbol chunk = get(variable);
-			newi.set(variable, chunk);
-		}
+		Instantiation newi = new Instantiation(production, time, u);
+		newi.mapping.putAll(mapping);
 		return newi;
 	}
 
@@ -87,21 +85,11 @@ public class Instantiation {
 			set(var2, previousValue);
 	}
 
-	void replaceValue(Symbol value1, Symbol value2) {
-		for (Symbol variable : mapping.keySet()) {
-			Symbol chunk = get(variable);
-			if (chunk == value1)
-				set(variable, value2);
+	void replaceValue(Symbol from, Symbol to) {
+		for (Map.Entry<Symbol, Symbol> variable : mapping.entrySet()) {
+			if (variable.getValue() == from)
+				variable.setValue(to);
 		}
-	}
-
-	/**
-	 * Gets the production associated with this instantiation.
-	 * 
-	 * @return the production
-	 */
-	public Production getProduction() {
-		return p;
 	}
 
 	/**
@@ -117,25 +105,12 @@ public class Instantiation {
 		u = val;
 	}
 
-	/**
-	 * Gets the time at which this instantiation fires.
-	 * 
-	 * @return the time in seconds after the start of simulation
-	 */
-	public double getTime() {
-		return time;
-	}
-
 	void addDelayedSlotCondition(Symbol buffer, SlotCondition sc, Chunk bufferChunk) {
 		DelayedSlotCondition dsc = new DelayedSlotCondition();
 		dsc.buffer = buffer;
 		dsc.slotCondition = sc;
 		dsc.bufferChunk = bufferChunk;
 		delayedSlotConditions.add(dsc);
-	}
-
-	Iterable<DelayedSlotCondition> getDelayedSlotConditions() {
-		return delayedSlotConditions;
 	}
 
 	/**
@@ -146,10 +121,9 @@ public class Instantiation {
 	 */
 	@Override
 	public String toString() {
-		String s = "<inst " + p.getName() + " ";
-		for (Symbol v : mapping.keySet()) {
-			Symbol c = get(v);
-			s += " " + v + "->" + c;
+		String s = "<inst " + production.name + " ";
+		for (Map.Entry<Symbol,Symbol> v : mapping.entrySet()) {
+			s += " " + v.getKey() + "->" + v.getValue();
 		}
 		return s + ">";
 	}

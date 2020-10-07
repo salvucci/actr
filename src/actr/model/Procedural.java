@@ -45,7 +45,7 @@ public class Procedural extends Module {
 	}
 
 	void add(Production p) {
-		productions.put(p.getName(), p);
+		productions.put(p.name, p);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class Procedural extends Module {
 	 * @return the last production to fire
 	 */
 	public Production getLastProductionFired() {
-		return lastFiredInst.getProduction();
+		return lastFiredInst.production;
 	}
 
 	public void setUtilityThreshold(double ut) {
@@ -99,7 +99,7 @@ public class Procedural extends Module {
 	}
 
 	public double getFatigueUtility() {
-		return initialUtility * model.getFatigue().getFatigueFP();
+		return initialUtility * model.fatigue.getFatigueFP();
 	}
 
 	public double getFinalInstUtility() {
@@ -111,12 +111,13 @@ public class Procedural extends Module {
 	}
 
 	public double getFatigueUtilityThreshold() {
-		return model.getFatigue().getFatigueUT();
+		return model.fatigue.getFatigueUT();
 	}
 
 	void findInstantiations(final Buffers buffers) {
-		if (model.getFatigue().isFatigueEnabled()){
-			model.getFatigue().update(); // update the FP and UT values in case of the fatigue mechanism
+		final Fatigue fatigue = model.fatigue;
+		if (fatigue.isFatigueEnabled()){
+			fatigue.update(); // update the FP and UT values in case of the fatigue mechanism
 		}
 		// if (model.verboseTrace) model.output ("procedural",
 		// "conflict-resolution");
@@ -125,14 +126,15 @@ public class Procedural extends Module {
 		HashSet<Instantiation> set = new HashSet<>();
 		buffers.sortGoals();
 
-		if (buffers.numGoals() == 0) {
+		final int goals = buffers.numGoals();
+		if (goals == 0) {
 			for (Production p : productions.values()) {
 				Instantiation inst = p.instantiate(buffers);
 				if (inst != null)
 					set.add(inst);
 			}
 		} else {
-			for (int i = 0; set.isEmpty() && i < buffers.numGoals(); i++) {
+			for (int i = 0; set.isEmpty() && i < goals; i++) {
 				buffers.tryGoal(i);
 				if (threadedCognitionTrace)
 					model.output("*** (tct) trying goal " + buffers.get(Symbol.goal));
@@ -194,18 +196,18 @@ public class Procedural extends Module {
 //				if (model.verboseTrace)
 //					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
 
-			if (model.getFatigue().isFatigueEnabled() &&
-					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
+			if (fatigue.isFatigueEnabled() &&
+					finalInst.getUtility() < ( fatigue.getFatigueUT())) {
 				microLapses = true;
 
-				if (model.getFatigue().isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
-					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+				if (fatigue.isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
+					fatigue.decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
 				}
 
 				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
 						"[no rule fired, utility below threshold] [microlapse] "
 						+ "[u:" + String.format("%.2f", finalInst.getUtility())
-						+ " ut:" + String.format("%.2f", model.getFatigue().getFatigueUT()) + "]") {
+						+ " ut:" + String.format("%.2f", fatigue.getFatigueUT()) + "]") {
 					public void action() {
 						findInstantiations(buffers);
 					}
@@ -215,9 +217,9 @@ public class Procedural extends Module {
 				if (conflictSetTrace)
 					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
 
-				if (finalInst.getProduction().isBreakPoint()) {
+				if (finalInst.production.isBreakPoint()) {
 					model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
-							"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
+							"about to fire " + finalInst.production.name.getString().toUpperCase()) {
 						public void action() {
 							model.output("------", "break");
 							model.stop();
@@ -226,17 +228,18 @@ public class Procedural extends Module {
 				}
 
 				String extra = "";
-				if (buffers.numGoals() > 1) {
+				if (goals > 1) {
 					Chunk goal = buffers.get(Symbol.goal);
-					extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
+					extra = " [" + ((goal != null) ? goal.name().getString() : "nil") + "]";
 				}
 
 				// model.addEvent(new Event(model.getTime() + .050 ,
 				// model.addEvent(new Event(model.getTime() + (realActionTime -
 				// .001), "procedural",
 				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
-						"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
+						"** " + finalInst.production.name.getString().toUpperCase() + " **" + extra) {
 					public void action() {
+
 						fire(finalInst, buffers);
 						findInstantiations(buffers);
 					}
@@ -245,16 +248,16 @@ public class Procedural extends Module {
 		}
 	}
 
-	void fire(Instantiation inst) {
-		inst.getProduction().fire(inst);
+	void fire(Instantiation inst, Buffers buffers) {
+		inst.production.fire(inst);
 		model.update();
 
 		if (productionLearning) {
 			Instantiation lastFired = (!productionCompilationThreaded) ? lastFiredInst
 					: lastFiredOnThread.get(inst.getThreadID());
 
-			if (lastFired != null && inst.getTime()
-					- lastFired.getTime() > model.procedural.productionCompilationThresholdTime) {
+			if (lastFired != null && inst.time
+					- lastFired.time > model.procedural.productionCompilationThresholdTime) {
 				if (productionCompilationTrace)
 					model.output("*** (pct) no compilation: too much time between firings");
 			} else if (lastFired != null) {
@@ -266,22 +269,22 @@ public class Procedural extends Module {
 						double alpha = utilityLearningAlpha;
 
 						if (productionCompilationAddUtilities) {
-							double sum = lastFired.getProduction().getUtility() + inst.getProduction().getUtility();
+							double sum = lastFired.production.getUtility() + inst.production.getUtility();
 							oldp.setUtility(oldp.getUtility() + alpha * (sum - oldp.getUtility()));
 						} else {
 							oldp.setUtility(oldp.getUtility()
-									+ alpha * (lastFired.getProduction().getUtility() - oldp.getUtility()));
+									+ alpha * (lastFired.production.getUtility() - oldp.getUtility()));
 						}
 
 						if (productionCompilationTrace)
-							model.output("*** (pct) strengthening " + oldp.getName() + " [u="
+							model.output("*** (pct) strengthening " + oldp.name + " [u="
 									+ String.format("%.3f", oldp.getUtility()) + "]");
 					} else {
 						model.procedural.add(newp);
 						if (productionCompilationTrace) {
 							model.output("\n*** (pct)\n");
-							model.output(lastFired.getProduction().toString(lastFired));
-							model.output(inst.getProduction().toString(inst));
+							model.output(lastFired.production.toString(lastFired));
+							model.output(inst.production.toString(inst));
 							model.output(String.valueOf(newp));
 							// model.output
 							// ("*** (pct) new production:\n"+newp);
@@ -305,8 +308,8 @@ public class Procedural extends Module {
 			if (rewardFirings.size() > 100)
 				rewardFirings.remove(0);
 		}
-		if (utilityLearning && inst.getProduction().hasReward()) {
-			adjustUtilities(inst.getProduction().getReward());
+		if (utilityLearning && inst.production.hasReward()) {
+			adjustUtilities(inst.production.getReward());
 			rewardFirings.clear();
 		}
 	}
@@ -314,13 +317,12 @@ public class Procedural extends Module {
 	void adjustUtilities(double reward) {
 		double alpha = utilityLearningAlpha;
 		int ff = rewardFirings.size();
-		for (int i = 0; i < ff; i++) {
-			Instantiation inst = rewardFirings.get(i);
-			Production p = inst.getProduction();
-			double pReward = reward - (model.getTime() - inst.getTime());
-			p.setUtility(p.getUtility() + alpha * (pReward - p.getUtility()));
-			// model.output ("*** "+ p.getName() + " : " + p.getUtility());
-		}
+        for (Instantiation inst : rewardFirings) {
+			Production p = inst.production;
+			double pReward = reward - (model.getTime() - inst.time);
+            p.setUtility(p.getUtility() + alpha * (pReward - p.getUtility()));
+            // model.output ("*** "+ p.getName() + " : " + p.getUtility());
+        }
 	}
 
 	/**

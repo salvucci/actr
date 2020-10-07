@@ -66,19 +66,16 @@ public class BioMathModel {
 
 	public static ArrayList<ArrayList<Double>> rBind(ArrayList<ArrayList<Double>> top,
 			ArrayList<ArrayList<Double>> bottom) {
-		ArrayList<ArrayList<Double>> output = new ArrayList<ArrayList<Double>>();
-		for (int i = 0; i < top.size(); i++)
-			output.add(top.get(i));
-		for (int i = 0; i < bottom.size(); i++)
-			output.add(bottom.get(i));
+		ArrayList<ArrayList<Double>> output = new ArrayList<>();
+		output.addAll(top);
+		output.addAll(bottom);
 		return output;
 	}
 
 	// equation 2
 	static double[] dpw(double t, double t0, double p0, double u0, double k0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { p0 };
-			return output;
+			return new double[]{ p0 };
 		}
 		double[] sofarp = dpw(t - precision, t0, p0, u0, k0);
 		double[] sofaru = duw(t - precision, t0, u0);
@@ -89,8 +86,7 @@ public class BioMathModel {
 
 	static double[] dps(double t, double t0, double p0, double u0, double k0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { p0 };
-			return output;
+			return new double[]{ p0 };
 		}
 		double[] sofarp = dps(t - precision, t0, p0, u0, k0);
 		double[] sofaru = dus(t - precision, t0, u0);
@@ -102,8 +98,7 @@ public class BioMathModel {
 	// Equation 3
 	static double[] duw(double t, double t0, double u0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { u0 };
-			return output;
+			return new double[]{ u0 };
 		}
 		double[] sofar = duw(t - precision, t0, u0);
 		double prev = sofar[sofar.length - 1];
@@ -112,8 +107,7 @@ public class BioMathModel {
 
 	static double[] dus(double t, double t0, double u0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { u0 };
-			return output;
+			return new double[]{ u0 };
 		}
 		double[] sofar = dus(t - precision, t0, u0);
 		double prev = sofar[sofar.length - 1];
@@ -141,8 +135,7 @@ public class BioMathModel {
 	// Equation 7
 	static double[] dkappaw(double t, double t0, double k0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { k0 };
-			return output;
+			return new double[]{ k0 };
 		}
 		double[] sofar = dkappaw(t - precision, t0, k0);
 		double prev = sofar[sofar.length - 1];
@@ -151,8 +144,7 @@ public class BioMathModel {
 
 	static double[] dkappas(double t, double t0, double k0) {
 		if (round(t, 2) == round(t0, 2)) {
-			double[] output = { k0 };
-			return output;
+			return new double[]{ k0 };
 		}
 		double[] sofar = dkappas(t - precision, t0, k0);
 		double prev = sofar[sofar.length - 1];
@@ -166,19 +158,19 @@ public class BioMathModel {
 	 */
 	static ArrayList<ArrayList<Double>> awakevalues(double t, double t0, double p0, double u0, double k0) {
 		// double[][] values={{0},{0},{0},{0}};
-		ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
+		ArrayList<ArrayList<Double>> values = new ArrayList<>();
 		double curt = t0;
 		for (int i = 1; i <= t + 1; i++) {
 			double[] processp = dpw(i + t0, curt, p0, u0, k0);
 			double[] processu = duw(i + t0, curt, u0);
 			double[] processk = dkappaw(i + t0, curt, k0);
-			ArrayList<Double> times = new ArrayList<Double>();
+			ArrayList<Double> times = new ArrayList<>();
 			for (double time = curt; time < i + t0; time += precision)
 				times.add(time);
 			// System.out.println(times.size());
 			// double[] times=seq(curt,i+t0,by=precision)
 			for (int j = 1; j < times.size(); j++) {
-				values.add(new ArrayList<Double>(Arrays.asList(processp[j], processu[j], processk[j], times.get(j))));
+				values.add(new ArrayList<>(Arrays.asList(processp[j], processu[j], processk[j], times.get(j))));
 
 			}
 			// curvalues=data.frame(processp, processu, processk, times)
@@ -201,17 +193,17 @@ public class BioMathModel {
 	 * initial
 	 */
 	static ArrayList<ArrayList<Double>> asleepvalues(double t, double t0, double p0, double u0, double k0) {
-		ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
+		ArrayList<ArrayList<Double>> values = new ArrayList<>();
 		double curt = t0;
 		for (int i = 1; i <= t + 1; i++) {
 			double[] processp = dps(i + t0, curt, p0, u0, k0);
 			double[] processu = dus(i + t0, curt, u0);
 			double[] processk = dkappas(i + t0, curt, k0);
-			ArrayList<Double> times = new ArrayList<Double>();
+			ArrayList<Double> times = new ArrayList<>();
 			for (double time = curt; time < i + t0; time += precision)
 				times.add(time);
 			for (int j = 1; j < times.size(); j++) {
-				values.add(new ArrayList<Double>(Arrays.asList(processp[j], processu[j], processk[j], times.get(j))));
+				values.add(new ArrayList<>(Arrays.asList(processp[j], processu[j], processk[j], times.get(j))));
 
 			}
 			curt = curt + 1;
@@ -234,8 +226,8 @@ public class BioMathModel {
 		// values=data.frame(p0,u0,k0,wake[1])
 
 		// values : "processp","processu","processk","times"
-		ArrayList<ArrayList<Double>> values = new ArrayList<ArrayList<Double>>();
-		values.add(new ArrayList<Double>(Arrays.asList(p0, u0, k0, wake.get(0))));
+		ArrayList<ArrayList<Double>> values = new ArrayList<>();
+		values.add(new ArrayList<>(Arrays.asList(p0, u0, k0, wake.get(0))));
 
 		int i = 0;
 		while (i < (wake.size() - 1)) {

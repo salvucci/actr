@@ -1,5 +1,6 @@
 package actr.env;
 
+import actr.env.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -11,7 +12,7 @@ import javax.swing.text.StyledEditorKit;
 
 import actr.resources.Resources;
 
-class Actions {
+public class Actions {
 	private final Core core;
 	private final Frame frame;
 

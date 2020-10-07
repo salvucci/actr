@@ -12,7 +12,7 @@ import java.util.List;
  * 
  * @author Dario Salvucci
  */
-class BufferCondition {
+public class BufferCondition {
 	private final Model model;
 	private final char prefix;
 	public final Symbol buffer;

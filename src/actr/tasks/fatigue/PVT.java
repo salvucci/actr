@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
-import actr.model.Event;
+
 import actr.model.Symbol;
 import actr.task.*;
 import actr.tasks.fatigue.SessionPVT.Block;
@@ -23,9 +23,9 @@ public class PVT extends Task {
 	private double PVTduration = 0;
 	public ArrayList<Double> timesOfPVT;
 
-	private TaskLabel label;
+	private final TaskLabel label;
 	private double lastTime = 0;
-	private String stimulus = "\u2588";
+	private final String stimulus = "\u2588";
 	private double interStimulusInterval = 0.0;
 	private Boolean stimulusVisibility = false;
 	private String response = null;
@@ -36,7 +36,7 @@ public class PVT extends Task {
 	int sessionNumber = 0; // starts from 0
 	private Block currentBlock;
 	private SessionPVT currentSession;
-	public Vector<SessionPVT> sessions = new Vector<SessionPVT>();
+	public final Vector<SessionPVT> sessions = new Vector<>();
 
 	/**
 	 * Constructs a new task.
@@ -50,20 +50,20 @@ public class PVT extends Task {
 
 	@Override
 	public void start() {
-		getModel().output("Staring a new session ========== "  + sessionNumber);
+		model.output("Staring a new session ========== "  + sessionNumber);
 		random = new Random();
 		lastTime = 0;
 		currentSession = new SessionPVT();
-		currentBlock = currentSession.new Block();
+		currentBlock = new Block();
 		stimulusVisibility = false;
 		currentSession.startTime = 0;
 		currentBlock.startTime = 0;
 
-		PVTduration = getModel().getFatigue().getTaskDuration();
-		timesOfPVT = getModel().getFatigue().getTaskSchdule();
+		PVTduration = model.fatigue.getTaskDuration();
+		timesOfPVT = model.fatigue.getTaskSchdule();
 
-		getModel().getFatigue().setFatigueStartTime(timesOfPVT.get(sessionNumber));
-		getModel().getFatigue().startFatigueSession();
+		model.fatigue.setFatigueStartTime(timesOfPVT.get(sessionNumber));
+		model.fatigue.startFatigueSession();
 
 
 		interStimulusInterval = random.nextDouble() * 8 + 2; // A random
@@ -72,27 +72,27 @@ public class PVT extends Task {
 
 	@Override
 	public void update(double time) {
-		currentSession.totalSessionTime = getModel().getTime() - currentSession.startTime;
-		currentBlock.totalBlockTime = getModel().getTime() - currentBlock.startTime;
+		currentSession.totalSessionTime = model.getTime() - currentSession.startTime;
+		currentBlock.totalBlockTime = model.getTime() - currentBlock.startTime;
 
 		if (currentSession.totalSessionTime <= PVTduration) {
 			label.setText(stimulus);
 			label.setVisible(true);
 			processDisplay();
 			stimulusVisibility = true;
-			if (getModel().isVerbose())
-				getModel().output("!!!!! Stimulus !!!!!");
+			if (model.isVerbose())
+				model.output("!!!!! Stimulus !!!!!");
 
-			lastTime = getModel().getTime(); // when the stimulus has happened
+			lastTime = model.getTime(); // when the stimulus has happened
 
 			// Handling the sleep attacks -- adding an event in 30 s to see if
 			// the current stimulus is still on
 			currentSession.stimulusIndex++;
-			addEvent(new Event(getModel().getTime() + 30.0, "task", "update") {
+			addEvent(new actr.model.Event(model.getTime() + 30.0, "task", "update") {
 				@Override
 				public void action() {
 					sleepAttackIndex++;
-					if (sleepAttackIndex == currentSession.stimulusIndex && stimulusVisibility == true) {
+					if (sleepAttackIndex == currentSession.stimulusIndex && stimulusVisibility) {
 						label.setVisible(false);
 						processDisplay();
 						stimulusVisibility = false;
@@ -103,16 +103,16 @@ public class PVT extends Task {
 						currentBlock.blockTimeOfReactionsFromStart.add(currentBlock.totalBlockTime);
 						// when sleep attack happens we add to the number of responses (NOT DOING IT FOR NOW)
 						// currentSession.numberOfResponses++; 
-						getModel().output("Sleep attack at session time  ==> " + (getModel().getTime() - currentSession.startTime)
-								+ " model time :" + getModel().getTime());
-						getModel().output("Stimulus index in the session ==> " + currentSession.stimulusIndex );
+						model.output("Sleep attack at session time  ==> " + (model.getTime() - currentSession.startTime)
+								+ " model time :" + model.getTime());
+						model.output("Stimulus index in the session ==> " + currentSession.stimulusIndex );
 
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
 						fatigueResetPercentage(); // reseting the system
-						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
-						getModel().getBuffers().clear(Symbol.visual); // clearing the buffers after the sleep attack
-						getModel().getBuffers().clear(Symbol.visloc); // clearing the buffers after the sleep attack
+						model.declarative.get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+						model.buffers.clear(Symbol.visual); // clearing the buffers after the sleep attack
+						model.buffers.clear(Symbol.visloc); // clearing the buffers after the sleep attack
 					}
 					repaint();
 				}
@@ -122,7 +122,7 @@ public class PVT extends Task {
 			// adding a new block
 			if (currentBlock.totalBlockTime >= 300 ) {
 				currentSession.blocks.add(currentBlock);
-				currentBlock = currentSession.new Block();
+				currentBlock = new Block();
 				currentBlock.startTime = currentSession.startTime + currentSession.blockIndex * 300.0;
 				currentSession.blockIndex++;
 			}
@@ -130,78 +130,76 @@ public class PVT extends Task {
 
 		// Starting a new Session
 		else {
-			getModel().output("Stoping session ========== "  + sessionNumber);
+			model.output("Stoping session ========== "  + sessionNumber);
 			currentSession.blocks.add(currentBlock);
-			currentSession.bioMathValue = getModel().getFatigue().getBioMathModelValue(timesOfPVT.get(sessionNumber));
-			currentSession.timeAwake = getModel().getFatigue().getTimeAwake(timesOfPVT.get(sessionNumber));
+			currentSession.bioMathValue = model.fatigue.getBioMathModelValue(timesOfPVT.get(sessionNumber));
+			currentSession.timeAwake = model.fatigue.getTimeAwake(timesOfPVT.get(sessionNumber));
 			currentSession.timeOfTheDay = timesOfPVT.get(sessionNumber) % 24;
 			sessions.add(currentSession);
 			sessionNumber++;
-			getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
+			model.declarative.get(Symbol.get("goal")).set(Symbol.get("state"), Symbol.get("none"));
 			// go to the next session or stop the model
 			if (sessionNumber < timesOfPVT.size()) {
-				addEvent(new Event(getModel().getTime() + 60.0, "task", "update") {
+				addEvent(new actr.model.Event(model.getTime() + 60.0, "task", "update") {
 					@Override
 					public void action() {
-						getModel().output("Staring a new session ========== "  + sessionNumber);
+						model.output("Staring a new session ========== "  + sessionNumber);
 						currentSession = new SessionPVT();
-						currentBlock = currentSession.new Block();
+						currentBlock = new Block();
 						stimulusVisibility = false;
 						sleepAttackIndex = 0;
-						currentSession.startTime = getModel().getTime();
-						currentBlock.startTime = getModel().getTime();
-						getModel().getFatigue().setFatigueStartTime(timesOfPVT.get(sessionNumber));
-						getModel().getFatigue().startFatigueSession();
+						currentSession.startTime = model.getTime();
+						currentBlock.startTime = model.getTime();
+						model.fatigue.setFatigueStartTime(timesOfPVT.get(sessionNumber));
+						model.fatigue.startFatigueSession();
 
 						interStimulusInterval = random.nextDouble() * 8 + 2; // A random
 						addUpdate(interStimulusInterval);
-						getModel().getDeclarative().get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
+						model.declarative.get(Symbol.get("goal")).set(Symbol.get("state"),Symbol.get("wait"));
 						fatigueResetPercentage();
 					}
 				});
 			} else {
-				getModel().stop();
+				model.stop();
 			}
 		}
 	}
 
 	@Override
 	public void eval(Iterator<String> it) {
-		it.next(); // (
+//		it.next(); // (
 		String cmd = it.next();
-		if (cmd.equals("fatigue-reset-percentage")) {
-			fatigueResetPercentage();
-		}else if (cmd.equals("fatigue-utility-dec-on")) {
-			getModel().getFatigue().setRunWithUtilityDecrement(true);
-		}else if (cmd.equals("fatigue-utility-dec-off")) {
-			getModel().getFatigue().setRunWithUtilityDecrement(false);
+		switch (cmd) {
+			case "fatigue-reset-percentage" -> fatigueResetPercentage();
+			case "fatigue-utility-dec-on" -> model.fatigue.setRunWithUtilityDecrement(true);
+			case "fatigue-utility-dec-off" -> model.fatigue.setRunWithUtilityDecrement(false);
 		}
 	}
 
 	// calling percentage reset after any new task presentation (audio or visual)
 	void fatigueResetPercentage() {
-		getModel().getFatigue().fatigueResetPercentages();
-//		if (getModel().isVerbose())
-//			getModel().output("!!!! Fatigue Percentage Reset !!!!");
+		model.fatigue.fatigueResetPercentages();
+//		if (model.isVerbose())
+//			model.output("!!!! Fatigue Percentage Reset !!!!");
 	}
 
 	@Override
 	public void typeKey(char c) {
-		double currentSessionTime = getModel().getTime() - currentSession.startTime;
-		double currentBlockTime = getModel().getTime() - currentBlock.startTime;
-		if (stimulusVisibility == true) {
+		double currentSessionTime = model.getTime() - currentSession.startTime;
+		double currentBlockTime = model.getTime() - currentBlock.startTime;
+		if (stimulusVisibility) {
 			response = c + "";
-			responseTime = getModel().getTime() - lastTime;
+			responseTime = model.getTime() - lastTime;
 			responseTime *= 1000; //Changing the scale to Millisecond
 			
-			if (getModel().isVerbose() && responseTime < 150)
-				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
-						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
+			if (model.isVerbose() && responseTime < 150)
+				model.output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of session : " + (model.getTime() - currentSession.startTime));
 			
 //			if (responseTime > 5000){ // just for testing
-//				getModel().output(getModel().getProcedural().getLastProductionFired().toString());
-//				getModel().output("" + responseTime);
-//				getModel().stop();				
+//				model.output(model.getProcedural().getLastProductionFired().toString());
+//				model.output("" + responseTime);
+//				model.stop();				
 //			}
 			
 			if (response != null) {
@@ -225,9 +223,9 @@ public class PVT extends Task {
 			currentSession.timeOfReactionsFromStart.add(currentSessionTime);
 			currentBlock.blockReactionTimes.add(1);
 			currentBlock.blockTimeOfReactionsFromStart.add(currentBlockTime);
-			if (getModel().isVerbose())
-				getModel().output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
-						+ "   time of session : " + (getModel().getTime() - currentSession.startTime));
+			if (model.isVerbose())
+				model.output("False alert happened " + "- Session: " + sessionNumber + " Block:" + (currentSession.blocks.size() + 1)
+						+ "   time of session : " + (model.getTime() - currentSession.startTime));
 		}
 	}
 
@@ -336,7 +334,7 @@ public class PVT extends Task {
 					blocksLSNRapx[i][j].add(b.getLSNR_apx());
 					blocksProportionSleepAtacks[i][j].add(b.getProportionOfSleepAttacks());
 
-					double blocksAP[] = b.getProportionAlertResponseDistribution();
+					double[] blocksAP = b.getProportionAlertResponseDistribution();
 					for (int k = 0; k < 35; k++) {
 						blocksProportionAlertResponcesDis[i][j][k].add(blocksAP[k]);
 					}
@@ -350,91 +348,91 @@ public class PVT extends Task {
 		DecimalFormat df2 = new DecimalFormat("#.00");
 		DecimalFormat df3 = new DecimalFormat("#.000");
 
-		getModel().output("******* The Reslut Based on the Sessions **********\n");
+		model.output("******* The Reslut Based on the Sessions **********\n");
 
-		getModel().outputInLine("Time Awake      " + "\t");
+		model.outputInLine("Time Awake      " + "\t");
 		PVT task = (PVT) tasks[0];
 		for (int i = 0; i < numberOfSessions; i++) {
 			SessionPVT session = task.sessions.get(i);
-			getModel().outputInLine(session.timeAwake + "\t");
+			model.outputInLine(session.timeAwake + "\t");
 		}
-		getModel().outputInLine("\n");
-		getModel().outputInLine("BioMath Value   " + "\t");
+		model.outputInLine("\n");
+		model.outputInLine("BioMath Value   " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
 			SessionPVT session = task.sessions.get(i);
-			getModel().outputInLine(df2.format(session.bioMathValue) + "\t");
+			model.outputInLine(df2.format(session.bioMathValue) + "\t");
 		}
-		getModel().output("\n");
+		model.output("\n");
 
 		
-		getModel().outputInLine("Lapses %        " + "\t");
+		model.outputInLine("Lapses %        " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(ProportionLapses[i].mean() * 100) + "\t");
+			model.outputInLine(df2.format(ProportionLapses[i].mean() * 100) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 
-		getModel().outputInLine("FalseStarts %   " + "\t");
+		model.outputInLine("FalseStarts %   " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(ProportionFalseStarts[i].mean() * 100) + "\t");
+			model.outputInLine(df2.format(ProportionFalseStarts[i].mean() * 100) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 		
-		getModel().outputInLine("Alert RT %      " + "\t");
+		model.outputInLine("Alert RT %      " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(ProportionAlertRT[i].mean() * 100) + "\t");
+			model.outputInLine(df2.format(ProportionAlertRT[i].mean() * 100) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 
-		getModel().outputInLine("SleepAttacks %  " + "\t");
+		model.outputInLine("SleepAttacks %  " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(ProportionSleepAtacks[i].mean() * 100) + "\t");
+			model.outputInLine(df2.format(ProportionSleepAtacks[i].mean() * 100) + "\t");
 		}
-		getModel().outputInLine("\n\n");
+		model.outputInLine("\n\n");
 		
-		getModel().outputInLine("Lapses #        " + "\t");
+		model.outputInLine("Lapses #        " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(NumberLapses[i].mean()) + "\t");
+			model.outputInLine(df2.format(NumberLapses[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 
-		getModel().outputInLine("FalseStarts #   " + "\t");
+		model.outputInLine("FalseStarts #   " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(NumberFalseStarts[i].mean()) + "\t");
+			model.outputInLine(df2.format(NumberFalseStarts[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 		
-		getModel().outputInLine("Alert RT #      " + "\t");
+		model.outputInLine("Alert RT #      " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(NumberAlertRT[i].mean()) + "\t");
+			model.outputInLine(df2.format(NumberAlertRT[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 
-		getModel().outputInLine("SleepAttacks #  " + "\t");
+		model.outputInLine("SleepAttacks #  " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(NumberSleepAtacks[i].mean()) + "\t");
+			model.outputInLine(df2.format(NumberSleepAtacks[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n\n");
+		model.outputInLine("\n\n");
 		
 		
 		
-		getModel().outputInLine("Median Alert RT " + "\t");
+		model.outputInLine("Median Alert RT " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(MedianAlertResponses[i].mean()) + "\t");
+			model.outputInLine(df2.format(MedianAlertResponses[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n");
+		model.outputInLine("\n");
 
-		getModel().outputInLine("LSNR_apx        " + "\t");
+		model.outputInLine("LSNR_apx        " + "\t");
 		for (int i = 0; i < numberOfSessions; i++) {
-			getModel().outputInLine(df2.format(LSNRapx[i].mean()) + "\t");
+			model.outputInLine(df2.format(LSNRapx[i].mean()) + "\t");
 		}
-		getModel().outputInLine("\n\n");
+		model.outputInLine("\n\n");
 		
 		////////////////////////////////////////////////////////////
 		for (int i = 0; i < numberOfSessions; i++){
-			getModel().output("Session " + (i+1) + "\t" + "Block# \tAlert RT       \t% Lapses        \t% False Starts  \t# Lapses");
-			getModel().output("        " +         "\t" + "       \t(Median\tSD   )\t(Mean\tSD\t95CI)\t(Mean\tSD\t95CI)\tMean");
+			model.output("Session " + (i+1) + "\t" + "Block# \tAlert RT       \t% Lapses        \t% False Starts  \t# Lapses");
+			model.output("        " +         "\t" + "       \t(Median\tSD   )\t(Mean\tSD\t95CI)\t(Mean\tSD\t95CI)\tMean");
 			for (int j = 0; j < numberOfBlocks; j++){
-				getModel().output("\t\tBlock" + (j+1)
+				model.output("\t\tBlock" + (j+1)
 						+ "\t(" + df2.format(blocksMedianAlertResponses[i][j].mean())
 						+ "\t" + df2.format(blocksMedianAlertResponses[i][j].stddev()) +")"
 						+ "\t(" + df2.format(blocksProportionLapses[i][j].mean() * 100)
@@ -446,12 +444,12 @@ public class PVT extends Task {
 						+ "\t" + df2.format(blocksNumberLapses[i][j].mean())
 						);
 			}
-			getModel().outputInLine("\n\n");
+			model.outputInLine("\n\n");
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////		
 		// Writing the output to csv files in the specified directory (outputDIR)
-		String DIR = getModel().getFatigue().getOutputDIR();
+		String DIR = model.fatigue.getOutputDIR();
 
 		if (DIR == null)
 			return result;

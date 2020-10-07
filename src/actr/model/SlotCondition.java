@@ -8,7 +8,7 @@ import java.util.Objects;
  * 
  * @author Dario Salvucci
  */
-class SlotCondition {
+public class SlotCondition {
 	private final Model model;
 	private Symbol slot;
 	private Symbol value;

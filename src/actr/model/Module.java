@@ -6,9 +6,9 @@ package actr.model;
  * @author Dario Salvucci
  */
 public abstract class Module {
-	void initialize() {
+	public void initialize() {
 	}
 
-	void update() {
+	public void update() {
 	}
 }

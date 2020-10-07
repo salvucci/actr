@@ -12,7 +12,7 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Production {
-	private Symbol name;
+	public final Symbol name;
 	private final Model model;
 	private final List<BufferCondition> conditions = new ArrayList();
 	private final List<BufferAction> actions = new ArrayList();
@@ -66,15 +66,6 @@ public class Production {
 	}
 
 	/**
-	 * Gets the name of the production.
-	 * 
-	 * @return the name symbol
-	 */
-	public Symbol getName() {
-		return name;
-	}
-
-	/**
 	 * Gets the utility of the production.
 	 * 
 	 * @return the utility value
@@ -82,7 +73,7 @@ public class Production {
 	public double getUtility() { return u; }
 	public double getProbability() { return p; }
 
-	void setName (Symbol name) { this.name = name; }
+//	void setName (Symbol name) { this.name = name; }
 	void setUtility (double x) { u = x; }
 	void setProbability (double x) { p = x; }
 
@@ -128,20 +119,20 @@ public class Production {
 		return timesFired;
 	}
 
-	void setParameter (String parameter, String value, Tokenizer t) throws Exception
-	{
-		if (parameter.equals(":u")) {
-			u = Double.valueOf(value);
-			constantUtility = true;
+	void setParameter (String parameter, String value, Tokenizer t) {
+		switch (parameter) {
+			case ":u" -> {
+				u = Double.parseDouble(value);
+				constantUtility = true;
+			}
+			case ":p" -> p = Double.parseDouble(value);
+			case ":reward" -> {
+				hasReward = true;
+				reward = Double.parseDouble(value);
+			}
+			case ":break" -> breakPoint = !value.equals("nil");
+			default -> model.recordWarning("unknown production parameter " + parameter, t);
 		}
-		else if (parameter.equals(":p")) p = Double.valueOf(value);
-		else if (parameter.equals(":reward"))
-		{
-			hasReward = true;
-			reward = Double.valueOf(value);
-		}
-		else if (parameter.equals(":break")) breakPoint = !value.equals("nil");
-		else model.recordWarning ("unknown production parameter "+parameter, t);
 	}
 
 
@@ -305,23 +296,23 @@ public class Production {
 		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
 		 */
 		double instU;
-		double noise = Utilities.getNoise(model.getProcedural().utilityNoiseS);
-		if (model.getFatigue().isFatigueEnabled() && !constantUtility){
+		double noise = Utilities.getNoise(model.procedural.utilityNoiseS);
+		final Fatigue fatigue = model.fatigue;
+		final boolean fatigueEnabled = fatigue.isFatigueEnabled();
+		if (fatigueEnabled && !constantUtility){
 			//Fatigue old version: just the affect of time on task
 //			instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original
 
 			// Fatigue new model with the additive factor
-			double BioMath = model.getFatigue().computeBioMathValue();
-			double FPMC0 = model.getFatigue().getFatigueFPMC0();
-			double FPMC = model.getFatigue().getFatigueFPMC();
-			double FPBMC = model.getFatigue().getFatigueFPBMC();
-			instU  = model.getFatigue().getFatigueFPPercent() * (
-					Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  +  noise) ;
-//			model.output(name.toString() + " U:" + (Math.pow(1 + model.getFatigue().mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath))
-//					+ " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+			double BioMath = fatigue.computeBioMathValue();
+			double FPMC0 = fatigue.getFatigueFPMC0();
+			double FPMC = fatigue.getFatigueFPMC();
+			double FPBMC = fatigue.getFatigueFPBMC();
+			instU  = fatigue.getFatigueFPPercent() * (
+					Math.pow(1 + fatigue.mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  +  noise) ;
 		}
-		else if (model.getFatigue().isFatigueEnabled() && constantUtility){
-			instU = model.getFatigue().getFatigueFPPercent() *(u + noise);
+		else if (fatigueEnabled && constantUtility){
+			instU = fatigue.getFatigueFPPercent() *(u + noise);
 //			model.output(name.toString() + " U:" + u + " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
 		}
 		else{
@@ -334,34 +325,34 @@ public class Production {
 
 		boolean fatigueMismatch = false;
 
-		for (int i = 0; i < conditions.size(); i++) {
-			BufferCondition bc = conditions.elementAt(i);
+//		final int n = conditions.size();
+		for (BufferCondition bc : conditions) {
 			if (!bc.test(inst)) {
-				if (model.getFatigue().isFatigueEnabled() && model.getFatigue().isFatiguePartialMatching()) {
-					Chunk bufferChunk = model.getBuffers().get(bc.getBuffer());
+				if (fatigueEnabled && fatigue.isFatiguePartialMatching()) {
+					Chunk bufferChunk = model.buffers.get(bc.buffer);
 					if (bufferChunk == null)
 						return null;
 					else
 						fatigueMismatch = true;
 				} else {
-					if (model.getProcedural().whyNotTrace)
+					if (model.procedural.whyNotTrace)
 						model.output("   X instantiation failed\n");
-					model.getProcedural().whyNotTrace = savedWhyNotTrace;
+					model.procedural.whyNotTrace = savedWhyNotTrace;
 					return null;
 				}
 			}
 		}
 
-		for (Instantiation.DelayedSlotCondition dsc : inst.getDelayedSlotConditions()) {
+		for (Instantiation.DelayedSlotCondition dsc : inst.delayedSlotConditions) {
 			if (model.procedural.whyNotTrace)
 				model.output("   [delayed] " + dsc.buffer + ">");
 			if (!dsc.slotCondition.test(dsc.buffer, dsc.bufferChunk, inst)) {
-				if (model.getFatigue().isFatigueEnabled() && model.getFatigue().isFatiguePartialMatching()) {
+				if (fatigueEnabled && fatigue.isFatiguePartialMatching()) {
 					fatigueMismatch = true;
 				} else {
-					if (model.getProcedural().whyNotTrace)
+					if (model.procedural.whyNotTrace)
 						model.output("   X instantiation failed\n");
-					model.getProcedural().whyNotTrace = savedWhyNotTrace;
+					model.procedural.whyNotTrace = savedWhyNotTrace;
 					return null;
 				}
 			}
@@ -370,7 +361,7 @@ public class Production {
 		if (fatigueMismatch) {
 			// if the production has not matched but fatigue partial matching is on,
 			// set instantiation utility to 0 (see Walsh, Gunzelmann, & Van Dongen, 2017)
-			inst.setUtility(model.getFatigue().getFatigueFPPercent() * (0 + noise));
+			inst.setUtility(fatigue.getFatigueFPPercent() * (0 + noise));
 		}
 
 		if (model.procedural.whyNotTrace)

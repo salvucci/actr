@@ -71,7 +71,7 @@ public class Speech extends Module {
 	}
 
 	@Override
-	void update() {
+	public void update() {
 		Chunk request = model.buffers.get(Symbol.vocal);
 		if (request == null || !request.isRequest())
 			return;

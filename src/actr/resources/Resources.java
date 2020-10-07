@@ -1,12 +1,14 @@
 package actr.resources;
 
+
+import actr.env.Main;
+
 import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import actr.env.Main;
 
 /**
  * The resources module used primarily for retrieving image and icon resources.

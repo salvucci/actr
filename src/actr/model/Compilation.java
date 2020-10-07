@@ -2,7 +2,6 @@ package actr.model;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Production compilation process that transforms two rules into a single rule.
@@ -24,11 +23,11 @@ class Compilation {
 		this.inst1 = inst1.copy();
 		this.inst2 = inst2.copy();
 		this.model = model;
-		p1 = inst1.getProduction().copy();
-		p2 = inst2.getProduction().copy();
+		p1 = inst1.production.copy();
+		p2 = inst2.production.copy();
 		p1.expandDirectActions(inst1);
 		p2.expandDirectActions(inst2);
-		String name = inst1.getProduction().getName() + "++" + inst2.getProduction().getName();
+		String name = inst1.production.name + "++" + inst2.production.name;
 		newp = new Production(Symbol.getUnique(name), model);
 	}
 
@@ -283,8 +282,7 @@ class Compilation {
 	void uniquifyVariables() {
 		List<Symbol> p1vars = p1.getVariables();
 		List<Symbol> p2vars = p2.getVariables();
-		for (int i = 0; i < p1vars.size(); i++) {
-			Symbol var = p1vars.get(i);
+		for (Symbol var : p1vars) {
 			if (p2vars.contains(var)) {
 				if (model.buffers.isLegalBuffer(var))
 					p2.specialize(var, inst2.get(var));
@@ -320,7 +318,7 @@ class Compilation {
 	}
 
 	Production compile() {
-		if ((inst2.getTime() - inst1.getTime()) < model.procedural.productionCompilationThresholdTime) {
+		if ((inst2.time - inst1.time) < model.procedural.productionCompilationThresholdTime) {
 			uniquifyVariables();
 			synchronizeVariables();
 			if (checkSpecials()
