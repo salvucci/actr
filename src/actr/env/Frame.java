@@ -675,6 +675,17 @@ public class Frame extends JFrame {
 		outputArea.append(s + "\n");
 		outputArea.setCaretPosition(outputArea.getDocument().getLength());
 	}
+	
+	/**
+	 * Prints the given string to the frame's output panel.
+	 * 
+	 * @param s
+	 *            the string
+	 */
+	public void outputInLine(String s) {
+		outputArea.append(s);
+		outputArea.setCaretPosition(outputArea.getDocument().getLength());
+	}
 
 	/**
 	 * Clears the frame's output panel.

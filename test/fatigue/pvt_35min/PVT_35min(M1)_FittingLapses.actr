@@ -1,0 +1,124 @@
+;;;;;
+;;Model of PVT test on time on task
+;;
+;;Paper: Functional Equivalence of sleep loss and time on task effects in sustained attention
+;;
+;;Bella Z. Vaksler, Glenn Gunzelmann, Air force research lab
+;;
+;;@author Ehsan Khosroshahi
+;;;;;
+
+(set-task "actr.tasks.test.fatigue.PVT")
+(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 71.5)(79.5 94.5))
+
+(set-task-schedule 
+    ;; 1 sessions in total at 12pm
+    36  ;; 24 +12
+)
+
+(set-task-duration 2100.0)
+
+(set-output-dir "./test/fatigue/pvt_35min")
+
+(add-dm
+    (goal isa goal state wait)
+)
+
+(sgp 
+    :cst nil
+    :v nil
+    :fatigue t   
+    :iu 3.1
+    :ut 2.4
+    
+    ;;:microlapses nil
+    :fpbmc .018
+    :fpmc -.05
+    
+    :utbmc .012  
+    :utmc -.01
+    
+    :fp-dec .99 ;;1.0002
+    
+    :egs .25
+    ;:cst t
+    
+    :dat .05
+    :randomize-time t
+    :vpft t
+    
+    :max-prep-time-diff 10.0
+)
+
+(goal-focus goal)
+
+
+(p wait 
+    =goal>
+        isa goal
+        state                 wait
+        - state                 none
+    ?visual-location>
+        buffer                empty
+==>
+    !eval! (fatigue-reset-percentage)
+)
+;(spp :u 1)
+
+(p attend-stimulus
+    =goal>
+        isa goal
+        state  wait
+    =visual-location>
+        isa visual-location
+    ?visual>
+        state free
+==>
+    !eval! (fatigue-reset-percentage)
+    +visual>               
+        isa	move-attention
+        screen-pos =visual-location
+    =goal>
+        state attending-stimulus
+)
+;(spp :u 1)
+
+(p see-stimulus*respond
+    =goal>
+        isa goal
+        state attending-stimulus
+    =visual>
+        isa text
+        value =val
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !output! (=val)
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+    +visual>
+        isa clear
+)
+;(spp :u 1)
+
+(p press-key 
+    =goal>
+        isa goal
+        state wait
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !output! ("***  press Key - False Start  ***")
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+)
+(spp :u 0)
+

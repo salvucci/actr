@@ -34,6 +34,8 @@ public class Model {
 	public final List<ParseError> errors;
 	public final Frame frame;
 
+	private Fatigue fatigue;
+
 	boolean realTime = false;
 	double realTimeMultiplier = 1;
 	boolean verboseTrace = true;
@@ -59,6 +61,8 @@ public class Model {
 		time = 0;
 		task = new Task();
 		taskUpdated = false;
+
+		fatigue = new Fatigue(this);
 
 		initialize();
 	}
@@ -117,6 +121,114 @@ public class Model {
 
 	public static Model compile(File file, Frame frame) {
 		return compile(file, frame, null);
+	}
+
+	/**
+	 * Gets the fatigue module.
+	 *
+	 * @return the fatigue module
+	 */
+	public Fatigue getFatigue() {
+		return fatigue;
+	}
+
+	/**
+	 * Gets the declarative module.
+	 * 
+	 * @return the declarative module
+	 */
+	public Declarative getDeclarative() {
+		return declarative;
+	}
+
+	/**
+	 * Gets the procedural module.
+	 * 
+	 * @return the procedural module
+	 */
+	public Procedural getProcedural() {
+		return procedural;
+	}
+
+	/**
+	 * Gets the vision module.
+	 * 
+	 * @return the vision module
+	 */
+	public Vision getVision() {
+		return vision;
+	}
+
+	/**
+	 * Gets the audio module.
+	 * 
+	 * @return the audio module
+	 */
+	public Audio getAudio() {
+		return audio;
+	}
+
+	/**
+	 * Gets the motor module.
+	 * 
+	 * @return the motor module
+	 */
+	public Motor getMotor() {
+		return motor;
+	}
+
+	/**
+	 * Gets the speech module.
+	 * 
+	 * @return the speech module
+	 */
+	public Speech getSpeech() {
+		return speech;
+	}
+
+	/**
+	 * Gets the imaginal module.
+	 * 
+	 * @return the imaginal module
+	 */
+	public Imaginal getImaginal() {
+		return imaginal;
+	}
+
+	/**
+	 * Gets the temporal module.
+	 * 
+	 * @return the temporal module
+	 */
+	public Temporal getTemporal() {
+		return temporal;
+	}
+
+	/**
+	 * Gets the BOLD module.
+	 * 
+	 * @return the BOLD module
+	 */
+	public Bold getBold() {
+		return bold;
+	}
+
+	/**
+	 * Gets the current buffers.
+	 * 
+	 * @return the buffers
+	 */
+	public Buffers getBuffers() {
+		return buffers;
+	}
+
+	/**
+	 * Gets the current events queue.
+	 * 
+	 * @return the events queue
+	 */
+	public Events getEvents() {
+		return events;
 	}
 
 	/**
@@ -209,6 +321,7 @@ public class Model {
 		motor.initialize();
 		speech.initialize();
 		imaginal.initialize();
+		fatigue.initialize();
 
 		buffers.set(Symbol.goalState, createBufferStateChunk("goal", true));
 		buffers.set(Symbol.retrievalState, createBufferStateChunk("retrieval-state", true));
@@ -233,6 +346,7 @@ public class Model {
 		declarative.update();
 		imaginal.update();
 		procedural.update();
+		// fatigue.update();
 	}
 
 	/**
@@ -610,6 +724,52 @@ public class Model {
 				t.caseSensitive = (!nil(value));
 				break;
 			default:
+				// Fatigue parameters
+		else if (parameter.equals(":fatigue")) {
+				fatigue.setFatigueEnabled(!value.equals("nil"));
+				procedural.utilityUseThreshold = !value.equals("nil");
+			}
+			else if (parameter.equals(":fatigue-partial-matching"))
+				fatigue.setFatiguePartialMatching(!value.equals("nil"));
+			else if (parameter.equals(":fp-dec"))
+				fatigue.setFatigueFPDec(Double.valueOf(value));
+			else if (parameter.equals(":fp-dec-sleep1"))
+				fatigue.setFatigueFPDecSleep1(Double.valueOf(value));
+			else if (parameter.equals(":fp-dec-sleep2"))
+				fatigue.setFatigueFPDecSleep2(Double.valueOf(value));
+			else if (parameter.equals(":fp"))
+				fatigue.setFatigueFP(Double.valueOf(value));
+			else if (parameter.equals(":fd-dec"))
+				fatigue.setFatigueFDDec(Double.valueOf(value));
+			else if (parameter.equals(":fd"))
+				fatigue.setFatigueFD(Double.valueOf(value));
+			else if (parameter.equals(":fpbmc"))
+				fatigue.setFatigueFPBMC(Double.valueOf(value));
+			else if (parameter.equals(":fpmc0"))
+				fatigue.setFatigueFPMC0(Double.valueOf(value));
+			else if (parameter.equals(":fpmc"))
+				fatigue.setFatigueFPMC(Double.valueOf(value));
+			else if (parameter.equals(":utbmc"))
+				fatigue.setFatigueUTBMC(Double.valueOf(value));
+			else if (parameter.equals(":utmc"))
+				fatigue.setFatigueUTMC(Double.valueOf(value));
+			else if (parameter.equals(":utmc0"))
+				fatigue.setFatigueUTMC0(Double.valueOf(value));
+			else if (parameter.equals(":ut0"))
+				fatigue.setFatigueUT0(Double.valueOf(value));
+			else if (parameter.equals(":fdbmc"))
+				fatigue.setFatigueFDBMC(Double.valueOf(value));
+			else if (parameter.equals(":fdc"))
+				fatigue.setFatigueFDC(Double.valueOf(value));
+			else if (parameter.equals(":hour"))
+				fatigue.setFatigueStartTime(Double.valueOf(value));
+			else if (parameter.equals(":p0"))
+				fatigue.fatigueP0 = Double.valueOf(value);
+			else if (parameter.equals(":u0"))
+				fatigue.fatigueU0 = Double.valueOf(value);
+			else if (parameter.equals(":k0"))
+				fatigue.fatigueK0 = Double.valueOf(value);
+			else
 				recordWarning("ignoring parameter " + parameter, t);
 				break;
 		}
@@ -711,6 +871,19 @@ public class Model {
 	}
 
 	/**
+	 * Prints a string to the output panel without newline at the end.
+	 *
+	 * @param s
+	 *            the message string
+	 */
+	public void outputInLine(String s) {
+		if (frame != null)
+			frame.outputInLine(s);
+		else
+			System.out.println(s);
+	}
+
+	/**
 	 * Clears the output panel.
 	 */
 	public void clearOutput() {
@@ -718,7 +891,7 @@ public class Model {
 			frame.clearOutput();
 	}
 
-	void outputError(String s) {
+	public void outputError(String s) {
 		output("Error: " + s);
 	}
 

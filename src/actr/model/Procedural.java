@@ -17,6 +17,8 @@ public class Procedural extends Module {
 	double actionTime = .050;
 	boolean variableProductionFiringTime = false;
 
+	boolean utilityUseThreshold = false;
+	double utilityThreshold = 0;
 	boolean utilityLearning = false;
 	double utilityNoiseS = 0;
 	double utilityLearningAlpha = 0.2;
@@ -26,6 +28,8 @@ public class Procedural extends Module {
 	double productionCompilationNewUtility = 0;
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
+	double finalInstUtility =0;
+	boolean microLapses = false;
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
@@ -90,7 +94,30 @@ public class Procedural extends Module {
 		return lastFiredInst.getProduction();
 	}
 
+	public void setUtilityThreshold(double ut) {
+		utilityThreshold = ut;
+	}
+
+	public double getFatigueUtility() {
+		return initialUtility * model.getFatigue().getFatigueFP();
+	}
+
+	public double getFinalInstUtility() {
+		return finalInstUtility;
+	}
+
+	public boolean isMicroLapse() {
+		return microLapses;
+	}
+
+	public double getFatigueUtilityThreshold() {
+		return model.getFatigue().getFatigueUT();
+	}
+
 	void findInstantiations(final Buffers buffers) {
+		if (model.getFatigue().isFatigueEnabled()){
+			model.getFatigue().update(); // update the FP and UT values in case of the fatigue mechanism
+		}
 		// if (model.verboseTrace) model.output ("procedural",
 		// "conflict-resolution");
 		buffers.removeDecayedChunks();
@@ -136,38 +163,85 @@ public class Procedural extends Module {
 			}
 
 			final Instantiation finalInst = highestU;
-			if (conflictSetTrace)
-				model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
+			finalInstUtility = finalInst.getUtility();
+
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// highestU.getUtility() + "----" );
+
+			// Scaling the instantiation production which has the highest
+			// utility
+			// with the fp parameter which is a representative of fatigue in the
+			// model
+			// highestU.setUtility(highestU.getUtility()
+			// * model.getFatigue().fatigue_fp);
+
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// (highestU.getUtility()* model.getFatigue().compute_fp() +
+			// Utilities.getNoise(model.getProcedural().utilityNoiseS))
+			// + "----" );
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " ut: " +
+			// (model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)
+			// + "----" );
 
 			double realActionTime = actionTime;
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (finalInst.getProduction().isBreakPoint()) {
-				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
-						"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
-					@Override
+//			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
+//				if (model.verboseTrace)
+//					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
+
+			if (model.getFatigue().isFatigueEnabled() &&
+					finalInst.getUtility() < ( model.getFatigue().getFatigueUT())) {
+				microLapses = true;
+
+				if (model.getFatigue().isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
+					model.getFatigue().decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+				}
+
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+						"[no rule fired, utility below threshold] [microlapse] "
+						+ "[u:" + String.format("%.2f", finalInst.getUtility())
+						+ " ut:" + String.format("%.2f", model.getFatigue().getFatigueUT()) + "]") {
 					public void action() {
-						model.output("------", "break");
-						model.stop();
+						findInstantiations(buffers);
+					}
+				});
+			} else {
+				microLapses = false;
+				if (conflictSetTrace)
+					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
+
+				if (finalInst.getProduction().isBreakPoint()) {
+					model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+							"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
+						public void action() {
+							model.output("------", "break");
+							model.stop();
+						}
+					});
+				}
+
+				String extra = "";
+				if (buffers.numGoals() > 1) {
+					Chunk goal = buffers.get(Symbol.goal);
+					extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
+				}
+
+				// model.addEvent(new Event(model.getTime() + .050 ,
+				// model.addEvent(new Event(model.getTime() + (realActionTime -
+				// .001), "procedural",
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+						"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
+					public void action() {
+						fire(finalInst, buffers);
+						findInstantiations(buffers);
 					}
 				});
 			}
-
-			String extra = "";
-			if (buffers.numGoals() > 1) {
-				Chunk goal = buffers.get(Symbol.goal);
-				extra = " [" + ((goal != null) ? goal.name().getString() : "nil") + "]";
-			}
-
-			model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
-					"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
-				@Override
-				public void action() {
-					fire(finalInst);
-					findInstantiations(buffers);
-				}
-			});
 		}
 	}
 

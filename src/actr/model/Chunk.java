@@ -236,7 +236,15 @@ public class Chunk {
 			return (name == c2.name());
 		if (slotCount() != c2.slotCount())
 			return false;
-		return slots.equals(c2.slots);
+		Iterator<Symbol> it = getSlotNames();
+		while (it.hasNext()) {
+			Symbol slot = it.next();
+			Symbol value = get(slot);
+			Symbol value2 = c2.get(slot);
+			if (value != value2)
+				return false;
+		}
+		return true;
 	}
 
 	double computeBaseLevel() {

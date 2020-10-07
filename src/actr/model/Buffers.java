@@ -137,7 +137,7 @@ public class Buffers {
 			model.bold.recordActivity(buffer);
 	}
 
-	void clear(Symbol buffer) {
+	public void clear(Symbol buffer) {
 		if (buffer == Symbol.goal)
 			goals.remove(buffers.get(buffer));
 		else if (buffer == Symbol.temporal)

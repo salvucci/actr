@@ -1,0 +1,144 @@
+;;;;;
+;;Model of PVT test and Fatigue mechanism : PVT on 88 hours of sleep deprivation 
+;;
+;;Paper: Sleep Deprivation and Sustained Attention Performance:
+;;Integrating Mathematical and Cognitive Modeling
+;;
+;;Glenn Gunzlemann, Joshua B.Gross, Kevin A. Gluck, David F. Dinges 
+;;
+;;@author Ehsan Khosroshahi
+;;;;;
+
+(set-task "actr.tasks.fatigue.PVT")
+(set-sleep-schedule (7.5 23.5)(31.5 47.5)(55.5 143.5)(151.5 167.5))
+
+(set-task-schedule 
+    ;; 88 TSD :  44 sessions in total
+    56  58  60  62  64  66  68  70  ;; //base line
+    72  74  76  78  80  82  84  86  88  90  92  94  ;; //day 1
+    96  98  100 102 104 106 108 110 112 114 116 118 ;; //day 2
+    120 122 124 126 128 130 132 134 136 138 140 142 ;; //day 3
+    ;; // End of 88 TSD    
+)
+
+(set-task-duration 600.0)
+
+(set-output-dir "./test/fatigue/pvt_88hour")
+
+(add-dm
+    (goal isa goal state wait)
+)
+
+(sgp 
+    :cst nil
+    :v nil
+    :fatigue t 
+    :fatigue-partial-matching t
+    :iu 1.56
+    :ut 1.15
+    ;; (IU-(fpbmc*BioMath)) - (UT-(utbmc*BioMath)) = X
+    ;; BioMath(utbmc-fpbmc) + IU - UT0 = X
+    ;; best value for  BioMath=4.26 (10am) : X=
+    ;; IU = BM * ( fpbmc - utbmc ) + X + UT0
+    
+    ;;:microlapses nil
+    :fpbmc .029
+    :fpmc .12 ;;.13
+    :fpmc0 0
+    
+    :utbmc .01
+    :utmc  .04 ;;.02
+    :utmc0 0
+    
+    :fp-dec 0.005
+    
+    :egs .25
+    ;:cst t
+    
+    :dat .05
+    :randomize-time t
+    :vpft t
+    
+    :motor-feature-prep-time 0 ; .05
+    :max-prep-time-diff 10.0  
+    :visual-attention-latency .055 ; .035
+)
+
+(goal-focus goal)
+
+(p wait 
+    =goal>
+        isa goal
+        state                 wait
+        - state                 none
+        state =state
+    ?visual-location>
+        buffer empty
+==>
+    !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-on)
+)
+;(spp :u 1)
+
+(p attend-stimulus
+    =goal>
+        isa goal
+        state  wait
+    =visual-location>
+        isa visual-location
+    ?visual>
+        state free
+==>
+    !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
+    +visual>               
+        isa	move-attention
+        screen-pos =visual-location
+    =goal>
+        state attending-stimulus
+)
+;(spp :u 1)
+
+(p see-stimulus*respond
+    =goal>
+        isa goal
+        state attending-stimulus
+    =visual>
+        isa text
+        value =val
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
+    !output! (=visual)
+    !output! (=val)
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+    +visual>
+        isa clear
+)
+;(spp :u 1)
+
+#|
+(p press-key 
+    =goal>
+        isa goal
+        state wait
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !eval! (fatigue-utility-dec-off)
+    !output! ("***  press Key - False Start  ***")
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+)
+(spp :u -1000)
+|#

@@ -1,0 +1,41 @@
+Time Awake,1.0,
+BioMath,3.293054620177672,
+Lapses %,0.0,
+FalseStarts %,1.0309278350515463,
+Median AlertRT,263.12335885413063,
+LSNR_apx,14.775666457164697,
+SleepAttacks %,0.0,
+**
+Lapses % SD,0.0,
+FalseStarts % SD,0.0,
+Median AlertRT SD,0.0,
+LSNR_apx SD,0.0,
+SleepAttacks % SD,0.0,
+
+
+
+
+
+Time Awake,1.0,
+B1 Lapses %,0.0,
+B2 Lapses %,0.0,
+B1 FalseStarts %,0.0,
+B2 FalseStarts %,2.1739130434782608,
+B1 Median AlertRT,257.84094351777753,
+B2 Median AlertRT,269.1903110558087,
+B1 LSNR_apx,15.004076126123984,
+B2 LSNR_apx,14.516802165677507,
+B1 SleepAttacks %,0.0,
+B2 SleepAttacks %,0.0,
+B1 Lapses % SD1,0.0,
+B2 Lapses % SD2,0.0,
+B1 FalseStarts % SD,0.0,
+B2 FalseStarts % SD,0.0,
+B1 Median AlertRT SD,0.0,
+B2 Median AlertRT SD,0.0,
+B1 LSNR_apx SD,0.0,
+B2 LSNR_apx SD,0.0,
+B1 SleepAttacks % SD,0.0,
+B2 SleepAttacks % SD,0.0,
+
+

@@ -112,6 +112,10 @@ public class Instantiation {
 	public double getUtility() {
 		return u;
 	}
+	
+	void setUtility(double val) {
+		u = val;
+	}
 
 	/**
 	 * Gets the time at which this instantiation fires.
