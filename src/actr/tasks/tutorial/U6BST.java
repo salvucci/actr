@@ -16,19 +16,22 @@ import actr.task.TaskLine;
  * @author Dario Salvucci
  */
 public class U6BST extends Task {
-	U6BST panel;
-	TaskButton buttonA, buttonB, buttonC, buttonReset;
+	final U6BST panel;
+	final TaskButton buttonA;
+	final TaskButton buttonB;
+	final TaskButton buttonC;
+	final TaskButton buttonReset;
 	TaskLine lineA, lineB, lineC, lineTarget, line;
-	TaskLabel doneLabel;
+	final TaskLabel doneLabel;
 	String choice = null;
 	boolean done = false;
-	int stimuli[][] = { { 15, 250, 55, 125 }, { 10, 155, 22, 101 }, { 14, 200, 37, 112 }, { 22, 200, 32, 114 },
+	final int[][] stimuli = { { 15, 250, 55, 125 }, { 10, 155, 22, 101 }, { 14, 200, 37, 112 }, { 22, 200, 32, 114 },
 			{ 10, 243, 37, 159 }, { 22, 175, 40, 73 }, { 15, 250, 49, 137 }, { 10, 179, 32, 105 }, { 20, 213, 42, 104 },
 			{ 14, 237, 51, 116 }, { 12, 149, 30, 72 }, { 14, 237, 51, 121 }, { 22, 200, 32, 114 }, { 14, 200, 37, 112 },
 			{ 15, 250, 55, 125 } };
 	int stimIndex = 0;
-	String responses[] = new String[stimuli.length];
-	double utilities[] = new double[4];
+	final String[] responses = new String[stimuli.length];
+	final double[] utilities = new double[4];
 
 	public U6BST() {
 		super();
@@ -126,27 +129,27 @@ public class U6BST extends Task {
 		} else
 			getModel().stop();
 
-		String prefix = (getModel().getProcedural().get(Symbol.get("decide-over")).getUtility() == 0) ? "u6bst*" : "";
-		utilities[0] = getModel().getProcedural().get(Symbol.get(prefix + "decide-over")).getUtility();
-		utilities[1] = getModel().getProcedural().get(Symbol.get(prefix + "decide-under")).getUtility();
-		utilities[2] = getModel().getProcedural().get(Symbol.get(prefix + "force-over")).getUtility();
-		utilities[3] = getModel().getProcedural().get(Symbol.get(prefix + "force-under")).getUtility();
+		String prefix = (getModel().procedural.get(Symbol.get("decide-over")).getUtility() == 0) ? "u6bst*" : "";
+		utilities[0] = getModel().procedural.get(Symbol.get(prefix + "decide-over")).getUtility();
+		utilities[1] = getModel().procedural.get(Symbol.get(prefix + "decide-under")).getUtility();
+		utilities[2] = getModel().procedural.get(Symbol.get(prefix + "force-over")).getUtility();
+		utilities[3] = getModel().procedural.get(Symbol.get(prefix + "force-under")).getUtility();
 	}
 
 	@Override
 	public void eval(Iterator<String> it) {
 		String s = "***** ( ";
-		s += getModel().getProcedural().get(Symbol.get("decide-over")).getUtility() + " ";
-		s += getModel().getProcedural().get(Symbol.get("decide-under")).getUtility() + " ";
-		s += getModel().getProcedural().get(Symbol.get("force-over")).getUtility() + " ";
-		s += getModel().getProcedural().get(Symbol.get("force-under")).getUtility() + " ";
+		s += getModel().procedural.get(Symbol.get("decide-over")).getUtility() + " ";
+		s += getModel().procedural.get(Symbol.get("decide-under")).getUtility() + " ";
+		s += getModel().procedural.get(Symbol.get("force-over")).getUtility() + " ";
+		s += getModel().procedural.get(Symbol.get("force-under")).getUtility() + " ";
 		s += ")";
 		getModel().output(s);
 	}
 
 	// --- Analysis Code ---//
 
-	double humanCounts[] = { 20.0, 67.0, 20.0, 47.0, 87.0, 20.0, 80.0, 93.0, 83.0, 13.0, 29.0, 27.0, 80.0, 73.0, 53.0 };
+	final double[] humanCounts = { 20.0, 67.0, 20.0, 47.0, 87.0, 20.0, 80.0, 93.0, 83.0, 13.0, 29.0, 27.0, 80.0, 73.0, 53.0 };
 
 	@Override
 	public int analysisIterations() {
@@ -157,8 +160,8 @@ public class U6BST extends Task {
 	public Result analyze(Task[] tasks, boolean output) {
 
 		double[] modelCounts = new double[stimuli.length];
-		for (int n = 0; n < tasks.length; n++) {
-			U6BST task = (U6BST) tasks[n];
+		for (Task value : tasks) {
+			U6BST task = (U6BST) value;
 			for (int i = 0; i < stimuli.length; i++)
 				if (task.responses[i] != null)
 					modelCounts[i] += (task.responses[i].equals("over")) ? 1 : 0;

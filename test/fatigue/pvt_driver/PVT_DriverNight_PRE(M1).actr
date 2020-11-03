@@ -1,0 +1,138 @@
+;;;;;
+;;Model of PVT test and Fatigue mechanism
+;;
+;;Paper: Efficient driver drowsiness detection at moderate levels of drowsiness
+;;
+;;Pia M. Forsmana, Bryan J. Vilaa,b, Robert A. Short c, Christopher G. Mott d, Hans P.A. Van Dongena,
+;;
+;;@author Ehsan Khosroshahi
+;;;;;
+
+(set-task "actr.tasks.test.fatigue.PVT")
+
+(set-sleep-schedule 
+    (8.0 22.0)(32.0 39.0)(44.0 58.0)(68.0 82.0)(92.0 106.0)(116.0 130.0)(140.0 154.0)
+    (159.0 166.0)(176.0 183.0)(188.0 202.0)(212.0 226.0)(236.0 250.0)(260.0 274.0)(284.0 298.0)
+)
+
+(set-task-schedule 
+    ;;;;;
+    45.0 48.0 51.0 54.0         ;; day2
+    69.0 72.0 75.0 78.0         ;; day3
+    93.0 96.0 99.0 102.0       ;; day4
+    117.0 120.0 123.0 126.0 ;; day5
+    141.0 144.0 147.0 150.0 ;; day6
+    ;;;;
+    189.0 192.0 195.0 198.0 ;; day9
+    213.0 216.0 219.0 222.0 ;; day10
+    237.0 240.0 243.0 246.0 ;; day11
+    261.0 264.0 267.0 270.0 ;; day12
+    285.0 288.0 291.0 294.0 ;; day13
+)
+
+(set-task-duration 600.0)
+
+(set-output-dir "./test/fatigue/pvt_driver")
+
+(add-dm
+    (goal isa goal state wait)
+)
+
+(sgp 
+    :cst nil
+    :v nil
+    :fatigue t   
+    :iu 2.9
+    :ut 2.3
+    
+    ;;:microlapses nil
+    :fpbmc .02
+    :fpmc -.06
+    
+    :utbmc .012  
+    :utmc -.01
+    
+    :fp-dec 0.99
+    
+    :egs .25
+    ;:cst t
+    
+    :dat .038
+    :randomize-time t
+    :vpft t
+    
+    :max-prep-time-diff 10.0  
+)
+
+(goal-focus goal)
+
+
+(p wait 
+    =goal>
+        isa goal
+        state                 wait
+        - state                 none
+    ?visual-location>
+        buffer                empty
+==>
+    !eval! (fatigue-reset-percentage)
+)
+;(spp :u 1)
+
+(p attend-stimulus
+    =goal>
+        isa goal
+        state  wait
+    =visual-location>
+        isa visual-location
+    ?visual>
+        state free
+==>
+    !eval! (fatigue-reset-percentage)
+    +visual>               
+        isa	move-attention
+        screen-pos =visual-location
+    =goal>
+        state attending-stimulus
+)
+;(spp :u 1)
+
+(p see-stimulus*respond
+    =goal>
+        isa goal
+        state attending-stimulus
+    =visual>
+        isa text
+        value =val
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !output! (=val)
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+    +visual>
+        isa clear
+)
+;(spp :u 1)
+
+(p press-key 
+    =goal>
+        isa goal
+        state wait
+    ?manual>
+        state free 
+==>
+    !eval! (fatigue-reset-percentage)
+    !output! ("***  press Key - False Start  ***")
+    +manual>
+        isa press-key
+        key space
+    =goal>
+        state wait
+)
+(spp :u 0)
+

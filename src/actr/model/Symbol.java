@@ -1,11 +1,8 @@
 package actr.model;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A symbol within the system, roughly represented as a string but allowing "=="
@@ -28,11 +25,11 @@ import java.util.Set;
  * @author Dario Salvucci
  */
 public class Symbol {
-	private String string;
-	private static Map<String, Symbol> hashmap = new HashMap<String, Symbol>();
-	private static long unique = 1;
-	private static Set<Symbol> pervasives = new HashSet<Symbol>();
-	private static DecimalFormat df = new DecimalFormat("#0.####");
+	private final String string;
+	private static final ConcurrentHashMap<String, Symbol> hashmap = new ConcurrentHashMap<>();
+	private static final AtomicLong unique = new AtomicLong(1);
+	private static final ConcurrentHashMap<String, Symbol> pervasives = new ConcurrentHashMap<>();
+	//private static final DecimalFormat df = new DecimalFormat("#0.####");
 
 	/** Pervasive symbol for the string <tt>"t"</tt>. */
 	public static final Symbol t = Symbol.createPervasiveSymbol("t");
@@ -233,20 +230,11 @@ public class Symbol {
 	 *         is null
 	 */
 	public static Symbol get(String s) {
-		if (s == null)
-			return nil;
-		Symbol sym = hashmap.get(s);
-		if (sym == null) {
-			sym = new Symbol(s);
-			hashmap.put(s, sym);
-		}
-		return sym;
+		return s == null ? nil : hashmap.computeIfAbsent(s, Symbol::new);
 	}
 
-	private static Symbol createPervasiveSymbol(String s) {
-		Symbol sym = get(s);
-		pervasives.add(sym);
-		return sym;
+	public static Symbol createPervasiveSymbol(String s) {
+		return pervasives.computeIfAbsent(s, Symbol::get);
 	}
 
 	/**
@@ -269,7 +257,7 @@ public class Symbol {
 	 * @return the associated symbol
 	 */
 	public static Symbol get(double x) {
-		return get(df.format(x));
+		return get(new DecimalFormat("#0.####").format(x)); //TODO avoid DecimalFormat
 	}
 
 	/**
@@ -280,10 +268,7 @@ public class Symbol {
 	 * @return the associated symbol
 	 */
 	public static Symbol get(boolean b) {
-		if (b)
-			return t;
-		else
-			return nil;
+		return b ? t : nil;
 	}
 
 	static Symbol getUnique(String s) {
@@ -300,7 +285,7 @@ public class Symbol {
 	private static String uniquify(String s) {
 		int pos = s.lastIndexOf('~');
 		String base = (pos >= 0) ? s.substring(0, pos) : s;
-		return base + "~" + (unique++);
+		return base + "~" + (unique.getAndIncrement());
 	}
 
 	/**
@@ -365,7 +350,7 @@ public class Symbol {
 	 * @return the double value
 	 */
 	public double toDouble() {
-		return Double.valueOf(string).doubleValue();
+		return Double.parseDouble(string);
 	}
 
 	/**
@@ -386,14 +371,11 @@ public class Symbol {
 		return (this != nil);
 	}
 
-	static void reset() {
-		hashmap = new HashMap<String, Symbol>();
-		Iterator<Symbol> it = pervasives.iterator();
-		while (it.hasNext()) {
-			Symbol sym = it.next();
+	synchronized static void reset() {
+		hashmap.clear();
+		for (Symbol sym : pervasives.values())
 			hashmap.put(sym.string, sym);
-		}
-		unique = pervasives.size() + 1;
+		unique.set(pervasives.size() + 1);
 	}
 
 	/**

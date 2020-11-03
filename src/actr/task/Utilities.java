@@ -8,9 +8,10 @@ import java.util.Random;
  * 
  * @author Dario Salvucci
  */
-public class Utilities {
+public enum Utilities {
+	;
 	/** A random number generator. */
-	public static Random random = new Random(System.currentTimeMillis());
+	public static final Random random = new Random(System.currentTimeMillis());
 
 	/**
 	 * Shuffles (randomizes) the contents of the given array.
@@ -18,7 +19,7 @@ public class Utilities {
 	 * @param a
 	 *            the array
 	 */
-	public static void shuffle(int a[]) {
+	public static void shuffle(int[] a) {
 		for (int i = 0; i < a.length - 1; i++) {
 			int tmp = a[i];
 			int index = i + 1 + random.nextInt(a.length - i - 1);
@@ -33,7 +34,7 @@ public class Utilities {
 	 * @param a
 	 *            the array
 	 */
-	public static void shuffle(Object a[]) {
+	public static void shuffle(Object[] a) {
 		for (int i = 0; i < a.length - 1; i++) {
 			Object tmp = a[i];
 			int index = i + 1 + random.nextInt(a.length - i - 1);
@@ -48,7 +49,7 @@ public class Utilities {
 	 * @param a
 	 *            the array
 	 */
-	public static void reverse(int a[]) {
+	public static void reverse(int[] a) {
 		for (int i = 0; i < 0.5 * a.length; i++) {
 			int tmp = a[i];
 			a[i] = a[a.length - 1 - i];
@@ -63,10 +64,10 @@ public class Utilities {
 	 *            the array
 	 * @return the tab-separated string
 	 */
-	public static String toString(double a[]) {
+	public static String toString(double[] a) {
 		String s = "";
-		for (int i = 0; i < a.length; i++)
-			s += String.format("%.3f", a[i]) + (i < a.length - 1 ? "\t" : "");
+		for (int i=0 ; i<a.length ; i++)
+			s += String.format("%.2f",a[i]) + (i<a.length-1 ? " " : "");
 		return s;
 	}
 }

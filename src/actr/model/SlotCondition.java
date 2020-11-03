@@ -1,17 +1,18 @@
 package actr.model;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Condition tested for a single slot within a buffer condition.
  * 
  * @author Dario Salvucci
  */
-class SlotCondition {
-	private Model model;
+public class SlotCondition {
+	private final Model model;
 	private Symbol slot;
 	private Symbol value;
-	private String operator;
+	private final String operator;
 
 	SlotCondition(String operator, Symbol slot, Symbol value, Model model) {
 		this.operator = operator;
@@ -24,11 +25,10 @@ class SlotCondition {
 		return new SlotCondition(operator, slot, value, model);
 	}
 
-	public boolean equals(SlotCondition sc2) {
-		if (operator == null)
-			return (sc2.operator == null && slot == sc2.slot && value == sc2.value);
-		else
-			return (operator.equals(sc2.operator) && slot == sc2.slot && value == sc2.value);
+	@Override public boolean equals(Object x) {
+		if (this == x) return true;
+		SlotCondition sc2 = (SlotCondition) x;
+		return (Objects.equals(operator, sc2.operator)) && slot == sc2.slot && value == sc2.value;
 	}
 
 	public Symbol getSlot() {
@@ -69,20 +69,22 @@ class SlotCondition {
 		}
 
 		if (operator == null)
-			return (testValue == bufferValue) || model.getDeclarative().isa(bufferValue, testValue);
+			return (testValue == bufferValue) || model.declarative.isa(bufferValue, testValue);
 		else if (operator.equals("-"))
-			return (testValue != bufferValue) && !model.getDeclarative().isa(bufferValue, testValue);
+			return (testValue != bufferValue) && !model.declarative.isa(bufferValue, testValue);
 		else {
-			double bufferNumber = Double.valueOf(bufferValue.getString());
-			double testNumber = Double.valueOf(testValue.getString());
-			if (operator.equals("<"))
-				return (bufferNumber < testNumber);
-			else if (operator.equals(">"))
-				return (bufferNumber > testNumber);
-			else if (operator.equals("<="))
-				return (bufferNumber <= testNumber);
-			else if (operator.equals(">="))
-				return (bufferNumber >= testNumber);
+			double bufferNumber = Double.parseDouble(bufferValue.getString());
+			double testNumber = Double.parseDouble(testValue.getString());
+			switch (operator) {
+				case "<":
+					return (bufferNumber < testNumber);
+				case ">":
+					return (bufferNumber > testNumber);
+				case "<=":
+					return (bufferNumber <= testNumber);
+				case ">=":
+					return (bufferNumber >= testNumber);
+			}
 		}
 		return false;
 	}
@@ -100,7 +102,7 @@ class SlotCondition {
 	 * 
 	 * @return the string
 	 */
-	public String toString(Instantiation inst, Vector<Symbol> used) {
+	public String toString(Instantiation inst, List<Symbol> used) {
 		String s = "      ";
 		if (operator != null)
 			s += operator + " ";

@@ -12,14 +12,13 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 class Menus extends JMenuBar {
-	private Actions actions;
-	private Preferences prefs;
-	private JMenu fileMenu, editMenu, runMenu, outputMenu;
+	private final Actions actions;
+	private final Preferences prefs;
+	private JMenu editMenu;
+	private JMenu runMenu;
+	private JMenu outputMenu;
 	private JMenu openRecentMenu;
-	private int accelerator = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-	private String appletFiles[] = { "U1Addition.actr", "U1Count.actr", "U1Semantic.actr", "U1Tutor.actr",
-			"U2Demo.actr", "U3Sperling.actr", "U4Paired.actr", "U5Fan.actr", "U5Grouped.actr", "U5Siegler.actr",
-			"U6BST.actr", "U7Paired.actr" };
+	private final int accelerator = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
 	Menus(Actions actions, Preferences prefs) {
 		this(actions, prefs, false);
@@ -29,7 +28,7 @@ class Menus extends JMenuBar {
 		this.actions = actions;
 		this.prefs = prefs;
 
-		fileMenu = new JMenu("File");
+		JMenu fileMenu = new JMenu("File");
 
 		if (Main.inApplication()) {
 			addToMenu(fileMenu, actions.newAction, KeyEvent.VK_N);
@@ -55,8 +54,10 @@ class Menus extends JMenuBar {
 			}
 		} else // Main.inApplet()
 		{
-			for (int i = 0; i < appletFiles.length; i++)
-				addToMenu(fileMenu, actions.createAppletFileAction(appletFiles[i]));
+			String[] appletFiles = {"U1Addition.actr", "U1Count.actr", "U1Semantic.actr", "U1Tutor.actr",
+				"U2Demo.actr", "U3Sperling.actr", "U4Paired.actr", "U5Fan.actr", "U5Grouped.actr", "U5Siegler.actr",
+				"U6BST.actr", "U7Paired.actr"};
+			for (String appletFile : appletFiles) addToMenu(fileMenu, actions.createAppletFileAction(appletFile));
 			fileMenu.addSeparator();
 			addToMenu(fileMenu, actions.closeAction, KeyEvent.VK_W);
 		}
@@ -106,7 +107,7 @@ class Menus extends JMenuBar {
 		updateOpenRecent();
 	}
 
-	void addToMenu(JMenu menu, Action action, int vk, int modifiers) {
+	static void addToMenu(JMenu menu, Action action, int vk, int modifiers) {
 		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(vk, modifiers));
 		JMenuItem item = new JMenuItem(action);
 		item.setIcon(null);
@@ -117,7 +118,7 @@ class Menus extends JMenuBar {
 		addToMenu(menu, action, vk, accelerator);
 	}
 
-	void addToMenu(JMenu menu, Action action) {
+	static void addToMenu(JMenu menu, Action action) {
 		JMenuItem item = new JMenuItem(action);
 		item.setIcon(null);
 		menu.add(item);
@@ -130,7 +131,7 @@ class Menus extends JMenuBar {
 		openRecentMenu.removeAll();
 		for (int i = 0; i < prefs.recentFiles.size(); i++) {
 			String filename = prefs.recentFiles.elementAt(i);
-			if (filename != null && !filename.equals("")) {
+			if (filename != null && !filename.isEmpty()) {
 				Action action = actions.createOpenRecentAction(new File(filename));
 				addToMenu(openRecentMenu, action, KeyEvent.VK_1 + i);
 			}

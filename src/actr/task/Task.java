@@ -1,14 +1,6 @@
 package actr.task;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Composite;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.Iterator;
@@ -48,7 +40,7 @@ import actr.model.Model;
  */
 public class Task extends JPanel {
 	private String name;
-	private Model model;
+	protected Model model;
 	private boolean showMouse;
 	private int mouseX, mouseY;
 	private boolean showAttention, showEye;
@@ -85,7 +77,7 @@ public class Task extends JPanel {
 	 */
 	public static Task createTaskInstance(String taskName) {
 		try {
-			Task task = (Task) (Class.forName(taskName).newInstance());
+			Task task = (Task) (Class.forName(taskName).getConstructor().newInstance());
 			task.name = (taskName.contains(".")) ? taskName.substring(taskName.lastIndexOf('.') + 1) : taskName;
 			return task;
 		} catch (Exception e) {
@@ -94,7 +86,7 @@ public class Task extends JPanel {
 	}
 
 	public static String[] allTaskClasses() {
-		Vector<String> strings = new Vector<String>();
+		Vector<String> strings = new Vector<>();
 		try {
 			File file = new File(Task.class.getResource("Task.class").toURI());
 			String tasks = file.getParentFile().getParent() + File.separator + "tasks";
@@ -108,12 +100,12 @@ public class Task extends JPanel {
 
 	static void allTasksHelper(File file, String prefix, Vector<String> strings) {
 		if (file.isDirectory()) {
-			String files[] = file.list();
+			String[] files = file.list();
 			if (files == null)
 				return;
-			for (int i = 0; i < files.length; i++)
-				allTasksHelper(new File(file.getPath() + File.separator + files[i]), prefix + file.getName() + ".",
-						strings);
+			for (String s : files)
+				allTasksHelper(new File(file.getPath() + File.separator + s), prefix + file.getName() + ".",
+					strings);
 		} else {
 			String name = file.getName();
 			if (!name.endsWith(".class") || name.contains("$"))
@@ -233,7 +225,7 @@ public class Task extends JPanel {
 	 *            the token iterator
 	 * @return the boolean value of the computed condition
 	 */
-	public boolean evalCondition(Iterator<String> it) {
+	public static boolean evalCondition(Iterator<String> it) {
 		return false;
 	}
 
@@ -248,7 +240,7 @@ public class Task extends JPanel {
 	 *            the token iterator
 	 * @return the double value of the eval binding
 	 */
-	public double bind(Iterator<String> it) {
+	public static double bind(Iterator<String> it) {
 		return 0;
 	}
 
@@ -269,7 +261,7 @@ public class Task extends JPanel {
 	 * and then re-adding all existing task components back into the model.
 	 */
 	public void processDisplay() {
-		model.getVision().clearVisual();
+		model.vision.clearVisual();
 		Component[] components = getComponents();
 		for (int i = 0; i < components.length; i++) {
 			Component c = components[i];
@@ -278,7 +270,7 @@ public class Task extends JPanel {
 				String id = tc.getKind() + i;
 				String type = tc.getKind();
 				String value = tc.getValue();
-				model.getVision().addVisual(id, type, value, centerX(c), centerY(c), c.getWidth(), c.getHeight());
+				model.vision.addVisual(id, type, value, centerX(c), centerY(c), c.getWidth(), c.getHeight());
 			}
 		}
 	}
@@ -294,7 +286,7 @@ public class Task extends JPanel {
 			if (c instanceof TaskComponent && c.isVisible()) {
 				TaskComponent tc = (TaskComponent) components[i];
 				String id = tc.getKind() + i;
-				model.getVision().moveVisual(id, centerX(c), centerY(c));
+				model.vision.moveVisual(id, centerX(c), centerY(c));
 			}
 		}
 	}
@@ -306,7 +298,7 @@ public class Task extends JPanel {
 	 *            the component
 	 * @return the center x coordinate
 	 */
-	public int centerX(Component c) {
+	public static int centerX(Component c) {
 		return c.getX() + c.getWidth() / 2;
 	}
 
@@ -317,7 +309,7 @@ public class Task extends JPanel {
 	 *            the component
 	 * @return the center y coordinate
 	 */
-	public int centerY(Component c) {
+	public static int centerY(Component c) {
 		return c.getY() + c.getHeight() / 2;
 	}
 
@@ -361,8 +353,7 @@ public class Task extends JPanel {
 	public void clickMouse() {
 		Point mousePoint = new Point(mouseX, mouseY);
 		Component[] components = getComponents();
-		for (int i = 0; i < components.length; i++) {
-			Component component = components[i];
+		for (Component component : components) {
 			if ((component instanceof TaskButton) && component.isVisible()) {
 				TaskButton taskButton = (TaskButton) component;
 				Rectangle bounds = component.getBounds();
@@ -440,7 +431,7 @@ public class Task extends JPanel {
 	 *            value)
 	 */
 	public void addAural(String id, String type, String content) {
-		model.getAudio().addAural(id, type, content);
+		model.audio.addAural(id, type, content);
 	}
 
 	/**
@@ -488,10 +479,11 @@ public class Task extends JPanel {
 	 *            the event
 	 */
 	public void addUpdate(final double timeDelta) {
-		model.addEvent(new actr.model.Event(model.getTime() + timeDelta, "task", "update") {
+		final double now = model.getTime();
+		model.addEvent(new actr.model.Event(now + timeDelta, "task", "update") {
 			@Override
 			public void action() {
-				update(model.getTime());
+				update(time);
 			}
 		});
 	}
@@ -504,8 +496,9 @@ public class Task extends JPanel {
 	 *            the period of the calls to the <tt>update()</tt> method
 	 */
 	public void addPeriodicUpdate(final double timeDelta) {
-		update(model.getTime());
-		model.addEvent(new actr.model.Event(model.getTime() + timeDelta, "task", "update") {
+		final double now = model.getTime();
+		update(now);
+		model.addEvent(new actr.model.Event(now + timeDelta, "task", "update") {
 			@Override
 			public void action() {
 				addPeriodicUpdate(timeDelta);
@@ -545,7 +538,7 @@ public class Task extends JPanel {
 		if (showAttention) {
 			g2d.setComposite(alphaComp);
 			g2d.setPaint(Color.yellow);
-			Ellipse2D.Double circle = new Ellipse2D.Double(attentionX - 20, attentionY - 20, 40, 40);
+			Shape circle = new Ellipse2D.Double(attentionX - 20, attentionY - 20, 40, 40);
 			g2d.fill(circle);
 			g2d.setComposite(oldComp);
 		}
@@ -553,7 +546,7 @@ public class Task extends JPanel {
 		if (showEye) {
 			g2d.setComposite(alphaComp);
 			g2d.setPaint(Color.blue);
-			Ellipse2D.Double circle = new Ellipse2D.Double(eyeX - 10, eyeY - 10, 20, 20);
+			Shape circle = new Ellipse2D.Double(eyeX - 10, eyeY - 10, 20, 20);
 			g2d.fill(circle);
 			g2d.setComposite(oldComp);
 		}

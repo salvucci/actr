@@ -1,10 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Procedural memory that holds skill knowledge represented as production rules.
@@ -12,15 +8,17 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Procedural extends Module {
-	private Model model;
-	private Map<Symbol, Production> productions;
-	private Vector<Instantiation> rewardFirings;
+	private final Model model;
+	private final Map<Symbol, Production> productions;
+	private final List<Instantiation> rewardFirings;
 	private Instantiation lastFiredInst;
-	private Map<Integer, Instantiation> lastFiredOnThread;
+	private final Map<Integer, Instantiation> lastFiredOnThread;
 
 	double actionTime = .050;
 	boolean variableProductionFiringTime = false;
 
+	boolean utilityUseThreshold = false;
+	double utilityThreshold = 0;
 	boolean utilityLearning = false;
 	double utilityNoiseS = 0;
 	double utilityLearningAlpha = 0.2;
@@ -30,6 +28,8 @@ public class Procedural extends Module {
 	double productionCompilationNewUtility = 0;
 	boolean productionCompilationAddUtilities = false;
 	boolean productionCompilationThreaded = true;
+	double finalInstUtility =0;
+	boolean microLapses = false;
 
 	boolean conflictSetTrace = false;
 	boolean whyNotTrace = false;
@@ -38,14 +38,14 @@ public class Procedural extends Module {
 
 	Procedural(Model model) {
 		this.model = model;
-		productions = new HashMap<Symbol, Production>();
-		rewardFirings = new Vector<Instantiation>();
+		productions = new HashMap<>();
+		rewardFirings = new Vector<>();
 		lastFiredInst = null;
-		lastFiredOnThread = new HashMap<Integer, Instantiation>();
+		lastFiredOnThread = new HashMap<>();
 	}
 
 	void add(Production p) {
-		productions.put(p.getName(), p);
+		productions.put(p.name, p);
 	}
 
 	/**
@@ -78,9 +78,7 @@ public class Procedural extends Module {
 	}
 
 	Production exists(Production p) {
-		Iterator<Production> it = productions.values().iterator();
-		while (it.hasNext()) {
-			Production ip = it.next();
+		for (Production ip : productions.values()) {
 			if (ip.equals(p))
 				return ip;
 		}
@@ -93,33 +91,54 @@ public class Procedural extends Module {
 	 * @return the last production to fire
 	 */
 	public Production getLastProductionFired() {
-		return lastFiredInst.getProduction();
+		return lastFiredInst.production;
+	}
+
+	public void setUtilityThreshold(double ut) {
+		utilityThreshold = ut;
+	}
+
+	public double getFatigueUtility() {
+		return initialUtility * model.fatigue.getFatigueFP();
+	}
+
+	public double getFinalInstUtility() {
+		return finalInstUtility;
+	}
+
+	public boolean isMicroLapse() {
+		return microLapses;
+	}
+
+	public double getFatigueUtilityThreshold() {
+		return model.fatigue.getFatigueUT();
 	}
 
 	void findInstantiations(final Buffers buffers) {
+		final Fatigue fatigue = model.fatigue;
+		if (fatigue.isFatigueEnabled()){
+			fatigue.update(); // update the FP and UT values in case of the fatigue mechanism
+		}
 		// if (model.verboseTrace) model.output ("procedural",
 		// "conflict-resolution");
 		buffers.removeDecayedChunks();
 
-		HashSet<Instantiation> set = new HashSet<Instantiation>();
+		HashSet<Instantiation> set = new HashSet<>();
 		buffers.sortGoals();
 
-		if (buffers.numGoals() == 0) {
-			Iterator<Production> it = productions.values().iterator();
-			while (it.hasNext()) {
-				Production p = it.next();
+		final int goals = buffers.numGoals();
+		if (goals == 0) {
+			for (Production p : productions.values()) {
 				Instantiation inst = p.instantiate(buffers);
 				if (inst != null)
 					set.add(inst);
 			}
 		} else {
-			for (int i = 0; set.isEmpty() && i < buffers.numGoals(); i++) {
+			for (int i = 0; set.isEmpty() && i < goals; i++) {
 				buffers.tryGoal(i);
 				if (threadedCognitionTrace)
 					model.output("*** (tct) trying goal " + buffers.get(Symbol.goal));
-				Iterator<Production> it = productions.values().iterator();
-				while (it.hasNext()) {
-					Production p = it.next();
+				for (Production p : productions.values()) {
 					Instantiation inst = p.instantiate(buffers);
 					if (inst != null)
 						set.add(inst);
@@ -146,51 +165,99 @@ public class Procedural extends Module {
 			}
 
 			final Instantiation finalInst = highestU;
-			if (conflictSetTrace)
-				model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
+			finalInstUtility = finalInst.getUtility();
+
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// highestU.getUtility() + "----" );
+
+			// Scaling the instantiation production which has the highest
+			// utility
+			// with the fp parameter which is a representative of fatigue in the
+			// model
+			// highestU.setUtility(highestU.getUtility()
+			// * model.getFatigue().fatigue_fp);
+
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " u: " +
+			// (highestU.getUtility()* model.getFatigue().compute_fp() +
+			// Utilities.getNoise(model.getProcedural().utilityNoiseS))
+			// + "----" );
+			// System.out.println(model.getTime() + " " +
+			// highestU.getProduction().getName() + " ut: " +
+			// (model.getFatigue().compute_ft()*model.getProcedural().utilityThreshold)
+			// + "----" );
 
 			double realActionTime = actionTime;
 			if (model.randomizeTime && variableProductionFiringTime)
 				realActionTime = model.randomizeTime(realActionTime);
 
-			if (finalInst.getProduction().isBreakPoint()) {
-				model.addEvent(new Event(model.getTime() + (realActionTime - .001), "procedural",
-						"about to fire " + finalInst.getProduction().getName().getString().toUpperCase()) {
-					@Override
+//			if (model.getFatigue().isFatigueEnabled() )  // for debugging fatigue
+//				if (model.verboseTrace)
+//					model.output("fatigue", "u:" + finalInst.getUtility()+ " dec:" + model.getFatigue().getFatigueFPPercent() + " ut:" + model.getFatigue().getFatigueUT());
+
+			if (fatigue.isFatigueEnabled() &&
+					finalInst.getUtility() < ( fatigue.getFatigueUT())) {
+				microLapses = true;
+
+				if (fatigue.isRunWithUtilityDecrement()){ // NEW for fatigue: decrement happens only for wait production
+					fatigue.decrementFPFD();  // Anytime there is a microlapse, the fp-percent and fd-percent are decremented
+				}
+
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+						"[no rule fired, utility below threshold] [microlapse] "
+						+ "[u:" + String.format("%.2f", finalInst.getUtility())
+						+ " ut:" + String.format("%.2f", fatigue.getFatigueUT()) + "]") {
 					public void action() {
-						model.output("------", "break");
-						model.stop();
+						findInstantiations(buffers);
+					}
+				});
+			} else {
+				microLapses = false;
+				if (conflictSetTrace)
+					model.output("-> (" + String.format("%.3f", finalInst.getUtility()) + ") " + finalInst);
+
+				if (finalInst.production.isBreakPoint()) {
+					model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+							"about to fire " + finalInst.production.name.getString().toUpperCase()) {
+						public void action() {
+							model.output("------", "break");
+							model.stop();
+						}
+					});
+				}
+
+				String extra = "";
+				if (goals > 1) {
+					Chunk goal = buffers.get(Symbol.goal);
+					extra = " [" + ((goal != null) ? goal.name().getString() : "nil") + "]";
+				}
+
+				// model.addEvent(new Event(model.getTime() + .050 ,
+				// model.addEvent(new Event(model.getTime() + (realActionTime -
+				// .001), "procedural",
+				model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
+						"** " + finalInst.production.name.getString().toUpperCase() + " **" + extra) {
+					public void action() {
+
+						fire(finalInst, buffers);
+						findInstantiations(buffers);
 					}
 				});
 			}
-
-			String extra = "";
-			if (buffers.numGoals() > 1) {
-				Chunk goal = buffers.get(Symbol.goal);
-				extra = " [" + ((goal != null) ? goal.getName().getString() : "nil") + "]";
-			}
-
-			model.addEvent(new Event(model.getTime() + realActionTime, "procedural",
-					"** " + finalInst.getProduction().getName().getString().toUpperCase() + " **" + extra) {
-				@Override
-				public void action() {
-					fire(finalInst, buffers);
-					findInstantiations(buffers);
-				}
-			});
 		}
 	}
 
 	void fire(Instantiation inst, Buffers buffers) {
-		inst.getProduction().fire(inst);
+		inst.production.fire(inst);
 		model.update();
 
 		if (productionLearning) {
 			Instantiation lastFired = (!productionCompilationThreaded) ? lastFiredInst
-					: lastFiredOnThread.get(new Integer(inst.getThreadID()));
+					: lastFiredOnThread.get(inst.getThreadID());
 
-			if (lastFired != null && inst.getTime()
-					- lastFired.getTime() > model.getProcedural().productionCompilationThresholdTime) {
+			if (lastFired != null && inst.time
+					- lastFired.time > model.procedural.productionCompilationThresholdTime) {
 				if (productionCompilationTrace)
 					model.output("*** (pct) no compilation: too much time between firings");
 			} else if (lastFired != null) {
@@ -202,23 +269,23 @@ public class Procedural extends Module {
 						double alpha = utilityLearningAlpha;
 
 						if (productionCompilationAddUtilities) {
-							double sum = lastFired.getProduction().getUtility() + inst.getProduction().getUtility();
+							double sum = lastFired.production.getUtility() + inst.production.getUtility();
 							oldp.setUtility(oldp.getUtility() + alpha * (sum - oldp.getUtility()));
 						} else {
 							oldp.setUtility(oldp.getUtility()
-									+ alpha * (lastFired.getProduction().getUtility() - oldp.getUtility()));
+									+ alpha * (lastFired.production.getUtility() - oldp.getUtility()));
 						}
 
 						if (productionCompilationTrace)
-							model.output("*** (pct) strengthening " + oldp.getName() + " [u="
+							model.output("*** (pct) strengthening " + oldp.name + " [u="
 									+ String.format("%.3f", oldp.getUtility()) + "]");
 					} else {
-						model.getProcedural().add(newp);
+						model.procedural.add(newp);
 						if (productionCompilationTrace) {
 							model.output("\n*** (pct)\n");
-							model.output("" + lastFired.getProduction().toString(lastFired));
-							model.output("" + inst.getProduction().toString(inst));
-							model.output("" + newp);
+							model.output(lastFired.production.toString(lastFired));
+							model.output(inst.production.toString(inst));
+							model.output(String.valueOf(newp));
 							// model.output
 							// ("*** (pct) new production:\n"+newp);
 						}
@@ -234,28 +301,28 @@ public class Procedural extends Module {
 		}
 
 		lastFiredInst = inst;
-		lastFiredOnThread.put(new Integer(inst.getThreadID()), inst);
+		lastFiredOnThread.put(inst.getThreadID(), inst);
 
 		if (utilityLearning) {
 			rewardFirings.add(inst);
 			if (rewardFirings.size() > 100)
-				rewardFirings.removeElementAt(0);
+				rewardFirings.remove(0);
 		}
-		if (utilityLearning && inst.getProduction().hasReward()) {
-			adjustUtilities(inst.getProduction().getReward());
+		if (utilityLearning && inst.production.hasReward()) {
+			adjustUtilities(inst.production.getReward());
 			rewardFirings.clear();
 		}
 	}
 
 	void adjustUtilities(double reward) {
 		double alpha = utilityLearningAlpha;
-		for (int i = 0; i < rewardFirings.size(); i++) {
-			Instantiation inst = rewardFirings.elementAt(i);
-			Production p = inst.getProduction();
-			double pReward = reward - (model.getTime() - inst.getTime());
-			p.setUtility(p.getUtility() + alpha * (pReward - p.getUtility()));
-			// model.output ("*** "+ p.getName() + " : " + p.getUtility());
-		}
+		int ff = rewardFirings.size();
+        for (Instantiation inst : rewardFirings) {
+			Production p = inst.production;
+			double pReward = reward - (model.getTime() - inst.time);
+            p.setUtility(p.getUtility() + alpha * (pReward - p.getUtility()));
+            // model.output ("*** "+ p.getName() + " : " + p.getUtility());
+        }
 	}
 
 	/**
@@ -267,9 +334,7 @@ public class Procedural extends Module {
 	@Override
 	public String toString() {
 		String s = "";
-		Iterator<Production> it = productions.values().iterator();
-		while (it.hasNext())
-			s += it.next() + "\n";
+		for (Production production : productions.values()) s += production + "\n";
 		return s;
 	}
 }

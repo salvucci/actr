@@ -19,27 +19,27 @@ public class U5Fan extends Task {
 	int tupleIndex = 0;
 	String response = null;
 	double responseTime = 0;
-	String[][] tuples = { { "lawyer", "store", "t" }, { "captain", "cave", "t" }, { "hippie", "church", "t" },
+	final String[][] tuples = { { "lawyer", "store", "t" }, { "captain", "cave", "t" }, { "hippie", "church", "t" },
 			{ "debutante", "bank", "t" }, { "earl", "castle", "t" }, { "hippie", "bank", "t" },
 			{ "fireman", "park", "t" }, { "captain", "park", "t" }, { "hippie", "park", "t" },
 			{ "fireman", "store", "nil" }, { "captain", "store", "nil" }, { "giant", "store", "nil" },
 			{ "fireman", "bank", "nil" }, { "captain", "bank", "nil" }, { "giant", "bank", "nil" },
 			{ "lawyer", "park", "nil" }, { "earl", "park", "nil" }, { "giant", "park", "nil" } };
-	boolean correct[] = new boolean[tuples.length];
-	double rts[] = new double[tuples.length];
+	final boolean[] correct = new boolean[tuples.length];
+	final double[] rts = new double[tuples.length];
 
 	public U5Fan() {
 		super();
 		setLayout(null);
 
-		String words[] = { "The", "person", "is", "in", "the", "location" };
+		String[] words = { "The", "person", "is", "in", "the", "location" };
 		int x = 15; // 25;
-		for (int i = 0; i < words.length; i++) {
-			TaskLabel label = new TaskLabel(words[i], x, 150, 75, 20);
+		for (String word : words) {
+			TaskLabel label = new TaskLabel(word, x, 150, 75, 20);
 			add(label);
-			if (words[i].equals("person"))
+			if (word.equals("person"))
 				personLabel = label;
-			else if (words[i].equals("location"))
+			else if (word.equals("location"))
 				locationLabel = label;
 			x += 75;
 		}
@@ -87,13 +87,13 @@ public class U5Fan extends Task {
 
 	@Override
 	public void typeKey(char c) {
-		response = c + "";
+		response = String.valueOf(c);
 		responseTime = getModel().getTime() - lastTime;
 	}
 
 	// --- Analysis Code ---//
 
-	final double humanTimes[] = { 1.11, 1.17, 1.22, 1.17, 1.20, 1.22, 1.15, 1.23, 1.36, 1.20, 1.22, 1.26, 1.25, 1.36,
+	final double[] humanTimes = { 1.11, 1.17, 1.22, 1.17, 1.20, 1.22, 1.15, 1.23, 1.36, 1.20, 1.22, 1.26, 1.25, 1.36,
 			1.29, 1.26, 1.47, 1.47 };
 
 	@Override
@@ -104,9 +104,9 @@ public class U5Fan extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		double[] modelTimes = new double[tuples.length];
-		double counts[] = new double[tuples.length];
-		for (int n = 0; n < tasks.length; n++) {
-			U5Fan task = (U5Fan) tasks[n];
+		double[] counts = new double[tuples.length];
+		for (Task value : tasks) {
+			U5Fan task = (U5Fan) value;
 			for (int i = 0; i < task.rts.length; i++)
 				if (task.correct[i]) {
 					modelTimes[i] += task.rts[i];

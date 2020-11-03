@@ -6,10 +6,10 @@ package actr.model;
  * @author Dario Salvucci
  */
 class SlotAction {
-	private Model model;
+	private final Model model;
 	private Symbol slot;
 	private Symbol value;
-	private String operator;
+	public final String operator;
 
 	SlotAction(String operator, Symbol slot, Symbol value, Model model) {
 		this.operator = operator;
@@ -26,12 +26,10 @@ class SlotAction {
 		return new SlotAction(operator, slot, value, model);
 	}
 
-	public boolean equals(SlotAction sa2) {
+	@Override public boolean equals(Object x) {
+		if (this == x) return true;
+		SlotAction sa2 = (SlotAction) x;
 		return (slot == sa2.slot && value == sa2.value);
-	}
-
-	public String getOperator() {
-		return operator;
 	}
 
 	public Symbol getSlot() {

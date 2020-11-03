@@ -1,7 +1,10 @@
 package actr.model;
 
+import actr.task.Task;
+
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Actions performed on a buffer as specified in the (right-hand) action side of
@@ -10,32 +13,29 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 class BufferAction {
-	private Model model;
+	public final Model model;
 	private char prefix;
-	private Symbol buffer;
-	private Vector<SlotAction> slotActions;
+	public final Symbol buffer;
+	private final List<SlotAction> slotActions = new ArrayList();
 	private Symbol directAction;
 	private Symbol bind;
-	private Vector<String> specials;
+	private final List<String> specials = new ArrayList();
 
 	BufferAction(char prefix, Symbol buffer, Model model) {
 		this.prefix = prefix;
 		this.buffer = buffer;
 		this.model = model;
-		slotActions = new Vector<SlotAction>();
 		directAction = null;
 		bind = null;
-		specials = new Vector<String>();
 	}
 
 	BufferAction copy() {
 		BufferAction ba = new BufferAction(prefix, buffer, model);
 		for (int i = 0; i < slotActions.size(); i++)
-			ba.slotActions.add(slotActions.elementAt(i).copy());
+			ba.slotActions.add(slotActions.get(i).copy());
 		ba.directAction = directAction;
 		ba.bind = bind;
-		for (int i = 0; i < specials.size(); i++)
-			ba.specials.add(specials.elementAt(i));
+		ba.specials.addAll(specials);
 		return ba;
 	}
 
@@ -47,24 +47,27 @@ class BufferAction {
 	 * @return <tt>true</tt> if the two buffer actions are the same, or
 	 *         <tt>false</tt> otherwise
 	 */
-	public boolean equals(BufferAction ba2) {
+	@Override public boolean equals(Object x) {
+		if (this == x)
+			return true;
+		BufferAction ba2 = (BufferAction) x;
 		if (prefix != ba2.prefix)
 			return false;
 		if (buffer != ba2.buffer)
 			return false;
 		if (slotActions.size() != ba2.slotActions.size())
 			return false;
-		for (int i = 0; i < slotActions.size(); i++)
-			if (!slotActions.elementAt(i).equals(ba2.slotActions.elementAt(i)))
-				return false;
 		if (directAction != ba2.directAction)
 			return false;
 		if (bind != ba2.bind)
 			return false;
 		if (specials.size() != ba2.specials.size())
 			return false;
+		for (int i = 0; i < slotActions.size(); i++)
+			if (!slotActions.get(i).equals(ba2.slotActions.get(i)))
+				return false;
 		for (int i = 0; i < specials.size(); i++)
-			if (!specials.elementAt(i).equals(ba2.specials.elementAt(i)))
+			if (!specials.get(i).equals(ba2.specials.get(i)))
 				return false;
 		return true;
 	}
@@ -76,15 +79,6 @@ class BufferAction {
 	 */
 	public char getPrefix() {
 		return prefix;
-	}
-
-	/**
-	 * Gets the buffer name associated with this buffer action.
-	 * 
-	 * @return the buffer name
-	 */
-	public Symbol getBuffer() {
-		return buffer;
 	}
 
 	/**
@@ -104,7 +98,7 @@ class BufferAction {
 	 * @return the slot action at the given index
 	 */
 	public SlotAction getSlotAction(int i) {
-		return slotActions.elementAt(i);
+		return slotActions.get(i);
 	}
 
 	/**
@@ -125,9 +119,9 @@ class BufferAction {
 	 *         not present
 	 */
 	public SlotAction getSlotAction(Symbol slot) {
-		for (int i = 0; i < slotActions.size(); i++)
-			if (slotActions.elementAt(i).getSlot() == slot)
-				return slotActions.elementAt(i);
+		for (SlotAction slotAction : slotActions)
+			if (slotAction.getSlot() == slot)
+				return slotAction;
 		return null;
 	}
 
@@ -152,8 +146,8 @@ class BufferAction {
 	 *          any slot action, and <tt>false</tt> otherwise
 	 */
 	public boolean hasSlotValue(Symbol value) {
-		for (int i = 0; i < slotActions.size(); i++)
-			if (slotActions.elementAt(i).getValue() == value)
+		for (SlotAction slotAction : slotActions)
+			if (slotAction.getValue() == value)
 				return true;
 		return false;
 	}
@@ -201,16 +195,16 @@ class BufferAction {
 	}
 
 	private void storeInMemory(Symbol buffer, Instantiation inst, boolean forceVisual) {
-		Chunk bufferChunk = model.getBuffers().get(buffer);
+		Chunk bufferChunk = model.buffers.get(buffer);
 		if (bufferChunk != null && (forceVisual || ((buffer != Symbol.visloc && buffer != Symbol.aurloc
 				&& buffer != Symbol.visual && buffer != Symbol.aural)))) {
 			if (model.verboseTrace)
-				model.output("declarative", "store chunk [" + bufferChunk.getName() + "] " + bufferChunk);
-			Chunk newChunk = model.getDeclarative().add(bufferChunk);
+				model.output("declarative", "store chunk [" + bufferChunk.name() + "] " + bufferChunk);
+			Chunk newChunk = model.declarative.add(bufferChunk);
 			if (newChunk != bufferChunk && model.verboseTrace)
-				model.output("declarative", "merged into [" + newChunk.getName() + "]");
+				model.output("declarative", "merged into [" + newChunk.name() + "]");
 			if (newChunk != bufferChunk)
-				inst.replaceValue(bufferChunk.getName(), newChunk.getName());
+				inst.replaceValue(bufferChunk.name(), newChunk.name());
 		}
 	}
 
@@ -221,50 +215,49 @@ class BufferAction {
 				model.outputWarning(directAction + " not a valid symbol");
 				return;
 			}
-			Chunk direct = model.getDeclarative().get(directSymbol);
+			Chunk direct = model.declarative.get(directSymbol);
 			if (direct == null)
-				direct = model.getBuffers().getBufferChunk(directSymbol);
+				direct = model.buffers.getBufferChunk(directSymbol);
 			if (direct == null) {
 				model.outputWarning(directAction + " -> " + directSymbol + " not a valid chunk");
 				return;
 			}
 			direct = direct.copy();
 			direct.setRequest(true);
-			model.getBuffers().set(buffer, direct);
+			model.buffers.set(buffer, direct);
 		} else if (prefix == '=') {
-			Chunk bufferChunk = model.getBuffers().get(buffer); // inst.get
+			Chunk bufferChunk = model.buffers.get(buffer); // inst.get
 																// (Symbol.get("="+buffer));
 			if (bufferChunk == null) {
 				model.outputWarning(buffer + " empty, not referenced in LHS?");
 				return;
 			}
-			for (int i = 0; i < slotActions.size(); i++)
-				slotActions.elementAt(i).fire(inst, bufferChunk);
+			for (SlotAction slotAction : slotActions) slotAction.fire(inst, bufferChunk);
 		} else if (prefix == '+') {
-			if (model.getDeclarative().addChunkOnNewRequest)
+			if (model.declarative.addChunkOnNewRequest)
 				storeInMemory(buffer, inst, false);
 			Chunk requestChunk = new Chunk(Symbol.getUnique("chunk"), model);
-			for (int i = 0; i < slotActions.size(); i++)
-				slotActions.elementAt(i).fire(inst, requestChunk);
+			for (SlotAction slotAction : slotActions) slotAction.fire(inst, requestChunk);
 			Symbol chunkType = requestChunk.get(Symbol.get("isa"));
 			if (chunkType != Symbol.nil)
 				requestChunk.setName(Symbol.getUnique(chunkType.getString()));
 			requestChunk.setRequest(true);
-			model.getBuffers().set(buffer, requestChunk);
+			model.buffers.set(buffer, requestChunk);
 		} else if (prefix == '-') {
 			storeInMemory(buffer, inst, true);
-			model.getBuffers().clear(buffer);
+			model.buffers.clear(buffer);
 		} else if (prefix == '!') {
-			Vector<String> tokens = new Vector<String>();
+			List<String> tokens = new ArrayList<>();
 			String s = "";
-			for (int i = 0; i < specials.size(); i++) {
-				String special = specials.elementAt(i);
+			int ss = specials.size();
+			for (int i = 0; i < ss; i++) {
+				String special = specials.get(i);
 				if (Symbol.get(special).isVariable()) {
 					Symbol value = inst.get(Symbol.get(special));
 					special = (value == null) ? "<unbound variable>" : value.getString();
 				}
 				tokens.add(special);
-				s += special + ((i == specials.size() - 1) ? "" : " ");
+				s += special + ((i == ss - 1) ? "" : " ");
 			}
 			if (buffer == Symbol.get("output")) {
 				if (s.length() >= 3)
@@ -273,11 +266,9 @@ class BufferAction {
 					model.output(s);
 			} else if (buffer == Symbol.get("bind")) {
 				try {
-					double value = Utilities.evalCompute(tokens.iterator());
-					inst.set(bind, Symbol.get(value));
+					inst.set(bind, Symbol.get(Utilities.evalCompute(tokens.iterator())));
 				} catch (Exception e) {
-					double value = model.getTask().bind(tokens.iterator());
-					inst.set(bind, Symbol.get(value));
+					inst.set(bind, Symbol.get(Task.bind(tokens.iterator())));
 				}
 			} else {
 				try {
@@ -290,17 +281,16 @@ class BufferAction {
 	}
 
 	void specialize(Symbol variable, Symbol value) {
-		for (int i = 0; i < slotActions.size(); i++)
-			slotActions.elementAt(i).specialize(variable, value);
+		for (SlotAction slotAction : slotActions) slotAction.specialize(variable, value);
 	}
 
 	void expandDirectAction(Instantiation inst) {
 		if (directAction == null)
 			return;
 		Symbol name = inst.get(directAction);
-		Chunk chunk = model.getDeclarative().get(name);
+		Chunk chunk = model.declarative.get(name);
 		if (chunk == null)
-			chunk = model.getBuffers().getBufferChunk(name);
+			chunk = model.buffers.getBufferChunk(name);
 		// when used for production compilation, expansion doesn't always have
 		// the chunk in the buffer!
 		// (particularly for the first production in compilation, which fired
@@ -327,8 +317,7 @@ class BufferAction {
 		String s = "";
 		if (directAction == null) {
 			s += "   " + prefix + buffer + ">\n";
-			for (int i = 0; i < slotActions.size(); i++)
-				s += slotActions.elementAt(i) + "\n";
+			for (SlotAction slotAction : slotActions) s += slotAction + "\n";
 		} else
 			s += "   " + prefix + buffer + "> " + directAction + "\n";
 		return s;

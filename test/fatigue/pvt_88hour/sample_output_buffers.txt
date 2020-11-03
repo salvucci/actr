@@ -1,0 +1,170 @@
+Buffers:
+goal             : (goal isa goal state wait)
+
+States:
+?temporal        : (temporal-state isa buffer-state buffer empty state free)
+?imaginal        : (imaginal-state isa buffer-state buffer empty state free)
+?vocal           : (vocal-state isa buffer-state state free)
+?aural           : (aural-state isa buffer-state buffer empty state free)
+?visual          : (visual-state isa buffer-state buffer empty state free)
+?aural-location  : (aurloc-state isa buffer-state buffer empty state free)
+?retrieval       : (retrieval-state isa buffer-state buffer empty state free)
+?manual          : (manual-state isa buffer-state buffer empty preparation free execution free where keyboard processor free state free)
+?visual-location : (visloc-state isa buffer-state buffer empty state free)
+
+Goals:
+(goal isa goal state wait)
+
+Sleep attack at session time  ==> 69.27950035999493 model time :8877.664833775274
+Stimulus index in the session ==> 2
+Buffers:
+goal             : (goal isa goal state wait)
+
+States:
+?temporal        : (temporal-state isa buffer-state buffer empty state free)
+?imaginal        : (imaginal-state isa buffer-state buffer empty state free)
+?vocal           : (vocal-state isa buffer-state state free)
+?aural           : (aural-state isa buffer-state buffer empty state free)
+?visual          : (visual-state isa buffer-state buffer empty state free)
+?aural-location  : (aurloc-state isa buffer-state buffer empty state free)
+?retrieval       : (retrieval-state isa buffer-state buffer empty state free)
+?manual          : (manual-state isa buffer-state buffer empty preparation free execution free where keyboard processor free state free)
+?visual-location : (visloc-state isa buffer-state buffer empty state free)
+
+Goals:
+(goal isa goal state wait)
+
+Sleep attack at session time  ==> 141.17834153279 model time :8949.56367494807
+Stimulus index in the session ==> 4
+Buffers:
+goal             : (goal isa goal state wait)
+
+States:
+?temporal        : (temporal-state isa buffer-state buffer empty state free)
+?imaginal        : (imaginal-state isa buffer-state buffer empty state free)
+?vocal           : (vocal-state isa buffer-state state free)
+?aural           : (aural-state isa buffer-state buffer empty state free)
+?visual          : (visual-state isa buffer-state buffer empty state free)
+?aural-location  : (aurloc-state isa buffer-state buffer empty state free)
+?retrieval       : (retrieval-state isa buffer-state buffer empty state free)
+?manual          : (manual-state isa buffer-state buffer empty preparation free execution free where keyboard processor free state free)
+?visual-location : (visloc-state isa buffer-state buffer empty state free)
+
+Goals:
+(goal isa goal state wait)
+
+Sleep attack at session time  ==> 175.45716150571752 model time :8983.842494920997
+Stimulus index in the session ==> 5
+Buffers:
+goal             : (goal isa goal state wait)
+
+States:
+?temporal        : (temporal-state isa buffer-state buffer empty state free)
+?imaginal        : (imaginal-state isa buffer-state buffer empty state free)
+?vocal           : (vocal-state isa buffer-state state free)
+?aural           : (aural-state isa buffer-state buffer empty state free)
+?visual          : (visual-state isa buffer-state buffer empty state free)
+?aural-location  : (aurloc-state isa buffer-state buffer empty state free)
+?retrieval       : (retrieval-state isa buffer-state buffer empty state free)
+?manual          : (manual-state isa buffer-state buffer empty preparation free execution free where keyboard processor free state free)
+?visual-location : (visloc-state isa buffer-state buffer empty state free)
+
+Goals:
+(goal isa goal state wait)
+
+Sleep attack at session time  ==> 225.8248162835098 model time :9034.210149698789
+Stimulus index in the session ==> 7
+Buffers:
+goal             : (goal isa goal state wait)
+
+States:
+?temporal        : (temporal-state isa buffer-state buffer empty state free)
+?imaginal        : (imaginal-state isa buffer-state buffer empty state free)
+?vocal           : (vocal-state isa buffer-state state free)
+?aural           : (aural-state isa buffer-state buffer empty state free)
+?visual          : (visual-state isa buffer-state buffer empty state free)
+?aural-location  : (aurloc-state isa buffer-state buffer empty state free)
+?retrieval       : (retrieval-state isa buffer-state buffer empty state free)
+?manual          : (manual-state isa buffer-state buffer empty preparation busy execution free where keyboard processor busy state busy)
+?visual-location : (visloc-state isa buffer-state buffer empty state free)
+
+Goals:
+(goal isa goal state wait)
+
+False alert happened - Session: 13 Block:1   time of session : 226.03497905366748
+******* The Reslut Based on the Sessions **********
+
+Time Awake      	0.5	2.5	4.5	6.5	8.5	10.5	12.5	14.5	16.5	18.5	20.5	22.5	24.5	
+
+Lapses %        	5.36	12.12	12.90	3.70	7.50	3.92	17.50	10.71	23.81	30.00	25.00	30.00	11.76	
+FalseStarts %   	.00	.00	.00	.00	.00	.00	.00	.00	.00	.00	.00	.00	.00	
+Alert RT %      	78.57	51.52	45.16	40.74	62.50	78.43	57.50	39.29	4.76	.00	.00	.00	.00	
+Sleep Attacks % 	16.07	36.36	41.94	55.56	30.00	17.65	25.00	50.00	71.43	70.00	75.00	70.00	88.24	
+Median Alert RT 	279.01	252.75	292.39	293.35	258.86	270.45	276.83	298.07	413.08	.00	.00	.00	.00	
+LSNR_apx        	12.92	12.17	10.45	12.06	12.78	12.99	11.04	10.53	2.34	.55	.48	.42	.27	
+
+Session1	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	265.40		6.25	.00	.00	.00	.00	.00
+		Block2	324.33		4.17	.00	.00	.00	.00	.00
+
+
+Session2	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	247.80		13.04	.00	.00	.00	.00	.00
+		Block2	448.25		10.00	.00	.00	.00	.00	.00
+
+
+Session3	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	292.39		15.00	.00	.00	.00	.00	.00
+		Block2	377.67		9.09	.00	.00	.00	.00	.00
+
+
+Session4	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	293.35		.00	.00	.00	.00	.00	.00
+		Block2	342.69		9.09	.00	.00	.00	.00	.00
+
+
+Session5	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	254.28		6.90	.00	.00	.00	.00	.00
+		Block2	433.23		9.09	.00	.00	.00	.00	.00
+
+
+Session6	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	265.18		2.70	.00	.00	.00	.00	.00
+		Block2	328.42		7.14	.00	.00	.00	.00	.00
+
+
+Session7	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	276.83		13.64	.00	.00	.00	.00	.00
+		Block2	313.81		22.22	.00	.00	.00	.00	.00
+
+
+Session8	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	298.07		6.25	.00	.00	.00	.00	.00
+		Block2	343.53		16.67	.00	.00	.00	.00	.00
+
+
+Session9	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	413.08		33.33	.00	.00	.00	.00	.00
+		Block2	.00		11.11	.00	.00	.00	.00	.00
+
+
+Session10	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	.00		30.00	.00	.00	.00	.00	.00
+		Block2	.00		30.00	.00	.00	.00	.00	.00
+
+
+Session11	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	.00		10.00	.00	.00	.00	.00	.00
+		Block2	.00		40.00	.00	.00	.00	.00	.00
+
+
+Session12	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	.00		40.00	.00	.00	.00	.00	.00
+		Block2	.00		20.00	.00	.00	.00	.00	.00
+
+
+Session13	Block# 	Alert RT Medain	%L Mean	%L SD 	%L 95CI	%FS Mean%FS SD	%FS 95CI
+		Block1	.00		22.22	.00	.00	.00	.00	.00
+		Block2	.00		.00	.00	.00	.00	.00	.00
+
+

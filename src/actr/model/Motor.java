@@ -1,9 +1,6 @@
 package actr.model;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * The motor module representing ACT-R's manual movements.
@@ -11,14 +8,14 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Motor extends Module {
-	private Model model;
+	private final Model model;
 	private Chunk lastMovement;
 	private double lastMovementTime;
 	private int mx, my;
-	private Map<String, Point> keys;
-	private Map<String, String> keycmds;
+	private final Map<String, Point> keys;
+	private final Map<String, String> keycmds;
 	private Point leftHand, rightHand;
-	private Vector<Chunk> queuedMovements;
+	private final List<Chunk> queuedMovements;
 
 	double featurePrepTime = .050;
 	double movementInitiationTime = .050;
@@ -28,8 +25,11 @@ public class Motor extends Module {
 	double minFittsTime = .100;
 	double defaultTargetWidth = 1.0;
 
-	final double keyClosureTime = .010;
-	final double maxPrepTimeDifference = 5.0; // new XXX was 10.0
+	static final double keyClosureTime = .010;
+//	static final double maxPrepTimeDifference = 5.0; // new XXX was 10.0
+final double maxPrepTimeDifference = 5.0; // new XXX was 10.0 (change from 5 to 10
+										// by Ehsan for fatigue module)
+
 	final Point leftHomeKey = new Point(4, 4);
 	final Point rightHomeKey = new Point(7, 4);
 	final Point mouseKey = new Point(28, 2);
@@ -38,21 +38,21 @@ public class Motor extends Module {
 		this.model = model;
 		lastMovement = null;
 		mx = my = 0;
-		keys = new HashMap<String, Point>();
-		keycmds = new HashMap<String, String>();
+		keys = new HashMap<>();
+		keycmds = new HashMap<>();
 		leftHand = leftHomeKey;
 		rightHand = rightHomeKey;
-		queuedMovements = new Vector<Chunk>();
+		queuedMovements = new ArrayList<>();
 		populateKeys();
 		populateKeyCommands();
 	}
 
 	@Override
-	void initialize() {
+	public void initialize() {
 		// model.getTask().moveMouse (mx, my);
 	}
 
-	private class Point {
+	private static class Point {
 		int x, y;
 
 		Point(int x, int y) {
@@ -64,7 +64,9 @@ public class Motor extends Module {
 			return new Point(x, y);
 		}
 
-		boolean equals(Point p2) {
+		@Override public boolean equals(Object z) {
+			if (this == z) return true;
+			Point p2 = (Point) z;
 			return (x == p2.x && y == p2.y);
 		}
 
@@ -85,10 +87,7 @@ public class Motor extends Module {
 		}
 
 		double angleTo(Point to) {
-			if (distanceTo(to) == 0)
-				return 0;
-			else
-				return Math.atan2(to.y - y, to.x - x);
+			return distanceTo(to) == 0 ? 0 : Math.atan2(to.y - y, to.x - x);
 		}
 
 		@Override
@@ -99,17 +98,21 @@ public class Motor extends Module {
 
 	void moveHandToMouse() {
 		rightHand = mouseKey;
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.where, Symbol.mouse);
+		model.buffers.setSlot(Symbol.manualState, Symbol.where, Symbol.mouse);
 	}
 
 	void moveHandToHome() {
 		rightHand = rightHomeKey;
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.where, Symbol.keyboard);
+		model.buffers.setSlot(Symbol.manualState, Symbol.where, Symbol.keyboard);
 	}
 
 	private class IncrementalMove {
-		int startx, starty, endx, endy;
-		double startTime, endTime;
+		final int startx;
+		final int starty;
+		final int endx;
+		final int endy;
+		final double startTime;
+		final double endTime;
 		int fracIndex;
 
 		IncrementalMove(double execTime, int startx, int starty, int endx, int endy) {
@@ -161,7 +164,7 @@ public class Motor extends Module {
 		return n;
 	}
 
-	private final double cumulative[] = { 0.000, 0.063, 0.269, 0.506, 0.697, 0.826, 0.905, 0.950, 0.975, 0.987, 1.0 };
+	private final double[] cumulative = { 0.000, 0.063, 0.269, 0.506, 0.697, 0.826, 0.905, 0.950, 0.975, 0.987, 1.0 };
 
 	private void incrementalMove(final IncrementalMove im) {
 		final double timeFrac = 1.0 * im.fracIndex / cumulative.length;
@@ -183,13 +186,13 @@ public class Motor extends Module {
 
 	private double prepareMovement(double time, Chunk request) {
 		time += model.randomizeTime(featurePrepTime * countFeaturesToPrepare(request));
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.processor, Symbol.busy);
-		model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
+		model.buffers.setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
+		model.buffers.setSlot(Symbol.manualState, Symbol.processor, Symbol.busy);
+		model.buffers.setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
 		model.addEvent(new Event(time, "motor", "preparation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
+				model.buffers.setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
 			}
 		});
 		lastMovement = request;
@@ -202,8 +205,8 @@ public class Motor extends Module {
 		model.addEvent(new Event(time, "motor", "initiation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.manualState, Symbol.processor, Symbol.free);
-				model.getBuffers().setSlot(Symbol.manualState, Symbol.execution, Symbol.busy);
+				model.buffers.setSlot(Symbol.manualState, Symbol.processor, Symbol.free);
+				model.buffers.setSlot(Symbol.manualState, Symbol.execution, Symbol.busy);
 			}
 		});
 		return time;
@@ -214,14 +217,14 @@ public class Motor extends Module {
 			@Override
 			public void action() {
 				if (queuedMovements.size() == 0) {
-					model.getBuffers().setSlot(Symbol.manualState, Symbol.execution, Symbol.free);
-					model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.free);
-					model.getBuffers().setSlot(Symbol.manualState, Symbol.where,
+					model.buffers.setSlot(Symbol.manualState, Symbol.execution, Symbol.free);
+					model.buffers.setSlot(Symbol.manualState, Symbol.state, Symbol.free);
+					model.buffers.setSlot(Symbol.manualState, Symbol.where,
 							(rightHand.equals(mouseKey) ? Symbol.mouse : Symbol.keyboard));
 				} else {
-					Chunk c = queuedMovements.firstElement();
-					queuedMovements.removeElementAt(0);
-					model.getBuffers().set(Symbol.manual, c);
+					Chunk c = queuedMovements.get(0);
+					queuedMovements.remove(0);
+					model.buffers.set(Symbol.manual, c);
 					update();
 				}
 			}
@@ -229,12 +232,12 @@ public class Motor extends Module {
 	}
 
 	@Override
-	void update() {
-		Chunk request = model.getBuffers().get(Symbol.manual);
+	public void update() {
+		Chunk request = model.buffers.get(Symbol.manual);
 		if (request == null || !request.isRequest())
 			return;
 		request.setRequest(false);
-		model.getBuffers().clear(Symbol.manual);
+		model.buffers.clear(Symbol.manual);
 
 		double eventTime = model.getTime();
 		double targetWidth = defaultTargetWidth;
@@ -243,14 +246,14 @@ public class Motor extends Module {
 		if (request.get(Symbol.isa) == Symbol.get("clear")) {
 			if (model.verboseTrace)
 				model.output("motor", "clear");
-			model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
-			model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
+			model.buffers.setSlot(Symbol.manualState, Symbol.preparation, Symbol.busy);
+			model.buffers.setSlot(Symbol.manualState, Symbol.state, Symbol.busy);
 			model.addEvent(new Event(model.getTime() + featurePrepTime, "motor", "change state last none prep free") {
 				@Override
 				public void action() {
 					lastMovement = null;
-					model.getBuffers().setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
-					model.getBuffers().setSlot(Symbol.manualState, Symbol.state, Symbol.free);
+					model.buffers.setSlot(Symbol.manualState, Symbol.preparation, Symbol.free);
+					model.buffers.setSlot(Symbol.manualState, Symbol.state, Symbol.free);
 				}
 			});
 			return;
@@ -263,11 +266,11 @@ public class Motor extends Module {
 				return;
 			}
 			String s = stringsym.getString().replaceAll("\"", "").toLowerCase();
-			if (!seen && model.verboseTrace)
+			if (model.verboseTrace)
 				model.output("motor", "type " + s);
-			queuedMovements.removeAllElements();
+			queuedMovements.clear();
 			for (int i = 0; i < s.length(); i++) {
-				String key = "" + s.charAt(i);
+				String key = String.valueOf(s.charAt(i));
 				String slots = getKeyCommand(key);
 				if (slots == null) {
 					model.outputWarning("bad key '" + key + "'");
@@ -275,11 +278,11 @@ public class Motor extends Module {
 				}
 				Chunk c = Parser.parseNewChunk(model, Symbol.getUnique("press-key"), "isa " + slots);
 				c.setRequest(true);
-				queuedMovements.addElement(c);
+				queuedMovements.add(c);
 			}
 			if (queuedMovements.size() > 0) {
-				request = queuedMovements.firstElement();
-				queuedMovements.removeElementAt(0);
+				request = queuedMovements.get(0);
+				queuedMovements.remove(0);
 			} else
 				return;
 			seen = true;
@@ -329,10 +332,20 @@ public class Motor extends Module {
 				model.outputWarning("hand not on mouse");
 				return;
 			}
-			Chunk loc = model.getVision().getVisualLocation(locName);
+			Chunk loc = model.vision.getVisualLocation(locName);
 			final Point locpt = new Point(loc.get(Symbol.get("screen-x")).toInt(),
-					loc.get(Symbol.get("screen-y")).toInt());
+				loc.get(Symbol.get("screen-y")).toInt());
 			Point mousePoint = new Point(mx, my);
+
+			Symbol noise = request.get(Symbol.get("noise"));
+			if (noise != null) {
+				double fraction = noise.isNumber() ? noise.toDouble() : 0;
+				double distance = mousePoint.distanceTo(locpt);
+				double noiseSD = fraction * distance;
+				locpt.x = (int) Math.round(locpt.x + Utilities.gaussianNoise(noiseSD));
+				locpt.y = (int) Math.round(locpt.y + Utilities.gaussianNoise(noiseSD));
+			}
+
 			double r = Utilities.pixels2angle(mousePoint.distanceTo(locpt));
 			if (r == 0)
 				return;
@@ -555,7 +568,7 @@ public class Motor extends Module {
 		return keys.get(key);
 	}
 
-	private char convertToChar(String keyname) {
+	private static char convertToChar(String keyname) {
 		keyname = keyname.replaceAll("\"", "").toLowerCase();
 		if (keyname.length() == 0)
 			return '-';
@@ -583,7 +596,7 @@ public class Motor extends Module {
 		return Math.max(minFittsTime, coeff * f);
 	}
 
-	private double approachWidth(Chunk loc, double theta) {
+	private static double approachWidth(Chunk loc, double theta) {
 		Symbol s = loc.get(Symbol.get("width"));
 		if (s == Symbol.nil)
 			return 0;
@@ -596,7 +609,7 @@ public class Motor extends Module {
 		theta = Math.abs(theta);
 		if (theta > Math.PI / 2)
 			theta = Math.PI - theta;
-		double retWidth = 0;
+		double retWidth;
 		if (theta == 0)
 			retWidth = x;
 		else if (theta == Math.PI / 2)
@@ -610,7 +623,7 @@ public class Motor extends Module {
 		return Utilities.pixels2angle(retWidth);
 	}
 
-	String keymap[][] = {
+	final String[][] keymap = {
 			{ "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14",
 					"f15" },
 			{},

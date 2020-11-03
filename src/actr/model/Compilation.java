@@ -1,7 +1,7 @@
 package actr.model;
 
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Production compilation process that transforms two rules into a single rule.
@@ -12,19 +12,22 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 class Compilation {
-	private Instantiation inst1, inst2;
-	private Model model;
-	private Production p1, p2, newp;
+	private final Instantiation inst1;
+	private final Instantiation inst2;
+	private final Model model;
+	private final Production p1;
+	private final Production p2;
+	private final Production newp;
 
 	Compilation(Instantiation inst1, Instantiation inst2, Model model) {
 		this.inst1 = inst1.copy();
 		this.inst2 = inst2.copy();
 		this.model = model;
-		p1 = inst1.getProduction().copy();
-		p2 = inst2.getProduction().copy();
+		p1 = inst1.production.copy();
+		p2 = inst2.production.copy();
 		p1.expandDirectActions(inst1);
 		p2.expandDirectActions(inst2);
-		String name = inst1.getProduction().getName() + "++" + inst2.getProduction().getName();
+		String name = inst1.production.name + "++" + inst2.production.name;
 		newp = new Production(Symbol.getUnique(name), model);
 	}
 
@@ -38,19 +41,19 @@ class Compilation {
 			newp.addBufferAction(ba);
 	}
 
-	BufferCondition blendConditions(BufferCondition bc1, BufferCondition bc2) {
+	static BufferCondition blendConditions(BufferCondition bc1, BufferCondition bc2) {
 		if (bc1 == null)
 			return bc2;
 		if (bc2 == null)
 			return bc1;
-		BufferCondition bcnew = bc1;
-		for (int i = 0; i < bc2.slotCount(); i++) {
+		int c = bc2.slotCount();
+		for (int i = 0; i < c; i++) {
 			SlotCondition sc = bc2.getSlotCondition(i);
-			SlotCondition scnew = bcnew.getSlotCondition(sc.getSlot());
+			SlotCondition scnew = bc1.getSlotCondition(sc.getSlot());
 			if (scnew == null)
-				bcnew.addCondition(sc);
+				bc1.addCondition(sc);
 		}
-		return bcnew;
+		return bc1;
 	}
 
 	BufferCondition blendConditionsMinusActions(BufferCondition bc1, BufferCondition bc2, BufferAction ba1) {
@@ -61,29 +64,29 @@ class Compilation {
 		if (ba1 == null)
 			return blendConditions(bc2, bc2);
 		if (bc1 == null)
-			bc1 = new BufferCondition('=', bc2.getBuffer(), model);
-		BufferCondition bcnew = bc1;
-		for (int i = 0; i < bc2.slotCount(); i++) {
+			bc1 = new BufferCondition('=', bc2.buffer, model);
+		int c = bc2.slotCount();
+		for (int i = 0; i < c; i++) {
 			SlotCondition sc = bc2.getSlotCondition(i);
-			SlotCondition scnew = bcnew.getSlotCondition(sc.getSlot());
-			if (scnew == null && !ba1.hasSlotAction(sc.getSlot()))
-				bcnew.addCondition(sc);
+			Symbol scs = sc.getSlot();
+			if (bc1.getSlotCondition(scs) == null && !ba1.hasSlotAction(scs))
+				bc1.addCondition(sc);
 		}
-		return bcnew;
+		return bc1;
 	}
 
-	BufferAction blendActions(BufferAction ba1, BufferAction ba2) {
+	static BufferAction blendActions(BufferAction ba1, BufferAction ba2) {
 		if (ba1 == null)
 			return ba2;
 		if (ba2 == null)
 			return ba1;
-		BufferAction banew = ba2;
-		for (int i = 0; i < ba1.slotCount(); i++) {
+		int scc = ba1.slotCount();
+		for (int i = 0; i < scc; i++) {
 			SlotAction sc = ba1.getSlotAction(i);
-			if (!banew.hasSlotAction(sc.getSlot()))
-				banew.addAction(sc);
+			if (!ba2.hasSlotAction(sc.getSlot()))
+				ba2.addAction(sc);
 		}
-		return banew;
+		return ba2;
 	}
 
 	BufferCondition createStandardStateCondition(Symbol stateBuffer) {
@@ -271,18 +274,17 @@ class Compilation {
 		return true;
 	}
 
-	void replaceValue(Production p, Instantiation inst, Symbol oldval, Symbol newval) {
+	static void replaceValue(Production p, Instantiation inst, Symbol oldval, Symbol newval) {
 		p.specialize(oldval, newval);
 		inst.replaceVariable(oldval, newval);
 	}
 
 	void uniquifyVariables() {
-		Vector<Symbol> p1vars = p1.getVariables();
-		Vector<Symbol> p2vars = p2.getVariables();
-		for (int i = 0; i < p1vars.size(); i++) {
-			Symbol var = p1vars.elementAt(i);
+		List<Symbol> p1vars = p1.getVariables();
+		List<Symbol> p2vars = p2.getVariables();
+		for (Symbol var : p1vars) {
 			if (p2vars.contains(var)) {
-				if (model.getBuffers().isLegalBuffer(var))
+				if (model.buffers.isLegalBuffer(var))
 					p2.specialize(var, inst2.get(var));
 				else
 					replaceValue(p2, inst2, var, Symbol.get(var.getString() + "2"));
@@ -294,7 +296,7 @@ class Compilation {
 		Iterator<BufferCondition> itBC = p2.getConditions();
 		while (itBC.hasNext()) {
 			BufferCondition c2 = itBC.next();
-			Symbol buffer = c2.getBuffer();
+			Symbol buffer = c2.buffer;
 			Iterator<SlotCondition> itSC = c2.getSlotConditions();
 			while (itSC.hasNext()) {
 				SlotCondition sc2 = itSC.next();
@@ -316,7 +318,7 @@ class Compilation {
 	}
 
 	Production compile() {
-		if ((inst2.getTime() - inst1.getTime()) < model.getProcedural().productionCompilationThresholdTime) {
+		if ((inst2.time - inst1.time) < model.procedural.productionCompilationThresholdTime) {
 			uniquifyVariables();
 			synchronizeVariables();
 			if (checkSpecials()
@@ -328,7 +330,7 @@ class Compilation {
 					&& compilePercMotorStyle(Symbol.manual) && compilePercMotorStyle(Symbol.vocal)
 
 			&& compileRetrievalStyle(Symbol.retrieval)) {
-				newp.setUtility(model.getProcedural().productionCompilationNewUtility);
+				newp.setUtility(model.procedural.productionCompilationNewUtility);
 				return newp;
 			}
 		}

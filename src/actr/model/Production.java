@@ -1,6 +1,8 @@
 package actr.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -10,30 +12,30 @@ import java.util.Vector;
  * @author Dario Salvucci
  */
 public class Production {
-	private Symbol name;
-	private Model model;
-	private Vector<BufferCondition> conditions;
-	private Vector<BufferAction> actions;
+	public final Symbol name;
+	private final Model model;
+	private final List<BufferCondition> conditions = new ArrayList();
+	private final List<BufferAction> actions = new ArrayList();
 	private double u;
+	private double p = 1; // the probability that the goal will achieve with the current this produciton
 	private boolean hasReward = false;
 	private double reward = 0;
 	private boolean breakPoint = false;
 	private int timesFired = 0;
+	private boolean constantUtility = false;
 
 	Production(Symbol name, Model model) {
 		this.name = name;
 		this.model = model;
-		conditions = new Vector<BufferCondition>();
-		actions = new Vector<BufferAction>();
-		u = model.getProcedural().initialUtility;
+		u = model.procedural.initialUtility;
 	}
 
 	Production copy() {
 		Production p = new Production(Symbol.getUnique(name.getString()), model);
 		for (int i = 0; i < conditions.size(); i++)
-			p.conditions.add(conditions.elementAt(i).copy());
+			p.conditions.add(conditions.get(i).copy());
 		for (int i = 0; i < actions.size(); i++)
-			p.actions.add(actions.elementAt(i).copy());
+			p.actions.add(actions.get(i).copy());
 		return p;
 	}
 
@@ -45,18 +47,14 @@ public class Production {
 	 * @return <tt>true</tt> if the two productions are the same, or
 	 *         <tt>false</tt> otherwise
 	 */
-	public boolean equals(Production p2) {
+	public boolean equals(Object x) {
+		if (this == x) return true;
+		Production p2 = (Production) x;
 		if (conditions.size() != p2.conditions.size())
 			return false;
-		for (int i = 0; i < conditions.size(); i++)
-			if (!conditions.elementAt(i).equals(p2.conditions.elementAt(i)))
-				return false;
 		if (actions.size() != p2.actions.size())
 			return false;
-		for (int i = 0; i < actions.size(); i++)
-			if (!actions.elementAt(i).equals(p2.actions.elementAt(i)))
-				return false;
-		return true;
+		return conditions.equals(p2.conditions) && actions.equals(p2.actions);
 	}
 
 	void addBufferCondition(BufferCondition bc) {
@@ -68,30 +66,16 @@ public class Production {
 	}
 
 	/**
-	 * Gets the name of the production.
-	 * 
-	 * @return the name symbol
-	 */
-	public Symbol getName() {
-		return name;
-	}
-
-	/**
 	 * Gets the utility of the production.
 	 * 
 	 * @return the utility value
 	 */
-	public double getUtility() {
-		return u;
-	}
+	public double getUtility() { return u; }
+	public double getProbability() { return p; }
 
-	void setName(Symbol name) {
-		this.name = name;
-	}
-
-	void setUtility(double x) {
-		u = x;
-	}
+//	void setName (Symbol name) { this.name = name; }
+	void setUtility (double x) { u = x; }
+	void setProbability (double x) { p = x; }
 
 	/**
 	 * Checks whether this production has an associated reward.
@@ -135,39 +119,40 @@ public class Production {
 		return timesFired;
 	}
 
-	void setParameter(String parameter, String value, Tokenizer t) throws Exception {
-		if (parameter.equals(":u"))
-			u = Double.valueOf(value);
-		else if (parameter.equals(":reward")) {
-			hasReward = true;
-			reward = Double.valueOf(value);
-		} else if (parameter.equals(":break"))
-			breakPoint = !value.equals("nil");
-		else
-			model.recordWarning("unknown production parameter " + parameter, t);
+	void setParameter (String parameter, String value, Tokenizer t) {
+		switch (parameter) {
+			case ":u" -> {
+				u = Double.parseDouble(value);
+				constantUtility = true;
+			}
+			case ":p" -> p = Double.parseDouble(value);
+			case ":reward" -> {
+				hasReward = true;
+				reward = Double.parseDouble(value);
+			}
+			case ":break" -> breakPoint = !value.equals("nil");
+			default -> model.recordWarning("unknown production parameter " + parameter, t);
+		}
 	}
+
 
 	Iterator<BufferCondition> getConditions() {
 		return conditions.iterator();
 	}
 
 	BufferCondition getBufferCondition(Symbol buffer) {
-		for (int i = 0; i < conditions.size(); i++)
-			if (conditions.elementAt(i).getBuffer() == buffer)
-				return conditions.elementAt(i);
+		for (BufferCondition condition : conditions)
+			if (condition.buffer == buffer)
+				return condition;
 		return null;
 	}
-
 	boolean hasBufferCondition(Symbol buffer) {
 		return getBufferCondition(buffer) != null;
 	}
 
 	SlotCondition getSlotCondition(Symbol buffer, Symbol slot) {
 		BufferCondition bc = getBufferCondition(buffer);
-		if (bc != null)
-			return bc.getSlotCondition(slot);
-		else
-			return null;
+		return bc != null ? bc.getSlotCondition(slot) : null;
 	}
 
 	Iterator<BufferAction> getActions() {
@@ -175,9 +160,9 @@ public class Production {
 	}
 
 	BufferAction getBufferAction(Symbol buffer) {
-		for (int i = 0; i < actions.size(); i++)
-			if (actions.elementAt(i).getBuffer() == buffer)
-				return actions.elementAt(i);
+		for (BufferAction action : actions)
+			if (action.buffer == buffer)
+				return action;
 		return null;
 	}
 
@@ -187,16 +172,12 @@ public class Production {
 
 	SlotAction getSlotAction(Symbol buffer, Symbol slot) {
 		BufferAction ba = getBufferAction(buffer);
-		if (ba != null)
-			return ba.getSlotAction(slot);
-		else
-			return null;
+		return ba != null ? ba.getSlotAction(slot) : null;
 	}
 
 	BufferAction getBufferAction(char prefix, Symbol buffer) {
-		for (int i = 0; i < actions.size(); i++) {
-			BufferAction ba = actions.elementAt(i);
-			if (ba.getBuffer() == buffer && ba.getPrefix() == prefix)
+		for (BufferAction ba : actions) {
+			if (ba.buffer == buffer && ba.getPrefix() == prefix)
 				return ba;
 		}
 		return null;
@@ -207,13 +188,11 @@ public class Production {
 	}
 
 	boolean hasSpecials() {
-		for (int i = 0; i < conditions.size(); i++) {
-			BufferCondition bc = conditions.elementAt(i);
+		for (BufferCondition bc : conditions) {
 			if (bc.isSpecial())
 				return true;
 		}
-		for (int i = 0; i < actions.size(); i++) {
-			BufferAction ba = actions.elementAt(i);
+		for (BufferAction ba : actions) {
 			if (ba.isDirect() || ba.isSpecial())
 				return true;
 		}
@@ -221,15 +200,15 @@ public class Production {
 	}
 
 	boolean hasConditionSlotValue(Symbol value) {
-		for (int i = 0; i < conditions.size(); i++)
-			if (conditions.get(i).hasSlotValue(value))
+		for (BufferCondition condition : conditions)
+			if (condition.hasSlotValue(value))
 				return true;
 		return false;
 	}
 
 	boolean hasActionSlotValue(Symbol value) {
-		for (int i = 0; i < actions.size(); i++)
-			if (actions.get(i).hasSlotValue(value))
+		for (BufferAction action : actions)
+			if (action.hasSlotValue(value))
 				return true;
 		return false;
 	}
@@ -238,13 +217,13 @@ public class Production {
 		return hasConditionSlotValue(value) || hasActionSlotValue(value);
 	}
 
-	Vector<Symbol> getConditionVariables() {
-		Vector<Symbol> variables = new Vector<Symbol>();
+	List<Symbol> getConditionVariables() {
+		List<Symbol> variables = new Vector<>();
 		Iterator<BufferCondition> it = getConditions();
 		while (it.hasNext()) {
 			BufferCondition bc = it.next();
 			if (bc.getPrefix() == '=')
-				variables.add(Symbol.get("=" + bc.getBuffer()));
+				variables.add(Symbol.get("=" + bc.buffer));
 			Iterator<SlotCondition> itBC = bc.getSlotConditions();
 			while (itBC.hasNext()) {
 				SlotCondition sc = itBC.next();
@@ -258,7 +237,7 @@ public class Production {
 	}
 
 	Vector<Symbol> getActionVariables() {
-		Vector<Symbol> variables = new Vector<Symbol>();
+		Vector<Symbol> variables = new Vector<>();
 		Iterator<BufferAction> it = getActions();
 		while (it.hasNext()) {
 			BufferAction ba = it.next();
@@ -274,12 +253,13 @@ public class Production {
 		return variables;
 	}
 
-	Vector<Symbol> getVariables() {
-		Vector<Symbol> cvs = getConditionVariables();
-		Vector<Symbol> avs = getActionVariables();
-		for (int i = 0; i < avs.size(); i++)
-			if (!cvs.contains(avs.elementAt(i)))
-				cvs.add(avs.elementAt(i));
+	List<Symbol> getVariables() {
+		List<Symbol> cvs = getConditionVariables();
+		List<Symbol> avs = getActionVariables();
+		for (Symbol ai : avs) {
+			if (!cvs.contains(ai))
+				cvs.add(ai);
+		}
 		return cvs;
 	}
 
@@ -290,9 +270,7 @@ public class Production {
 		if (bc.slotCount() == 0)
 			return false;
 		SlotCondition state = bc.getSlotCondition(Symbol.state);
-		if (state == null)
-			return true;
-		return (state.getValue() != Symbol.busy);
+		return state == null || state.getValue() != Symbol.busy;
 	}
 
 	boolean queriesForError(Symbol buffer) {
@@ -300,76 +278,122 @@ public class Production {
 		if (bc == null)
 			return false;
 		SlotCondition state = bc.getSlotCondition(Symbol.state);
-		if (state == null)
-			return false;
-		return (state.getValue() == Symbol.error);
+		return state != null && state.getValue() == Symbol.error;
 	}
 
 	Instantiation instantiate(Buffers buffers) {
-		boolean savedWhyNotTrace = model.getProcedural().whyNotTrace;
+		boolean savedWhyNotTrace = model.procedural.whyNotTrace;
 		SlotCondition prodGoalSC = getSlotCondition(Symbol.goal, Symbol.isa);
 		Symbol prodGoalType = (prodGoalSC != null) ? prodGoalSC.getValue() : null;
 		Symbol bufGoalType = buffers.getSlot(Symbol.goal, Symbol.isa);
 		if (prodGoalType != bufGoalType && !(prodGoalType == null || prodGoalType.isVariable()))
-			model.getProcedural().whyNotTrace = false;
+			model.procedural.whyNotTrace = false;
 
-		if (model.getProcedural().whyNotTrace)
+		if (model.procedural.whyNotTrace)
 			model.output(name.getString());
-		double instU = u + Utilities.getNoise(model.getProcedural().utilityNoiseS);
-		Instantiation inst = new Instantiation(this, model.getTime(), instU);
 
-		for (int i = 0; i < conditions.size(); i++) {
-			BufferCondition bc = conditions.elementAt(i);
+		/*
+		 * putting the fatigue (alertness) inside the unstU (instantiation utility). Subtract the cognitive cycle
+		 */
+		double instU;
+		double noise = Utilities.getNoise(model.procedural.utilityNoiseS);
+		final Fatigue fatigue = model.fatigue;
+		final boolean fatigueEnabled = fatigue.isFatigueEnabled();
+		if (fatigueEnabled && !constantUtility){
+			//Fatigue old version: just the affect of time on task
+//			instU  = u * model.getFatigue().getFatigueFP() +  Utilities.getNoise(model.getProcedural().utilityNoiseS); // original
+
+			// Fatigue new model with the additive factor
+			double BioMath = fatigue.computeBioMathValue();
+			double FPMC0 = fatigue.getFatigueFPMC0();
+			double FPMC = fatigue.getFatigueFPMC();
+			double FPBMC = fatigue.getFatigueFPBMC();
+			instU  = fatigue.getFatigueFPPercent() * (
+					Math.pow(1 + fatigue.mpTime(), -(FPMC + FPMC0*BioMath) ) + u  -  (FPBMC * BioMath)  +  noise) ;
+		}
+		else if (fatigueEnabled && constantUtility){
+			instU = fatigue.getFatigueFPPercent() *(u + noise);
+//			model.output(name.toString() + " U:" + u + " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+		}
+		else{
+			instU = u + noise;
+//			model.output(name.toString() + "U:" + u + " noise:" + noise + " dec" + model.getFatigue().getFatigueFPPercent());
+		}
+		//System.out.println("u  ::: " + instU + "----" + name);
+
+		Instantiation inst = new Instantiation (this, model.getTime(), instU);
+
+		boolean fatigueMismatch = false;
+
+//		final int n = conditions.size();
+		for (BufferCondition bc : conditions) {
 			if (!bc.test(inst)) {
-				if (model.getProcedural().whyNotTrace)
-					model.output("   X instantiation failed\n");
-				model.getProcedural().whyNotTrace = savedWhyNotTrace;
-				return null;
+				if (fatigueEnabled && fatigue.isFatiguePartialMatching()) {
+					Chunk bufferChunk = model.buffers.get(bc.buffer);
+					if (bufferChunk == null)
+						return null;
+					else
+						fatigueMismatch = true;
+				} else {
+					if (model.procedural.whyNotTrace)
+						model.output("   X instantiation failed\n");
+					model.procedural.whyNotTrace = savedWhyNotTrace;
+					return null;
+				}
 			}
 		}
 
-		Iterator<Instantiation.DelayedSlotCondition> it = inst.getDelayedSlotConditions();
-		while (it.hasNext()) {
-			Instantiation.DelayedSlotCondition dsc = it.next();
-			if (model.getProcedural().whyNotTrace)
+		for (Instantiation.DelayedSlotCondition dsc : inst.delayedSlotConditions) {
+			if (model.procedural.whyNotTrace)
 				model.output("   [delayed] " + dsc.buffer + ">");
 			if (!dsc.slotCondition.test(dsc.buffer, dsc.bufferChunk, inst)) {
-				if (model.getProcedural().whyNotTrace)
-					model.output("   X instantiation failed\n");
-				model.getProcedural().whyNotTrace = savedWhyNotTrace;
-				return null;
+				if (fatigueEnabled && fatigue.isFatiguePartialMatching()) {
+					fatigueMismatch = true;
+				} else {
+					if (model.procedural.whyNotTrace)
+						model.output("   X instantiation failed\n");
+					model.procedural.whyNotTrace = savedWhyNotTrace;
+					return null;
+				}
 			}
 		}
 
-		if (model.getProcedural().whyNotTrace)
+		if (fatigueMismatch) {
+			// if the production has not matched but fatigue partial matching is on,
+			// set instantiation utility to 0 (see Walsh, Gunzelmann, & Van Dongen, 2017)
+			inst.setUtility(fatigue.getFatigueFPPercent() * (0 + noise));
+		}
+
+		if (model.procedural.whyNotTrace)
 			model.output("   * instantiation succeeded: " + inst + "\n");
-		model.getProcedural().whyNotTrace = savedWhyNotTrace;
+		model.procedural.whyNotTrace = savedWhyNotTrace;
 		return inst;
 	}
 
 	void fire(Instantiation inst) {
-		Chunk goal = model.getBuffers().get(Symbol.goal);
+		Chunk goal = model.buffers.get(Symbol.goal);
 		if (goal != null)
 			goal.setLastUsedAsGoal(model.getTime());
 
-		for (int i = 0; i < conditions.size(); i++) {
-			BufferCondition bc = conditions.elementAt(i);
-			if (bc.getPrefix() == '=' && bc.getBuffer() != Symbol.goal && bc.getBuffer() != Symbol.temporal
+		for (BufferCondition bc : conditions) {
 			// && bc.getBuffer()!=Symbol.imaginal
-			) {
-				Symbol buffer = bc.getBuffer();
-				boolean found = false;
-				for (int j = 0; j < actions.size(); j++)
-					if (actions.elementAt(j).getBuffer() == buffer)
-						found = true;
-				if (!found)
-					model.getBuffers().clear(bc.getBuffer());
-				else
-					model.getBuffers().touch(bc.getBuffer());
+			if (bc.getPrefix() == '=') {
+				Symbol bb = bc.buffer;
+				if (bb != Symbol.goal && bb != Symbol.temporal) {
+					boolean found = false;
+					for (BufferAction action : actions)
+						if (action.buffer == bb) {
+							found = true;
+							break;
+						}
+					if (!found)
+						model.buffers.clear(bb);
+					else
+						model.buffers.touch(bb);
+				}
 			}
 		}
-		for (int i = 0; i < actions.size(); i++) {
-			BufferAction ba = actions.elementAt(i);
+		for (BufferAction ba : actions) {
 			ba.fire(inst);
 		}
 
@@ -381,15 +405,12 @@ public class Production {
 			model.outputError("cannot specialize " + variable + " to null value");
 			return;
 		}
-		for (int i = 0; i < conditions.size(); i++)
-			conditions.elementAt(i).specialize(variable, value);
-		for (int i = 0; i < actions.size(); i++)
-			actions.elementAt(i).specialize(variable, value);
+		for (BufferCondition condition : conditions) condition.specialize(variable, value);
+		for (BufferAction action : actions) action.specialize(variable, value);
 	}
 
 	void expandDirectActions(Instantiation inst) {
-		for (int i = 0; i < actions.size(); i++)
-			actions.elementAt(i).expandDirectAction(inst);
+		for (BufferAction action : actions) action.expandDirectAction(inst);
 	}
 
 	/**
@@ -398,13 +419,11 @@ public class Production {
 	 * @return the string
 	 */
 	public String toString(Instantiation inst) {
-		Vector<Symbol> used = new Vector<Symbol>();
+		List<Symbol> used = new ArrayList<>();
 		String s = "(p " + name + "\n";
-		for (int i = 0; i < conditions.size(); i++)
-			s += conditions.elementAt(i).toString(inst, used);
+		for (BufferCondition condition : conditions) s += condition.toString(inst, used);
 		s += "==>\n";
-		for (int i = 0; i < actions.size(); i++)
-			s += actions.elementAt(i);
+		for (BufferAction action : actions) s += action;
 		s += String.format(") [u: %.3f]\n", getUtility());
 		return s;
 	}

@@ -16,10 +16,10 @@ import actr.task.Utilities;
 public class U3Subitize extends Task {
 	// --- Task Code ---//
 
-	int count;
+	final int count;
 	double rt;
 
-	static int counts[] = { 3, 6, 9, 2, 5, 8, 1, 4, 7, 10 };
+	static final int[] counts = { 3, 6, 9, 2, 5, 8, 1, 4, 7, 10 };
 	static int currentCount = -1;
 
 	public U3Subitize() {
@@ -31,8 +31,9 @@ public class U3Subitize extends Task {
 		count = counts[currentCount];
 	}
 
-	class Point {
-		int x, y;
+	static class Point {
+		final int x;
+		final int y;
 
 		Point() {
 			x = Utilities.random.nextInt(240) + 20;
@@ -53,7 +54,7 @@ public class U3Subitize extends Task {
 
 	@Override
 	public void start() {
-		Vector<Point> points = new Vector<Point>();
+		Vector<Point> points = new Vector<>();
 		for (int i = 0; i < count; i++) {
 			Point p = new Point();
 			while (p.tooClose(points))
@@ -77,7 +78,7 @@ public class U3Subitize extends Task {
 
 	// --- Analysis Code ---//
 
-	final double humanRT[] = { .60, .65, .70, .86, 1.12, 1.50, 1.79, 2.13, 2.15, 2.58 };
+	final double[] humanRT = { .60, .65, .70, .86, 1.12, 1.50, 1.79, 2.13, 2.15, 2.58 };
 
 	@Override
 	public int analysisIterations() {
@@ -87,10 +88,10 @@ public class U3Subitize extends Task {
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
 		try {
-			double modelRT[] = new double[counts.length];
-			int totals[] = new int[counts.length];
-			for (int n = 0; n < tasks.length; n++) {
-				U3Subitize task = (U3Subitize) tasks[n];
+			double[] modelRT = new double[counts.length];
+			int[] totals = new int[counts.length];
+			for (Task value : tasks) {
+				U3Subitize task = (U3Subitize) value;
 				modelRT[task.count - 1] += task.rt;
 				totals[task.count - 1]++;
 			}

@@ -18,18 +18,18 @@ import actr.task.Utilities;
 public class DualChoicePRP extends Task {
 	// Task Code
 
-	final double soas[] = { .050, .150, .250, .500, 1.000 };
-	final double trialSpacing = 10.0;
-	final int totalTrials = 24;
+	final double[] soas = { .050, .150, .250, .500, 1.000 };
+	static final double trialSpacing = 10.0;
+	static final int totalTrials = 24;
 
-	TaskLabel label;
+	final TaskLabel label;
 	int numTrials = -1;
 	int currentSOAIndex = -1;
 	double auralVocalStartTime, visualManualStartTime;
 	Trial currentTrial;
-	Vector<Trial> trials = new Vector<Trial>();
+	final Vector<Trial> trials = new Vector<>();
 
-	class Trial {
+	static class Trial {
 		int soaIndex;
 		double visualManualResponseTime;
 		double auralVocalResponseTime;
@@ -47,7 +47,7 @@ public class DualChoicePRP extends Task {
 		addPeriodicUpdate(trialSpacing);
 	}
 
-	Random random = new Random();
+	final Random random = new Random();
 
 	String randomAuralStimulus() {
 		int i = random.nextInt(3);
@@ -114,15 +114,15 @@ public class DualChoicePRP extends Task {
 
 	// Analysis Code
 
-	double humanRT[][] = { { .410, .415, .420, .415, .415 }, { .475, .395, .350, .300, .295 } };
+	final double[][] humanRT = { { .410, .415, .420, .415, .415 }, { .475, .395, .350, .300, .295 } };
 
 	@Override
 	public Result analyze(Task[] tasks, boolean output) {
-		double modelRT[][] = new double[2][soas.length];
-		double modelCount[] = new double[soas.length];
+		double[][] modelRT = new double[2][soas.length];
+		double[] modelCount = new double[soas.length];
 
-		for (int i = 0; i < tasks.length; i++) {
-			DualChoicePRP task = (DualChoicePRP) (tasks[i]);
+		for (Task value : tasks) {
+			DualChoicePRP task = (DualChoicePRP) value;
 			for (int j = 0; j < task.trials.size(); j++) {
 				Trial trial = task.trials.elementAt(j);
 				modelRT[0][trial.soaIndex] += trial.auralVocalResponseTime;

@@ -15,5 +15,5 @@ public interface Starter {
 	 * @param core
 	 *            the system core
 	 */
-	public void startup(Core core);
+	void startup(Core core);
 }

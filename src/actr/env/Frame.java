@@ -43,18 +43,20 @@ import actr.task.Task;
  * @author Dario Salvucci
  */
 public class Frame extends JFrame {
-	private Frame frame;
+	private final Frame frame;
 
-	private Core core;
-	private Actions actions;
-	private Editor editor;
-	private JTextArea outputArea;
-	private Brain brainPanel;
-	private Navigator navigator;
-	private FindPanel editorFind, outputFind;
-	private JSplitPane splitPane, taskSplitPane;
-	private Menus menus;
-	private Toolbar toolbar;
+	private final Core core;
+	private final Actions actions;
+	private final Editor editor;
+	private final JTextArea outputArea;
+	private final Brain brainPanel;
+	private final Navigator navigator;
+	private final FindPanel editorFind;
+	private final FindPanel outputFind;
+	private final JSplitPane splitPane;
+	private final JSplitPane taskSplitPane;
+	private final Menus menus;
+	private final Toolbar toolbar;
 
 	private File file;
 	private Model model;
@@ -247,16 +249,13 @@ public class Frame extends JFrame {
 
 	String getShortName() {
 		String name = getFileName();
-		if (name.indexOf(".actr") >= 0)
+		if (name.contains(".actr"))
 			name = name.substring(0, name.indexOf(".actr"));
 		return name;
 	}
 
 	String getFileName() {
-		if (file == null)
-			return "Untitled";
-		else
-			return file.getName();
+		return file == null ? "Untitled" : file.getName();
 	}
 
 	String getFilePath() {
@@ -320,7 +319,6 @@ public class Frame extends JFrame {
 	 */
 	public void open(URL url) {
 		this.file = new File(url.getPath());
-		;
 		editor.open(url);
 		editor.grabFocus();
 		model = null;
@@ -350,7 +348,7 @@ public class Frame extends JFrame {
 
 		final String modelText = editor.getText();
 		final String speedup = toolbar.getSpeedup();
-		(new SwingWorker<Object, Object>() {
+		(new SwingWorker<>() {
 			@Override
 			public Object doInBackground() {
 				if (!core.acquireLock(frame))
@@ -367,9 +365,9 @@ public class Frame extends JFrame {
 				} else
 					output("\n> (resume)\n");
 				if (model != null) {
-					brainPanel.setVisible(model.getBold().isImaging());
+					brainPanel.setVisible(model.bold.isImaging());
 					showTask(model.getTask());
-					if (!speedup.equals(""))
+					if (!speedup.isEmpty())
 						model.setParameter(":real-time", speedup);
 					model.run(reset);
 					hideTask();
@@ -397,11 +395,9 @@ public class Frame extends JFrame {
 		final String modelText = editor.getText();
 		String iterations = toolbar.getIterations();
 		model = Model.compile(modelText, frame);
-		if (model == null)
-			return;
 		Task task = model.getTask();
-		final int n = (iterations.equals("")) ? task.analysisIterations() : Integer.valueOf(iterations);
-		(new SwingWorker<Object, Object>() {
+		final int n = (iterations.isEmpty()) ? task.analysisIterations() : Integer.parseInt(iterations);
+		(new SwingWorker<>() {
 			@Override
 			public Object doInBackground() {
 				if (!core.acquireLock(frame))
@@ -429,12 +425,12 @@ public class Frame extends JFrame {
 				core.releaseLock(frame);
 				update();
 				return null;
-			};
+			}
 		}).execute();
 	}
 
 	void runBatch(final boolean output) {
-		(new SwingWorker<Object, Object>() {
+		(new SwingWorker<>() {
 			@Override
 			public Object doInBackground() {
 				if (file == null)
@@ -452,44 +448,35 @@ public class Frame extends JFrame {
 				String basePath = file.getPath();
 				basePath = basePath.substring(0, basePath.lastIndexOf(File.separator)) + File.separator;
 				String[] filenames = editor.getText().split("\\s");
-				if (filenames != null) {
-					for (int k = 0; !stop && k < filenames.length; k++) {
-						String line = filenames[k];
-						String modelName = line;
-						String taskOverrides[] = { null };
-						if (line.contains(":")) {
-							modelName = line.substring(0, line.indexOf(":"));
-							taskOverrides = line.substring(line.indexOf(":") + 1).split(",");
-						}
-						open(new File(basePath + modelName), true);
-						final String modelText = editor.getText();
+				for (int k = 0; !stop && k < filenames.length; k++) {
+					String line = filenames[k];
+					String modelName = line;
+					String[] taskOverrides = {null};
+					if (line.contains(":")) {
+						modelName = line.substring(0, line.indexOf(':'));
+						taskOverrides = line.substring(line.indexOf(':') + 1).split(",");
+					}
+					open(new File(basePath + modelName), true);
+					final String modelText = editor.getText();
 
-						for (int ti = 0; ti < taskOverrides.length; ti++) {
-							String taskOverride = taskOverrides[ti];
+					for (String taskOverride : taskOverrides) {
+						model = Model.compile(modelText, frame, taskOverride);
+						int n = model.getTask().analysisIterations();
+						Task[] tasks = new Task[n];
+						for (int i = 0; !stop && i < n; i++) {
 							model = Model.compile(modelText, frame, taskOverride);
-							if (model == null) {
-								output("Error: Model " + basePath + modelName + " does not exist");
-								break;
-							}
-							int n = model.getTask().analysisIterations();
-							Task[] tasks = new Task[n];
-							for (int i = 0; !stop && i < n; i++) {
-								model = Model.compile(modelText, frame, taskOverride);
-								if (model == null)
-									System.exit(1);
-								brainPanel.setVisible(false);
-								showTask(model.getTask());
-								model.setParameter(":real-time", "nil");
-								model.setParameter(":v", "nil");
-								model.run();
-								model.getTask().finish();
-								tasks[i] = model.getTask();
-							}
-							if (!stop && model != null) {
-								Task task = model.getTask();
-								Result result = task.analyze(tasks, output);
-								output(result.toString());
-							}
+							brainPanel.setVisible(false);
+							showTask(model.getTask());
+							model.setParameter(":real-time", "nil");
+							model.setParameter(":v", "nil");
+							model.run();
+							model.getTask().finish();
+							tasks[i] = model.getTask();
+						}
+						if (!stop && model != null) {
+							Task task = model.getTask();
+							Result result = task.analyze(tasks, output);
+							output(result.toString());
 						}
 					}
 				}
@@ -545,7 +532,7 @@ public class Frame extends JFrame {
 					filename += ".actr";
 					newFile = new File(filename);
 					if (newFile.exists()) {
-						String options[] = { "Yes", "No", "Cancel" };
+						String[] options = { "Yes", "No", "Cancel" };
 						int choice = JOptionPane.showOptionDialog(frame,
 								"Overwrite existing \"" + newFile.getName() + "\"?", "File Exists",
 								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
@@ -558,10 +545,8 @@ public class Frame extends JFrame {
 				}
 				file = newFile;
 			}
-			if (file == null)
-				return;
 			StringReader sr = new StringReader(editor.getText());
-			FileWriter outputStream = null;
+			FileWriter outputStream;
 			outputStream = new FileWriter(file);
 			int c;
 			while ((c = sr.read()) != -1)
@@ -680,6 +665,17 @@ public class Frame extends JFrame {
 		outputArea.append(s + "\n");
 		outputArea.setCaretPosition(outputArea.getDocument().getLength());
 	}
+	
+	/**
+	 * Prints the given string to the frame's output panel.
+	 * 
+	 * @param s
+	 *            the string
+	 */
+	public void outputInLine(String s) {
+		outputArea.append(s);
+		outputArea.setCaretPosition(outputArea.getDocument().getLength());
+	}
 
 	/**
 	 * Clears the frame's output panel.
@@ -739,8 +735,7 @@ public class Frame extends JFrame {
 	public void outputTasks() {
 		output("\n> (all-tasks)\n");
 		String[] tasks = Task.allTaskClasses();
-		for (int i = 0; i < tasks.length; i++)
-			output(tasks[i]);
+		for (String task : tasks) output(task);
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package actr.env;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -14,35 +15,43 @@ import javax.swing.text.StyleConstants;
 import actr.model.Model;
 
 class Document extends DefaultStyledDocument {
-	private Frame frame;
-	private Preferences prefs;
-	private MutableAttributeSet styleCommand, styleParameter, styleProduction, styleChunk, styleBuffer, styleComment;
-	private UndoQueue undos, redos;
+	private final Frame frame;
+	private final Preferences prefs;
+	private final MutableAttributeSet styleCommand;
+	private final MutableAttributeSet styleParameter;
+	private final MutableAttributeSet styleProduction;
+	private final MutableAttributeSet styleChunk;
+	private final MutableAttributeSet styleBuffer;
+	private final MutableAttributeSet styleComment;
+	private final UndoQueue undos;
+	private final UndoQueue redos;
 	private boolean extrasEnabled = true;
 	private int undoKeystrokes = 0;
 	private boolean changed = false;
-	private boolean suppressStyling = false;
+	private final boolean suppressStyling;
 	private int undoCountAtLastSave = 0;
 	private SwingWorker<Object, Object> restyleThread = null;
-	private final int maxUndos = 50, maxUndoKeystrokes = 10;
-	private final int restyleDelay = 100;
-	private Vector<Marker> commands, productions, chunks;
+	private static final int maxUndos = 50, maxUndoKeystrokes = 10;
+	private static final int restyleDelay = 100;
+	private final List<Marker> commands;
+	private final List<Marker> productions;
+	private final List<Marker> chunks;
 
 	static MutableAttributeSet styleNormal;
 
-	private class UndoState {
+	private static class UndoState {
 		String text;
 		int selectionStart;
 		int selectionEnd;
 	}
 
-	private class UndoQueue {
-		int max;
-		private Vector<UndoState> v;
+	private static class UndoQueue {
+		final int max;
+		private final List<UndoState> v;
 
 		UndoQueue(int max) {
 			this.max = max;
-			v = new Vector<UndoState>();
+			v = new Vector<>();
 		}
 
 		int size() {
@@ -52,13 +61,11 @@ class Document extends DefaultStyledDocument {
 		void push(UndoState ui) {
 			v.add(ui);
 			if (v.size() > max)
-				v.removeElementAt(0);
+				v.remove(0);
 		}
 
 		UndoState pop() {
-			UndoState ui = v.lastElement();
-			v.removeElementAt(v.size() - 1);
-			return ui;
+			return v.remove(v.size()-1);
 		}
 
 		void clear() {
@@ -66,7 +73,8 @@ class Document extends DefaultStyledDocument {
 		}
 
 		int lastOffset() {
-			return (v.size() == 0) ? 0 : v.lastElement().selectionStart;
+			int s = v.size();
+			return (s == 0) ? 0 : v.get(s -1).selectionStart;
 		}
 	}
 
@@ -87,9 +95,9 @@ class Document extends DefaultStyledDocument {
 		undos = new UndoQueue(maxUndos);
 		redos = new UndoQueue(maxUndos);
 
-		productions = new Vector<Marker>();
-		chunks = new Vector<Marker>();
-		commands = new Vector<Marker>();
+		productions = new Vector<>();
+		chunks = new Vector<>();
+		commands = new Vector<>();
 	}
 
 	void resetStyles() {
@@ -171,33 +179,33 @@ class Document extends DefaultStyledDocument {
 		return 0;
 	}
 
-	int findNextMarker(int offset, Vector<Marker> markers) {
+	int findNextMarker(int offset, List<Marker> markers) {
 		int i = 0;
-		while (i < markers.size() && markers.elementAt(i).getOffset() <= offset)
+		while (i < markers.size() && markers.get(i).getOffset() <= offset)
 			i++;
 		if (i >= markers.size())
 			return getLength();
-		return markers.elementAt(i).getOffset();
+		return markers.get(i).getOffset();
 	}
 
-	int findPreviousMarker(int offset, Vector<Marker> markers) {
+	static int findPreviousMarker(int offset, List<Marker> markers) {
 		int i = markers.size() - 1;
-		while (i >= 0 && markers.elementAt(i).getOffset() >= offset)
+		while (i >= 0 && markers.get(i).getOffset() >= offset)
 			i--;
 		if (i < 0)
 			return 0;
-		return markers.elementAt(i).getOffset();
+		return markers.get(i).getOffset();
 	}
 
-	Vector<Marker> getCommandMarkers() {
+	List<Marker> getCommandMarkers() {
 		return commands;
 	}
 
-	Vector<Marker> getProductionMarkers() {
+	List<Marker> getProductionMarkers() {
 		return productions;
 	}
 
-	Vector<Marker> getChunkMarkers() {
+	List<Marker> getChunkMarkers() {
 		return chunks;
 	}
 
@@ -244,7 +252,7 @@ class Document extends DefaultStyledDocument {
 			return;
 		if (restyleThread != null)
 			restyleThread.cancel(false);
-		restyleThread = new SwingWorker<Object, Object>() {
+		restyleThread = new SwingWorker<>() {
 			@Override
 			public Object doInBackground() {
 				try {
@@ -290,11 +298,11 @@ class Document extends DefaultStyledDocument {
 		}
 	}
 
-	private boolean isWhite(int c) {
+	private static boolean isWhite(int c) {
 		return Character.isWhitespace(c);
 	}
 
-	private boolean notWhiteOrSpecial(int c) {
+	private static boolean notWhiteOrSpecial(int c) {
 		return !(Character.isWhitespace(c) || c == '(' || c == ')');
 	}
 
@@ -340,7 +348,7 @@ class Document extends DefaultStyledDocument {
 					chunks.add(new Marker(keyword, createPosition(parenPos)));
 				}
 
-				if (keyword.toLowerCase().equals("p")) {
+				if (keyword.equalsIgnoreCase("p")) {
 					inProductionRule = true;
 					while (pos < length && isWhite(charAt(pos)))
 						pos++;
@@ -403,7 +411,7 @@ class Document extends DefaultStyledDocument {
 				if (text.charAt(pos - 1) == '!')
 					if (prefs.autoHilite)
 						setCharacterAttributes(start, pos - start, styleBuffer, false);
-			} else if (pos < length) {
+			} else {
 				while (pos < length && notWhiteOrSpecial(charAt(pos)))
 					pos++;
 			}
@@ -449,7 +457,7 @@ class Document extends DefaultStyledDocument {
 			else if (parenLevel < startParenLevel && !firstToken.startsWith(")"))
 				realParenLevel = startParenLevel;
 
-			if (firstToken.toLowerCase().equals("(p")) {
+			if (firstToken.equalsIgnoreCase("(p")) {
 				inProduction = true;
 				realParenLevel = 0;
 			} else if (inProduction) {
@@ -484,7 +492,7 @@ class Document extends DefaultStyledDocument {
 	}
 
 	void changeFontSize(int dpoints) {
-		SimpleAttributeSet styleSmall = new SimpleAttributeSet();
+		MutableAttributeSet styleSmall = new SimpleAttributeSet();
 		StyleConstants.setFontSize(styleSmall, prefs.fontSize + dpoints);
 		setCharacterAttributes(0, getLength(), styleSmall, false);
 	}

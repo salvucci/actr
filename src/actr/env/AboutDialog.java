@@ -4,11 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -22,7 +21,7 @@ import javax.swing.KeyStroke;
 import actr.resources.Resources;
 
 class AboutDialog extends JDialog {
-	private AboutDialog dialog;
+	private final AboutDialog dialog;
 
 	AboutDialog(Core core) {
 		super();
@@ -32,7 +31,7 @@ class AboutDialog extends JDialog {
 		setUndecorated(true);
 		// setBackground (new Color(0.9f, 0.9f, 0.9f, 0.25f));
 
-		JLabel icon = new JLabel(new ImageIcon(Resources.getImage("actr.png")));
+		JLabel icon = new JLabel(new ImageIcon(Objects.requireNonNull(Resources.getImage("actr.png"))));
 		icon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		JLabel text = new JLabel(
@@ -56,19 +55,9 @@ class AboutDialog extends JDialog {
 			}
 		});
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dialog.setVisible(false);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dialog.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dialog.setVisible(false);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dialog.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(center, BorderLayout.CENTER);

@@ -2,7 +2,9 @@ package actr.env;
 
 import java.awt.FileDialog;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JFrame;
 
@@ -13,30 +15,27 @@ import javax.swing.JFrame;
  * @author Dario Salvucci
  */
 public class Core {
-	private Vector<Frame> frames;
-	private Preferences prefs;
-	private PrefDialog prefDialog;
-	private Frame runLock;
+	private final List<Frame> frames;
+	private final Preferences prefs;
+	private final PrefDialog prefDialog;
+	private final AtomicReference<Frame> runLock = new AtomicReference<>();
 	private JFrame invisibleFrame;
 
-	static String fileToOpen = null;
-	static String starterClass = "actr.tasks.Starter";
+	static final String fileToOpen = null;
+	static final String starterClass = "actr.tasks.Starter";
 
 	Core() {
-		frames = new Vector<Frame>();
+		frames = new Vector<>();
 		prefs = Preferences.load(this);
 		prefDialog = new PrefDialog(this);
 	}
 
 	void startup() {
 		try {
-			Starter starter = (Starter) (Class.forName(starterClass).newInstance());
+			Starter starter = (Starter) (Class.forName(starterClass).getConstructor().newInstance());
 			starter.startup(this);
 		} catch (Exception e) {
-			if (fileToOpen != null)
-				openFrame(new File(fileToOpen));
-			else
-				newFrame();
+			newFrame();
 		}
 	}
 
@@ -65,9 +64,9 @@ public class Core {
 	 * @return the associated frame, or <tt>null</tt> if not present
 	 */
 	public Frame getFrame(File file) {
-		for (int i = 0; i < frames.size(); i++)
-			if (file.equals(frames.elementAt(i).getFile()))
-				return frames.elementAt(i);
+		for (Frame frame : frames)
+			if (file.equals(frame.getFile()))
+				return frame;
 		return null;
 	}
 
@@ -77,9 +76,10 @@ public class Core {
 	 * @return the current frame, or <tt>null</tt> if no frames exist
 	 */
 	public Frame currentFrame() {
-		for (int i = 0; i < frames.size(); i++)
-			if (frames.elementAt(i).isActive())
-				return frames.elementAt(i);
+		int n = frames.size();
+		for (Frame frame : frames)
+			if (frame.isActive())
+				return frame;
 		return null;
 	}
 
@@ -112,7 +112,8 @@ public class Core {
 	 * opens the file.
 	 */
 	public void openFrame() {
-		FileDialog fileDialog = new FileDialog(currentFrame(), "Open...", FileDialog.LOAD);
+		final Frame f = currentFrame();
+		FileDialog fileDialog = new FileDialog(f, "Open...", FileDialog.LOAD);
 		fileDialog.setDirectory(prefs.getMostRecentPath());
 		fileDialog.setVisible(true);
 		if (fileDialog.getFile() == null)
@@ -144,8 +145,7 @@ public class Core {
 	}
 
 	void refreshEditors() {
-		for (int i = 0; i < frames.size(); i++)
-			frames.elementAt(i).refresh();
+		for (Frame frame : frames) frame.refresh();
 	}
 
 	/**
@@ -171,25 +171,20 @@ public class Core {
 		}
 	}
 
-	synchronized boolean acquireLock(Frame frame) {
-		if (runLock == null) {
-			runLock = frame;
-			return true;
-		} else
-			return false;
+	boolean acquireLock(Frame frame) {
+		return runLock.compareAndSet(null, frame);
 	}
 
-	synchronized void releaseLock(Frame frame) {
-		if (runLock == frame)
-			runLock = null;
+	boolean releaseLock(Frame frame) {
+		return runLock.compareAndSet(frame, null);
 	}
 
-	synchronized boolean hasLock(Frame frame) {
-		return (runLock == frame);
+	boolean hasLock(Frame frame) {
+		return (runLock.getOpaque() == frame);
 	}
 
-	synchronized boolean isAnyModelRunning() {
-		return (runLock != null);
+	boolean isAnyModelRunning() {
+		return (runLock.getOpaque() != null);
 	}
 
 	void openPreferencesDialog() {
@@ -208,8 +203,8 @@ public class Core {
 	 *         otherwise
 	 */
 	public boolean closeAllFrames() {
-		for (int i = 0; i < frames.size(); i++)
-			if (!frames.elementAt(i).close())
+		for (Frame frame : frames)
+			if (!frame.close())
 				return false;
 		return true;
 	}
@@ -227,7 +222,7 @@ public class Core {
 		return false;
 	}
 
-	private class InvisibleFrame extends JFrame {
+	private static class InvisibleFrame extends JFrame {
 		InvisibleFrame(Core core) {
 			super();
 			setUndecorated(true);

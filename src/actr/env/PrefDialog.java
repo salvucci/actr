@@ -4,11 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -27,37 +24,35 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 class PrefDialog extends JDialog {
-	private Core core;
-	private Preferences prefs;
-	private ColorDialog colorDialog;
-	private JComboBox<String> fontCB, fontSizeCB;
-	private JCheckBox autoHiliteCB, autoIndentCB;
-	private ColorButton commandColorButton, parameterColorButton, productionColorButton, chunkColorButton,
-			bufferColorButton, commentColorButton;
-	private JComboBox<String> indentSpacesCB;
+	private final Core core;
+	private final Preferences prefs;
+	private final ColorDialog colorDialog;
+	private final JComboBox<String> fontCB;
+	private final JComboBox<String> fontSizeCB;
+	private final JCheckBox autoHiliteCB;
+	private final JCheckBox autoIndentCB;
+	private final ColorButton commandColorButton;
+	private final ColorButton parameterColorButton;
+	private final ColorButton productionColorButton;
+	private final ColorButton chunkColorButton;
+	private final ColorButton bufferColorButton;
+	private final ColorButton commentColorButton;
+	private final JComboBox<String> indentSpacesCB;
 
-	class ColorDialog extends JDialog {
+	static class ColorDialog extends JDialog {
 		Color color;
-		JColorChooser colorChooser;
+		final JColorChooser colorChooser;
 
 		ColorDialog(JDialog parent) {
 			super(parent, true);
 			colorChooser = new JColorChooser();
 			JButton okButton = new JButton("OK");
-			okButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					color = colorChooser.getColor();
-					setVisible(false);
-				}
+			okButton.addActionListener(e -> {
+				color = colorChooser.getColor();
+				setVisible(false);
 			});
 			JButton cancelButton = new JButton("Cancel");
-			cancelButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
-				}
-			});
+			cancelButton.addActionListener(e -> setVisible(false));
 			JPanel bottom = new JPanel();
 			bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
 			bottom.add(Box.createHorizontalGlue());
@@ -68,12 +63,7 @@ class PrefDialog extends JDialog {
 			getContentPane().add(colorChooser, BorderLayout.CENTER);
 			getContentPane().add(bottom, BorderLayout.SOUTH);
 			getRootPane().setDefaultButton(okButton);
-			getRootPane().registerKeyboardAction(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
-				}
-			}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+			getRootPane().registerKeyboardAction(e -> setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 			pack();
 			setLocation(200, 200);
 			setVisible(false);
@@ -87,21 +77,18 @@ class PrefDialog extends JDialog {
 	}
 
 	class ColorButton extends JButton {
-		JPanel panel;
+		final JPanel panel;
 
 		ColorButton() {
 			super();
 			panel = new JPanel();
 			panel.setBackground(getColor());
 			add(panel);
-			addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					colorDialog.show(getColor());
-					setColor(colorDialog.color);
-					refresh();
-					core.refreshEditors();
-				}
+			addActionListener(e -> {
+				colorDialog.show(getColor());
+				setColor(colorDialog.color);
+				refresh();
+				core.refreshEditors();
 			});
 		}
 
@@ -127,32 +114,23 @@ class PrefDialog extends JDialog {
 		colorDialog = new ColorDialog(this);
 
 		String[] fonts = { "Courier", "Lucida Grande", "Menlo", "Monaco", "Myriad Pro", "Verdana" };
-		fontCB = new JComboBox<String>(fonts);
-		fontCB.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				prefs.font = (String) fontCB.getSelectedItem();
-				core.refreshEditors();
-			}
+		fontCB = new JComboBox<>(fonts);
+		fontCB.addItemListener(e -> {
+			prefs.font = (String) fontCB.getSelectedItem();
+			core.refreshEditors();
 		});
 
 		String[] fontSizes = { "9", "10", "11", "12", "13", "14" };
-		fontSizeCB = new JComboBox<String>(fontSizes);
-		fontSizeCB.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				prefs.fontSize = Integer.valueOf((String) fontSizeCB.getSelectedItem()).intValue();
-				core.refreshEditors();
-			}
+		fontSizeCB = new JComboBox<>(fontSizes);
+		fontSizeCB.addItemListener(e -> {
+			prefs.fontSize = Integer.parseInt((String) Objects.requireNonNull(fontSizeCB.getSelectedItem()));
+			core.refreshEditors();
 		});
 
 		autoHiliteCB = new JCheckBox("Auto-Highlight");
-		autoHiliteCB.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				prefs.autoHilite = autoHiliteCB.isSelected();
-				core.refreshEditors();
-			}
+		autoHiliteCB.addItemListener(e -> {
+			prefs.autoHilite = autoHiliteCB.isSelected();
+			core.refreshEditors();
 		});
 
 		commandColorButton = new ColorButton() {
@@ -223,22 +201,16 @@ class PrefDialog extends JDialog {
 		};
 
 		autoIndentCB = new JCheckBox("Auto-Indent");
-		autoIndentCB.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				prefs.autoIndent = autoIndentCB.isSelected();
-				core.refreshEditors();
-			}
+		autoIndentCB.addItemListener(e -> {
+			prefs.autoIndent = autoIndentCB.isSelected();
+			core.refreshEditors();
 		});
 
 		String[] indentOptions = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
-		indentSpacesCB = new JComboBox<String>(indentOptions);
-		indentSpacesCB.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				prefs.indentSpaces = Integer.valueOf((String) indentSpacesCB.getSelectedItem()).intValue();
-				core.refreshEditors();
-			}
+		indentSpacesCB = new JComboBox<>(indentOptions);
+		indentSpacesCB.addItemListener(e -> {
+			prefs.indentSpaces = Integer.parseInt((String) Objects.requireNonNull(indentSpacesCB.getSelectedItem()));
+			core.refreshEditors();
 		});
 
 		refresh();
@@ -314,20 +286,12 @@ class PrefDialog extends JDialog {
 		center.add(indentPanel);
 
 		JButton closeButton = new JButton("Close");
-		closeButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-			}
-		});
+		closeButton.addActionListener(e -> setVisible(false));
 
 		JButton resetButton = new JButton("Reset");
-		resetButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				prefs.setDefaults();
-				refresh();
-			}
+		resetButton.addActionListener(e -> {
+			prefs.setDefaults();
+			refresh();
 		});
 
 		JPanel bottom = new JPanel();
@@ -345,12 +309,7 @@ class PrefDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(mainPanel, BorderLayout.CENTER);
 
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		getRootPane().setDefaultButton(closeButton);
 
@@ -359,13 +318,13 @@ class PrefDialog extends JDialog {
 		setVisible(false);
 	}
 
-	JLabel createLabel(String text) {
+	static JLabel createLabel(String text) {
 		JLabel label = new JLabel(text);
 		label.setHorizontalAlignment(SwingConstants.RIGHT);
 		return label;
 	}
 
-	Border createBorder(String title) {
+	static Border createBorder(String title) {
 		Border lineB = BorderFactory.createLineBorder(Color.gray, 1);
 		Border titleB = BorderFactory.createTitledBorder(lineB, title);
 		Border emptyB = BorderFactory.createEmptyBorder(0, 6, 6, 6);
@@ -374,7 +333,7 @@ class PrefDialog extends JDialog {
 
 	void refresh() {
 		fontCB.setSelectedItem(prefs.font);
-		fontSizeCB.setSelectedItem("" + prefs.fontSize);
+		fontSizeCB.setSelectedItem(String.valueOf(prefs.fontSize));
 		autoHiliteCB.setSelected(prefs.autoHilite);
 		autoIndentCB.setSelected(prefs.autoIndent);
 		commandColorButton.refresh();
@@ -383,6 +342,6 @@ class PrefDialog extends JDialog {
 		chunkColorButton.refresh();
 		bufferColorButton.refresh();
 		commentColorButton.refresh();
-		indentSpacesCB.setSelectedItem("" + prefs.indentSpaces);
+		indentSpacesCB.setSelectedItem(String.valueOf(prefs.indentSpaces));
 	}
 }

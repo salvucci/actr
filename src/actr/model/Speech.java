@@ -6,18 +6,18 @@ package actr.model;
  * @author Dario Salvucci
  */
 public class Speech extends Module {
-	private Model model;
+	private final Model model;
 	private String lastText;
 
 	double syllableRate = .150;
 	int charsPerSyllable = 3;
 	double subvocalizeDetectDelay = .300;
 
-	final double prepFirstText = .150;
-	final double prepDiffText = .100;
-	final double prepSameText = .000;
-	final double initiationTime = .050;
-	final double clearTime = .050;
+	static final double prepFirstText = .150;
+	static final double prepDiffText = .100;
+	static final double prepSameText = .000;
+	static final double initiationTime = .050;
+	static final double clearTime = .050;
 
 	Speech(Model model) {
 		this.model = model;
@@ -26,13 +26,13 @@ public class Speech extends Module {
 
 	double prepareMovement(double time, String text) {
 		time += (lastText == null) ? prepFirstText : (lastText.equals(text) ? prepSameText : prepDiffText);
-		model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
-		model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor, Symbol.busy);
-		model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
+		model.buffers.setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
+		model.buffers.setSlot(Symbol.vocalState, Symbol.processor, Symbol.busy);
+		model.buffers.setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
 		model.addEvent(new Event(time, "speech", "preparation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
+				model.buffers.setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
 			}
 		});
 		lastText = text;
@@ -44,8 +44,8 @@ public class Speech extends Module {
 		model.addEvent(new Event(time, "speech", "initiation-complete") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.processor, Symbol.free);
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution, Symbol.busy);
+				model.buffers.setSlot(Symbol.vocalState, Symbol.processor, Symbol.free);
+				model.buffers.setSlot(Symbol.vocalState, Symbol.execution, Symbol.busy);
 			}
 		});
 		return time;
@@ -55,8 +55,8 @@ public class Speech extends Module {
 		model.addEvent(new Event(time, "speech", "finish-movement") {
 			@Override
 			public void action() {
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.execution, Symbol.free);
-				model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
+				model.buffers.setSlot(Symbol.vocalState, Symbol.execution, Symbol.free);
+				model.buffers.setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
 			}
 		});
 	}
@@ -71,28 +71,27 @@ public class Speech extends Module {
 	}
 
 	@Override
-	void update() {
-		Chunk request = model.getBuffers().get(Symbol.vocal);
+	public void update() {
+		Chunk request = model.buffers.get(Symbol.vocal);
 		if (request == null || !request.isRequest())
 			return;
 		request.setRequest(false);
-		model.getBuffers().clear(Symbol.vocal);
+		model.buffers.clear(Symbol.vocal);
 		double eventTime = model.getTime();
 
 		if (request.get(Symbol.isa) == Symbol.get("clear")) {
 			if (model.verboseTrace)
 				model.output("speech", "clear");
-			model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
-			model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
+			model.buffers.setSlot(Symbol.vocalState, Symbol.preparation, Symbol.busy);
+			model.buffers.setSlot(Symbol.vocalState, Symbol.state, Symbol.busy);
 			model.addEvent(new Event(eventTime + clearTime, "speech", "change state last none prep free") {
 				@Override
 				public void action() {
 					lastText = null;
-					model.getBuffers().setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
-					model.getBuffers().setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
+					model.buffers.setSlot(Symbol.vocalState, Symbol.preparation, Symbol.free);
+					model.buffers.setSlot(Symbol.vocalState, Symbol.state, Symbol.free);
 				}
 			});
-			return;
 		}
 
 		else if (request.get(Symbol.isa) == Symbol.get("speak")) {

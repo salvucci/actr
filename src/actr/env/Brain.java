@@ -1,13 +1,8 @@
 package actr.env;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RadialGradientPaint;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
@@ -15,19 +10,21 @@ import actr.model.Symbol;
 import actr.resources.Resources;
 
 class Brain extends JPanel {
-	private Frame frame;
-	private Vector<Region> regions = new Vector<Region>();
+	private final Frame frame;
+	private final java.util.List<Region> regions = new ArrayList<>();
 
-	private final Image images[] = { Resources.getImage("brain1.png"), Resources.getImage("brain2.png"),
+	private final Image[] images = { Resources.getImage("brain1.png"), Resources.getImage("brain2.png"),
 			Resources.getImage("brain3.png") };
-	private final double scale = .75;
-	private final int sizes[][] = { { 110, 130 }, { 115, 125 }, { 120, 120 } };
-	private final int centers[][] = { { 0, -150 }, { 0, 0 }, { 0, 150 } };
-	private final int shift[][] = { { -1, -10 }, { 0, -1 }, { 8, -7 } };
+	private static final double scale = .75;
+	private final int[][] sizes = { { 110, 130 }, { 115, 125 }, { 120, 120 } };
+	private final int[][] centers = { { 0, -150 }, { 0, 0 }, { 0, 150 } };
+	private final int[][] shift = { { -1, -10 }, { 0, -1 }, { 8, -7 } };
 
-	private class Region {
-		String buffer;
-		int x, y, z;
+	private static class Region {
+		final String buffer;
+		final int x;
+		final int y;
+		final int z;
 		@SuppressWarnings("unused")
 		Color color;
 
@@ -62,7 +59,7 @@ class Brain extends JPanel {
 		setSize(new Dimension(200, 200));
 	}
 
-	private Color getColor(double bold) {
+	private static Color getColor(double bold) {
 		float h, s, b;
 		if (bold < .25) {
 			h = 0;
@@ -84,19 +81,19 @@ class Brain extends JPanel {
 		return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 	}
 
-	private Color[] getColors(double bold) {
+	private static Color[] getColors(double bold) {
 		bold = Math.min(Math.max(bold, 0), 1);
-		Color colors[] = new Color[3];
+		Color[] colors = new Color[3];
 		colors[0] = getColor(bold);
 		colors[1] = getColor(.5 * bold);
 		colors[2] = new Color(128, 128, 128, 0);
 		return colors;
 	}
 
-	private void paintActivation(Graphics2D g2d, int x, int y, Color colors[], Region region) {
-		float fractions[] = { .4f, .7f, 1.0f };
+	private static void paintActivation(Graphics2D g2d, int x, int y, Color[] colors, Region region) {
+		float[] fractions = { .4f, .7f, 1.0f };
 		int r = 10;
-		RadialGradientPaint paint = new RadialGradientPaint(x, y, r, fractions, colors);
+		Paint paint = new RadialGradientPaint(x, y, r, fractions, colors);
 		g2d.setPaint(paint);
 		g2d.fillOval(x - r, y - r, 2 * r, 2 * r);
 
@@ -124,12 +121,11 @@ class Brain extends JPanel {
 		}
 
 		if (frame.getModel() != null) {
-			for (int n = 0; n < regions.size(); n++) {
-				Region region = regions.elementAt(n);
-				double bold = frame.getModel().getBold().getValue(Symbol.get(region.buffer));
+			for (Region region : regions) {
+				double bold = frame.getModel().bold.getValue(Symbol.get(region.buffer));
 
 				if (bold > 0) {
-					Color colors[] = getColors(bold);
+					Color[] colors = getColors(bold);
 
 					int x = centers[0][0] + shift[0][0] + region.x;
 					int y = centers[0][1] + shift[0][1] - region.y;

@@ -1,7 +1,10 @@
 package actr.model;
 
+import actr.task.Task;
+
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Conditions tested for a buffer as specified in the (left-hand) condition side
@@ -9,27 +12,27 @@ import java.util.Vector;
  * 
  * @author Dario Salvucci
  */
-class BufferCondition {
-	private Model model;
-	private char prefix;
-	private Symbol buffer;
-	private Vector<SlotCondition> slotConditions;
-	private Vector<String> specials;
+public class BufferCondition {
+	private final Model model;
+	private final char prefix;
+	public final Symbol buffer;
+	private final List<SlotCondition> slotConditions;
+	private final List<String> specials;
 
 	BufferCondition(char prefix, Symbol buffer, Model model) {
 		this.prefix = prefix;
 		this.buffer = buffer;
 		this.model = model;
-		slotConditions = new Vector<SlotCondition>();
-		specials = new Vector<String>();
+		slotConditions = new ArrayList<>();
+		specials = new ArrayList<>();
 	}
 
 	BufferCondition copy() {
 		BufferCondition bc = new BufferCondition(prefix, buffer, model);
-		for (int i = 0; i < slotConditions.size(); i++)
-			bc.slotConditions.add(slotConditions.elementAt(i).copy());
-		for (int i = 0; i < specials.size(); i++)
-			bc.specials.add(specials.elementAt(i));
+		int sc = slotConditions.size();
+		for (int i = 0; i < sc; i++)
+			bc.slotConditions.add(slotConditions.get(i).copy());
+		bc.specials.addAll(specials);
 		return bc;
 	}
 
@@ -41,20 +44,18 @@ class BufferCondition {
 	 * @return <tt>true</tt> if the two buffer conditions are the same, or
 	 *         <tt>false</tt> otherwise
 	 */
-	public boolean equals(BufferCondition bc2) {
-		if (prefix != bc2.prefix)
+	@Override public boolean equals(Object x) {
+		if (this == x) return true;
+		BufferCondition bc2 = (BufferCondition) x;
+		if (prefix != bc2.prefix || buffer != bc2.buffer || slotConditions.size() != bc2.slotConditions.size())
 			return false;
-		if (buffer != bc2.buffer)
-			return false;
-		if (slotConditions.size() != bc2.slotConditions.size())
-			return false;
-		for (int i = 0; i < slotConditions.size(); i++)
-			if (!slotConditions.elementAt(i).equals(bc2.slotConditions.elementAt(i)))
-				return false;
 		if (specials.size() != bc2.specials.size())
 			return false;
+		for (int i = 0; i < slotConditions.size(); i++)
+			if (!slotConditions.get(i).equals(bc2.slotConditions.get(i)))
+				return false;
 		for (int i = 0; i < specials.size(); i++)
-			if (!specials.elementAt(i).equals(bc2.specials.elementAt(i)))
+			if (!specials.get(i).equals(bc2.specials.get(i)))
 				return false;
 		return true;
 	}
@@ -66,15 +67,6 @@ class BufferCondition {
 	 */
 	public char getPrefix() {
 		return prefix;
-	}
-
-	/**
-	 * Gets the buffer name associated with this buffer condition.
-	 * 
-	 * @return the buffer name
-	 */
-	public Symbol getBuffer() {
-		return buffer;
 	}
 
 	/**
@@ -94,7 +86,7 @@ class BufferCondition {
 	 * @return the slot condition at the given index
 	 */
 	public SlotCondition getSlotCondition(int i) {
-		return slotConditions.elementAt(i);
+		return slotConditions.get(i);
 	}
 
 	/**
@@ -115,9 +107,9 @@ class BufferCondition {
 	 *         not present
 	 */
 	public SlotCondition getSlotCondition(Symbol slot) {
-		for (int i = 0; i < slotConditions.size(); i++)
-			if (slotConditions.elementAt(i).getSlot() == slot)
-				return slotConditions.elementAt(i);
+		for (SlotCondition slotCondition : slotConditions)
+			if (slotCondition.getSlot() == slot)
+				return slotCondition;
 		return null;
 	}
 
@@ -142,8 +134,8 @@ class BufferCondition {
 	 *          in any slot condition, and <tt>false</tt> otherwise
 	 */
 	public boolean hasSlotValue(Symbol value) {
-		for (int i = 0; i < slotConditions.size(); i++)
-			if (slotConditions.elementAt(i).getValue() == value)
+		for (SlotCondition slotCondition : slotConditions)
+			if (slotCondition.getValue() == value)
 				return true;
 		return false;
 	}
@@ -168,12 +160,11 @@ class BufferCondition {
 	}
 
 	boolean testBufferChunk(Chunk bufferChunk, Instantiation inst) {
-		for (int i = 0; i < slotConditions.size(); i++) {
-			SlotCondition slotCondition = slotConditions.elementAt(i);
-			if (model.getProcedural().whyNotTrace) {
+		for (SlotCondition slotCondition : slotConditions) {
+			if (model.procedural.whyNotTrace) {
 				int savedSize = inst.size();
 				boolean result = slotCondition.test(buffer, bufferChunk, inst);
-				if (model.getProcedural().whyNotTrace) {
+				if (model.procedural.whyNotTrace) {
 					if (result && inst.size() > savedSize)
 						model.output(slotCondition.toString(inst, null));
 					else
@@ -187,7 +178,7 @@ class BufferCondition {
 			}
 		}
 		if (buffer == Symbol.goal) {
-			Chunk goal = model.getBuffers().get(Symbol.goal);
+			Chunk goal = model.buffers.get(Symbol.goal);
 			if (goal != null)
 				inst.setThreadID(goal.getThreadID());
 		}
@@ -196,11 +187,11 @@ class BufferCondition {
 
 	boolean test(Instantiation inst) {
 		if (prefix == '!') {
-			if (model.getProcedural().whyNotTrace)
+			if (model.procedural.whyNotTrace)
 				model.output(toStringFirstLine(null));
-			Vector<String> tokens = new Vector<String>();
-			for (int i = 0; i < specials.size(); i++) {
-				String special = specials.elementAt(i);
+			List<String> tokens = new ArrayList<>();
+			int ss = specials.size();
+			for (String special : specials) {
 				if (Symbol.get(special).isVariable())
 					special = inst.get(Symbol.get(special)).getString();
 				tokens.add(special);
@@ -208,13 +199,13 @@ class BufferCondition {
 			try {
 				return Utilities.evalComputeCondition(tokens.iterator());
 			} catch (Exception e) {
-				return model.getTask().evalCondition(tokens.iterator());
+				return Task.evalCondition(tokens.iterator());
 			}
 		} else {
-			Chunk bufferChunk = model.getBuffers().get(buffer);
+			Chunk bufferChunk = model.buffers.get(buffer);
 			if (bufferChunk != null && prefix == '=')
-				inst.set(Symbol.get("=" + buffer), bufferChunk.getName());
-			if (model.getProcedural().whyNotTrace)
+				inst.set(Symbol.get("=" + buffer), bufferChunk.name());
+			if (model.procedural.whyNotTrace)
 				model.output(toStringFirstLine(inst));
 			if (bufferChunk == null)
 				return false;
@@ -223,8 +214,7 @@ class BufferCondition {
 	}
 
 	void specialize(Symbol variable, Symbol value) {
-		for (int i = 0; i < slotConditions.size(); i++)
-			slotConditions.elementAt(i).specialize(variable, value);
+		for (SlotCondition slotCondition : slotConditions) slotCondition.specialize(variable, value);
 	}
 
 	/**
@@ -234,11 +224,10 @@ class BufferCondition {
 	 * @return the string
 	 */
 	String toStringFirstLine(Instantiation inst) {
-		String s = "";
+		String s;
 		if (prefix == '!') {
 			s = "   !" + buffer + "! (";
-			for (int i = 0; i < specials.size(); i++)
-				s += " " + specials.elementAt(i);
+			for (String special : specials) s += " " + special;
 			s += " )";
 		} else {
 			s = "   " + ((prefix == '?') ? "" : prefix) + buffer + ">";
@@ -259,11 +248,10 @@ class BufferCondition {
 	 * 
 	 * @return the string
 	 */
-	public String toString(Instantiation inst, Vector<Symbol> used) {
+	public String toString(Instantiation inst, List<Symbol> used) {
 		String s = "";
 		s += toStringFirstLine(inst) + "\n";
-		for (int i = 0; i < slotConditions.size(); i++)
-			s += slotConditions.elementAt(i).toString(inst, used) + "\n";
+		for (SlotCondition slotCondition : slotConditions) s += slotCondition.toString(inst, used) + "\n";
 		return s;
 	}
 

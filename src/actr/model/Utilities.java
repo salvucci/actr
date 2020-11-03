@@ -1,20 +1,23 @@
 package actr.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utility code with various utility variables and methods.
  * 
  * @author Dario Salvucci
  */
-public class Utilities {
-	static Random random = new Random();
+public enum Utilities {
+	;
+	static final Random random = new Random();
 
-	private static long currentID = 0;
+	private static final AtomicLong currentID = new AtomicLong();
 
 	static long getUniqueID() {
-		return (++currentID);
+		return currentID.incrementAndGet();
 	}
 
 	/**
@@ -34,6 +37,20 @@ public class Utilities {
 		// normal is used below, derived from act-r code
 		double p = Math.max(0.0001, Math.min(random.nextDouble(), 0.9999));
 		return s * Math.log((1.0 - p) / p);
+	}
+
+	/**
+	 * Gets a noise value sampled from an approximation of the normal
+	 * distribution.
+	 * 
+	 * @param sd
+	 *            the standard deviation
+	 * @return a value sampled from this distribution
+	 */
+	public static double gaussianNoise(double sd) {
+		double v = sd * sd;
+		double s = Math.sqrt(3.0 * v) / Math.PI;
+		return (s == 0) ? 0 : Utilities.getNoise(s);
 	}
 
 	/**
@@ -59,10 +76,10 @@ public class Utilities {
 	}
 
 	/** The viewing distance to the screen, in inches. */
-	public static double viewingDistance = 30; // from Byrne-IJHCS01 // not 15
+	public static final double viewingDistance = 30; // from Byrne-IJHCS01 // not 15
 
 	/** The value of pixels per inch on the standard display. */
-	public static double pixelsPerInch = 72;
+	public static final double pixelsPerInch = 72;
 
 	/**
 	 * Converts a value from pixels to visual angle on the standard display.
@@ -95,7 +112,7 @@ public class Utilities {
 		if (test.equals(")"))
 			return -9999;
 		if (!test.equals("("))
-			return Double.valueOf(test);
+			return Double.parseDouble(test);
 
 		String operator = it.next();
 		double result = evalCompute(it);
@@ -107,22 +124,16 @@ public class Utilities {
 		if (last == -9999)
 			throw new Exception();
 		while (last != -9999) {
-			if (operator.equals("+"))
-				result += last;
-			else if (operator.equals("-"))
-				result -= last;
-			else if (operator.equals("*"))
-				result *= last;
-			else if (operator.equals("/"))
-				result /= last;
-			else if (operator.equals("my/"))
-				result = (last == 0) ? 0 : result / last;
-			else if (operator.equals("min"))
-				result = (last < result) ? last : result;
-			else if (operator.equals("max"))
-				result = (last > result) ? last : result;
-			else
-				throw new Exception();
+			switch (operator) {
+				case "+" -> result += last;
+				case "-" -> result -= last;
+				case "*" -> result *= last;
+				case "/" -> result /= last;
+				case "my/" -> result = (last == 0) ? 0 : result / last;
+				case "min" -> result = Math.min(last, result);
+				case "max" -> result = Math.max(last, result);
+				default -> throw new Exception();
+			}
 			last = evalCompute(it);
 		}
 		return result;
@@ -134,19 +145,36 @@ public class Utilities {
 		double r1 = evalCompute(it);
 		double r2 = evalCompute(it);
 		// it.next(); // ")"
-		if (operator.equals("="))
-			return (r1 == r2);
-		else if (operator.equals("<>"))
-			return (r1 != r2);
-		else if (operator.equals("<"))
-			return (r1 < r2);
-		else if (operator.equals(">"))
-			return (r1 > r2);
-		else if (operator.equals("<="))
-			return (r1 <= r2);
-		else if (operator.equals(">="))
-			return (r1 >= r2);
-		else
-			throw new Exception();
+		return switch (operator) {
+			case "=" -> (r1 == r2);
+			case "<>" -> (r1 != r2);
+			case "<" -> (r1 < r2);
+			case ">" -> (r1 > r2);
+			case "<=" -> (r1 <= r2);
+			case ">=" -> (r1 >= r2);
+			default -> throw new Exception();
+		};
+	}
+
+	public static boolean isNumeric(String s) {
+		return s.matches("[-+]?\\d*\\.?\\d+");
+	}
+
+	public static boolean isNumericPos(String s) {
+		return s.matches("\\d*\\.?\\d+");
+	}
+
+	public static String toString(double[] a) {
+		String s = "";
+		for (int i = 0; i < a.length; i++)
+			s += String.format("%.8f", a[i]) + (i < a.length - 1 ? " " : "");
+		return s;
+	}
+
+	public static String toString(ArrayList<Double> a) {
+		String s = "";
+		for (int i = 0; i < a.size(); i++)
+			s += String.format("%.8f", a.get(i)) + (i < a.size() - 1 ? " " : "");
+		return s;
 	}
 }
